@@ -1,0 +1,18 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	<node name="Camera" pkg="raspicam" type="raspicam_raw_node _width:=320" output="screen" machine="phoenix" />
+	<node name="CaptureStarter" pkg="rosservice" type="rosservice"  args="call --wait /camera/start_capture" machine="phoenix" />
+	
+    <node pkg="svo_ros" type="vo" name="svo" clear_params="true" output="screen">
+    
+        <!-- Camera topic to subscribe to -->
+        <param name="cam_topic" value="/camera/image" type="str" />
+        
+        <!-- Camera calibration file -->
+        <rosparam file="$(find phx_odometry)/param/camera_atan_low.yaml" />
+        
+        <!-- Default parameter settings: choose between vo_fast and vo_accurate -->
+        <rosparam file="$(find svo_ros)/param/vo_fast.yaml" />
+
+    </node>
+</launch>

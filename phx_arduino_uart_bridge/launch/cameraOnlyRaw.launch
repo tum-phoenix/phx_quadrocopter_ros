@@ -1,0 +1,5 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	<node name="Camera" pkg="raspicam" type="raspicam_raw_node" output="screen" machine="phoenix" />
+	<node name="CaptureStarter" pkg="rosservice" type="rosservice"  args="call --wait /camera/start_capture" machine="phoenix" />
+</launch>
