@@ -44,7 +44,7 @@ class ros_communication():
             self.Joy_1_msg = Joy()
             self.ros_publish_rc2 = rospy.Publisher('/phoenix/rc_2', Joy, queue_size=10)
             self.Joy_2_msg = Joy()
-            self.freq = 100     # Hz
+            self.freq = 50     # Hz
             self.rate = rospy.Rate(self.freq)
         except:
             print ' >>> error in ros __init__'
@@ -78,7 +78,6 @@ class ros_communication():
             if debug: print ' >>> sent imu'
         except:
             print '>>> error in ros pub_imu!'
-        print ' >>> pub_imu not implemented'
 
     def pub_motors(self, motors=(1, 2, 3, 4), debug=False):
         """
