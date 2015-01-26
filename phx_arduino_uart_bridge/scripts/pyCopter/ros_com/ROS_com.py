@@ -114,15 +114,9 @@ class ros_communication():
         """
         try:
             if debug: print 'in pub_rc0:', rc0
-            self.Joy_0_msg.axes[0] = rc0[0]
-            self.Joy_0_msg.axes[1] = rc0[1]
-            self.Joy_0_msg.axes[2] = rc0[2]
-            self.Joy_0_msg.axes[3] = rc0[3]
+            self.Joy_0_msg.axes = rc0[0:4]
             if debug: print 'added first 4 axes'
-            self.Joy_0_msg.buttons[0] = int(rc0[4])
-            self.Joy_0_msg.buttons[1] = int(rc0[5])
-            self.Joy_0_msg.buttons[2] = int(rc0[6])
-            self.Joy_0_msg.buttons[3] = int(rc0[7])
+            self.Joy_0_msg.buttons = rc0[4:]
             if debug: print 'added 4 buttons'
             self.ros_publish_rc0.publish(self.Joy_0_msg)
             if debug: print ' >>> sent rc0'
