@@ -64,19 +64,15 @@ class ros_communication():
     def callback_cmd_vel(self, stuff):
         print ' >>> ROS_callback: received cmd_vel', stuff
 
-    def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=True):
+    def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=False):
         """
          imu = [ acc=(accX, accY, accZ), gyr=(gyrX, gyrY, gyrZ), mag=(magX, magY. magZ), attitude=(pitch, roll, heading, altitude)
         """
         try:
             if debug: print 'trying to send imu'
-            self.imu_msg.angular_velocity[0] = gyr[0]
-            self.imu_msg.angular_velocity[1] = gyr[1]
-            self.imu_msg.angular_velocity[2] = gyr[2]
+            self.imu_msg.angular_velocity = gyr
             if debug: print 'imu did angular_velocity'
-            self.imu_msg.linear_acceleration[0] = acc[0]
-            self.imu_msg.linear_acceleration[1] = acc[1]
-            self.imu_msg.linear_acceleration[2] = acc[2]
+            self.imu_msg.linear_acceleration = acc
             if debug: print 'imu did linear_acceleration'
             self.ros_publish_imu.publish(self.imu_msg)
             if debug: print ' >>> sent imu'
@@ -108,13 +104,13 @@ class ros_communication():
         except:
             print '>>> error in ros pub_gps!'
 
-    def pub_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=True):
+    def pub_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """
          rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
             if debug: print 'in pub_rc0:', rc0
-            self.Joy_0_msg.axes = rc0[0:4]
+            self.Joy_0_msg.axes = rc0[:4]
             if debug: print 'added first 4 axes'
             self.Joy_0_msg.buttons = rc0[4:]
             if debug: print 'added 4 buttons'
@@ -128,14 +124,8 @@ class ros_communication():
          rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            self.Joy_1_msg.axes[0] = rc1[0]
-            self.Joy_1_msg.axes[1] = rc1[1]
-            self.Joy_1_msg.axes[2] = rc1[2]
-            self.Joy_1_msg.axes[3] = rc1[3]
-            self.Joy_1_msg.buttons[0] = rc1[4]
-            self.Joy_1_msg.buttons[1] = rc1[5]
-            self.Joy_1_msg.buttons[2] = rc1[6]
-            self.Joy_1_msg.buttons[3] = rc1[7]
+            self.Joy_1_msg.axes = rc1[:4]
+            self.Joy_1_msg.buttons = rc1[4:]
             self.ros_publish_rc1.publish(self.Joy_1_msg)
             if debug: print ' >>> sent rc1'
         except:
@@ -146,14 +136,8 @@ class ros_communication():
          rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            self.Joy_2_msg.axes[0] = rc2[0]
-            self.Joy_2_msg.axes[1] = rc2[1]
-            self.Joy_2_msg.axes[2] = rc2[2]
-            self.Joy_2_msg.axes[3] = rc2[3]
-            self.Joy_2_msg.buttons[0] = rc2[4]
-            self.Joy_2_msg.buttons[1] = rc2[5]
-            self.Joy_2_msg.buttons[2] = rc2[6]
-            self.Joy_2_msg.buttons[3] = rc2[7]
+            self.Joy_2_msg.axes = rc2[:4]
+            self.Joy_2_msg.buttons = rc2[4:]
             self.ros_publish_rc2.publish(self.Joy_2_msg)
             if debug: print ' >>> sent rc2'
         except:
