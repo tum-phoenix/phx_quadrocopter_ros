@@ -1,0 +1,11 @@
+<launch>
+
+    <node pkg="tum_phoenix_port_interface" name="SimuLink_ReceiverStub" type="SimuLink_ReceiverStub" output="screen">
+    	<param name="port" value="31338" type="string" />
+    </node>
+    
+    <node pkg="tum_phoenix_port_interface" name="SimuLink_SenderStub" type="SimuLink_SenderStub" output="screen">
+    	<param name="port" value="31337" type="string" />
+    </node>
+    
+</launch>

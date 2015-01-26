@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="phx_workstation_override" type="WorkstationOverrideNode" name="WorkstationOverride" output="screen" />
+	<node name="reconfigure_gui" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" />
+</launch>

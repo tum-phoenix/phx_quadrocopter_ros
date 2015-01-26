@@ -1,0 +1,13 @@
+<launch>
+	
+	<param name="phx_uart_bridge/baudrate" value="57600" type="int" />
+	<param name="phx_uart_bridge/path" value="/dev/ttyUSB0" type="string" />
+	
+	<node pkg="phx_uart_bridge" name="UARTReaderNode" type="UARTReaderNode" output="screen"/>
+	<node pkg="phx_uart_bridge" name="UARTWriterNode" type="UARTWriterNode" output="screen"/>
+	<node pkg="phx_uart_bridge" name="UARTMessageMergerNode" type="UARTMessageMergerNode" output="screen"/>
+	
+	<node pkg="phx_kinect_bridge" name="KinectBridgeNode" type="KinectBridgeNode" output="screen">
+		<param name="phx_kinect_bridge/port" value="31339" type="string" />
+	</node>
+</launch>
