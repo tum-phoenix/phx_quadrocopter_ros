@@ -25,15 +25,15 @@ class MultiWiiUartBridgeNode():
 
         """
         
-        self.ImuPublisher = rospy.Publisher('/phoenix/imu', Imu, queue_size=10)
-        self.NavSatFixPublisher = rospy.Publisher('/phoenix/gps', NavSatFix, queue_size=10)
-        self.motorSubscriber = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.motorMessageCallback)
+        self.pub = rospy.Publisher('/phoenix/imu', Imu, queue_size=10)
+        self.pub = rospy.Publisher('/phoenix/gps', NavSatFix, queue_size=10)
+        self.pub = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.motorMessageCallback)
 
         self.freq = 100 #hz
         r = rospy.Rate(self.freq)
         
         while not rospy.is_shutdown():
-            
+            r.sleep()
 
     def motorMessageCallback(self, imu_msg):
         print '>>>motorMessageCallback not implemented'
