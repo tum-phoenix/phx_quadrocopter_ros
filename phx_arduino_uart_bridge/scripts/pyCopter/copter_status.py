@@ -106,11 +106,11 @@ class copter:
     def update_ros(self):
         self.ros_node.listen()
         self.ros_node.pub_motors(self.motors)
-        #self.ros_node.pub_imu(self.imu_acc + self.imu_gyr + self.imu_mag)
+        self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
         #self.ros_node.pub_battery(self.battery)
-        #self.ros_node.pub_rc0(self.rc0)
-        #self.ros_node.pub_rc1(self.rc1)
-        #self.ros_node.pub_rc2(self.rc2)
+        self.ros_node.pub_rc0(self.rc0)
+        self.ros_node.pub_rc1(self.rc1)
+        self.ros_node.pub_rc2(self.rc2)
         self.ros_node.listen()
 
     def serial_receive_update(self, debug=False):

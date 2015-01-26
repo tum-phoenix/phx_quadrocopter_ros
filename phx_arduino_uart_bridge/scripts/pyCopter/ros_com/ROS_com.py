@@ -7,6 +7,7 @@ try:
     import rospy
     from sensor_msgs.msg import Imu
     from sensor_msgs.msg import NavSatFix
+    from sensor_msgs.msg import Joy
     from sensor_msgs.msg import FluidPressure #Barometer
     from sensor_msgs.msg import Temperature #For compensation gyrodrift
     from sensor_msgs.msg import Range #Distance to ground
@@ -31,12 +32,20 @@ class ros_communication():
         """
         try:
             rospy.init_node('MultiWiiBridge')
-            self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size = 10)
-            self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size = 10)
-            self.freq = 100 #hz
+            self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
+            self.imu_msg = Imu()
+            self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
+            self.motor_msg = Motor()
+            self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
+            self.NavSatFix_msg = NavSatFix()
+            self.ros_publish_rc0 = rospy.Publisher('/phoenix/rc_0', Joy, queue_size=10)
+            self.Joy_0_msg = Joy()
+            self.ros_publish_rc1 = rospy.Publisher('/phoenix/rc_1', Joy, queue_size=10)
+            self.Joy_1_msg = Joy()
+            self.ros_publish_rc2 = rospy.Publisher('/phoenix/rc_2', Joy, queue_size=10)
+            self.Joy_2_msg = Joy()
+            self.freq = 100     # Hz
             self.rate = rospy.Rate(self.freq)
-
-
         except:
             print ' >>> error in ros __init__'
         if not copter:
@@ -55,32 +64,97 @@ class ros_communication():
     def callback_cmd_vel(self, stuff):
         print ' >>> ROS_callback: received cmd_vel', stuff
 
+    def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=False):
+        """
+         imu = [ acc=(accX, accY, accZ), gyr=(gyrX, gyrY, gyrZ), mag=(magX, magY. magZ), attitude=(pitch, roll, heading, altitude)
+        """
+        try:
+            self.imu_msg.angular_velocity[0] = gyr[0]
+            self.imu_msg.angular_velocity[1] = gyr[1]
+            self.imu_msg.angular_velocity[2] = gyr[2]
+            self.imu_msg.linear_acceleration[0] = acc[0]
+            self.imu_msg.linear_acceleration[1] = acc[1]
+            self.imu_msg.linear_acceleration[2] = acc[2]
+            self.ros_publish_imu.publish(self.imu_msg)
+            if debug: print ' >>> sent imu'
+        except:
+            print '>>> error in ros pub_imu!'
+        print ' >>> pub_imu not implemented'
+
     def pub_motors(self, motors=(1, 2, 3, 4), debug=False):
         """
          motors = [ motor0, motor1, motor2, motor3 ]
         """
         try:
-            motor_msg = Motor()
-            motor_msg.motor0 = motors[0]
-            motor_msg.motor1 = motors[1]
-            motor_msg.motor2 = motors[2]
-            motor_msg.motor3 = motors[3]
-            self.ros_publish_motor.publish(motor_msg)
+            self.motor_msg.motor0 = motors[0]
+            self.motor_msg.motor1 = motors[1]
+            self.motor_msg.motor2 = motors[2]
+            self.motor_msg.motor3 = motors[3]
+            self.ros_publish_motor.publish(self.motor_msg)
             if debug: print ' >>> sent rc2'
         except:
-            print '>>> error in ros send_motor!'
+            print '>>> error in ros pub_motor!'
+
+    def pub_gps(self, gps_lat, gps_lon, gps_alt, debug=False):
+        try:
+            self.NavSatFix_msg.latitude = gps_lat
+            self.NavSatFix_msg.longitude = gps_lon
+            self.NavSatFix_msg.altitude = gps_alt
+            self.ros_publish_gps.publish(self.NavSatFix_msg)
+            if debug: print ' >>> sent pub_gps'
+        except:
+            print '>>> error in ros pub_gps!'
 
     def pub_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """
          rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
-        print ' >>> send_rc0 not implemented'
+        try:
+            self.Joy_0_msg.axes[0] = rc0[0]
+            self.Joy_0_msg.axes[1] = rc0[1]
+            self.Joy_0_msg.axes[2] = rc0[2]
+            self.Joy_0_msg.axes[3] = rc0[3]
+            self.Joy_0_msg.buttons[0] = rc0[4]
+            self.Joy_0_msg.buttons[1] = rc0[5]
+            self.Joy_0_msg.buttons[2] = rc0[6]
+            self.Joy_0_msg.buttons[3] = rc0[7]
+            if debug: print ' >>> sent rc0'
+        except:
+            print '>>> error in ros pub_rc0!'
 
-    def pub_imu(self, imu=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), debug=False):
+    def pub_rc1(self, rc1=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """
-         imu = [ accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY. magZ, pitch, roll, heading, altitude ]
+         rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
-        print ' >>> send_imu not implemented'
+        try:
+            self.Joy_1_msg.axes[0] = rc1[0]
+            self.Joy_1_msg.axes[1] = rc1[1]
+            self.Joy_1_msg.axes[2] = rc1[2]
+            self.Joy_1_msg.axes[3] = rc1[3]
+            self.Joy_1_msg.buttons[0] = rc1[4]
+            self.Joy_1_msg.buttons[1] = rc1[5]
+            self.Joy_1_msg.buttons[2] = rc1[6]
+            self.Joy_1_msg.buttons[3] = rc1[7]
+            if debug: print ' >>> sent rc1'
+        except:
+            print '>>> error in ros pub_rc1!'
+
+    def pub_rc2(self, rc2=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
+        """
+         rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
+        """
+        try:
+            self.Joy_2_msg.axes[0] = rc2[0]
+            self.Joy_2_msg.axes[1] = rc2[1]
+            self.Joy_2_msg.axes[2] = rc2[2]
+            self.Joy_2_msg.axes[3] = rc2[3]
+            self.Joy_2_msg.buttons[0] = rc2[4]
+            self.Joy_2_msg.buttons[1] = rc2[5]
+            self.Joy_2_msg.buttons[2] = rc2[6]
+            self.Joy_2_msg.buttons[3] = rc2[7]
+            if debug: print ' >>> sent rc2'
+        except:
+            print '>>> error in ros pub_rc2!'
 
     def pub_battery(self, battery=(1, 2, 3, 0), debug=False):
         """
@@ -105,7 +179,7 @@ if __name__ == '__main__':
             # do some stuff like updating data via serial connection
             time.sleep(0.5)
 
-            ros_network.send_motors([2, 4, 6, 8])
+            ros_network.pub_motors([2, 4, 6, 8])
 
     except rospy.ROSInterruptException:
         pass
