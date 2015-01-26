@@ -7,6 +7,8 @@ project(phx_arduino_uart_bridge)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
+  geometry_msgs
+  diagnostic_msgs
   message_generation
 )
 
@@ -81,7 +83,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phx_arduino_uart_bridge
-   CATKIN_DEPENDS  rospy sensor_msgs message_runtime
+   CATKIN_DEPENDS  rospy sensor_msgs geometry_msgs diagnostic_msgs message_runtime
 #  DEPENDS system_lib
 )
 
