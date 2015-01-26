@@ -1,0 +1,3 @@
+<launch>
+  <node name="MultiWiiUartBridgeNode" pkg="phx_arduino_uart_bridge" type="phoenix_os_1.py" output="screen" />
+</launch>
