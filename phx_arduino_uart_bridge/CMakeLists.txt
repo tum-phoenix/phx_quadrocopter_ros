@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   diagnostic_msgs
   message_generation
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -83,7 +84,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phx_arduino_uart_bridge
-   CATKIN_DEPENDS  rospy sensor_msgs geometry_msgs diagnostic_msgs message_runtime
+   CATKIN_DEPENDS  rospy sensor_msgs geometry_msgs diagnostic_msgs message_runtime tf
 #  DEPENDS system_lib
 )
 
