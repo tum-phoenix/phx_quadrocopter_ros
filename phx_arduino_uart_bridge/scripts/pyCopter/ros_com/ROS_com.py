@@ -2,22 +2,18 @@ __author__ = 'manuelviermetz'
 
 import time
 import numpy as np
-try:
-    import rospy
-    import tf
-    from copter_status import copter
-    from sensor_msgs.msg import Imu, Quaternion
-    from sensor_msgs.msg import NavSatFix
-    from sensor_msgs.msg import Joy
-    from sensor_msgs.msg import FluidPressure #Barometer
-    from sensor_msgs.msg import Temperature #For compensation gyrodrift
-    from sensor_msgs.msg import Range #Distance to ground
-    from geometry_msgs.msg import Twist
-    from phx_arduino_uart_bridge.msg import Motor
-    from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
-except:
-    print 'import rospy failed, have fun...'
-
+import rospy
+import tf
+from copter_status import copter
+from sensor_msgs.msg import Imu 
+from sensor_msgs.msg import NavSatFix, NavSatStatus
+from sensor_msgs.msg import Joy
+from sensor_msgs.msg import FluidPressure #Barometer
+from sensor_msgs.msg import Temperature #For compensation gyrodrift
+from sensor_msgs.msg import Range #Distance to ground
+from geometry_msgs.msg import Twist, Quaternion
+from phx_arduino_uart_bridge.msg import Motor
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
 
 class ros_communication():
     def __init__(self, copter=None):
