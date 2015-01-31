@@ -33,14 +33,14 @@ class copter:
 
         # start ros node
         if con_ros:
-            self.ros_node = ros_com.ros_communication(copter)
+            self.ros_node = ros_com.ros_communication(self)
 
         # define some timing variables
-        self.interval_read_serial = 1./200.
+        self.interval_read_serial = 1./100.
         self.interval_send_serial_low_priority = 10.0   # IP, position_LED
         self.interval_send_serial_rc = 1./50.
         self.interval_send_osc_status = 1./25.
-        self.interval_update_status = 1./50.
+        self.interval_update_status = 1./75.
         self.timer_read_serial = 0
         self.timer_send_serial_low_priority = 0
         self.timer_send_serial_rc = 0
@@ -53,6 +53,7 @@ class copter:
         self.imu_mag = [0, 0, 0]
         self.attitude = [0, 0, 0, 0]
         self.motors = [0, 0, 0, 0]
+        self.gps = [0, 0, 0, 0, 0]    # [lat, lon, alt, speed, course]
         self.cycletime_0 = [0]
         self.cycletime_1 = [0]
         self.rc0 = [0, 0, 0, 0, 0, 0, 0, 0]     # original RC signals from Human operator
@@ -95,22 +96,26 @@ class copter:
             The timings are defined in the copters init section about timings.
             --> This can not be called too often since it handles its rate on it's own.
         """
-        self.serial_receive_update(debug=debug)        # receives data on serial connections...ensures that we receive data and the buffer does not overflow
-        self.update_status(debug=debug)                # sends requests and receives the answers if they are replied instantly
-        self.send_serial_rc(debug=debug)               # sends the default RC command to the intermediate arduino (default RC is set by self.use_rc)
-        self.send_serial_low_priority(debug=debug)     # sends serial messages - low rate
-        self.send_osc_status(debug=debug)              # publishes status to OSC listeners
+        self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
+        self.update_status(debug=debug)                 # sends requests and receives the answers if they are replied instantly
+        if self.serial_intermediate:
+            self.send_serial_rc(debug=debug)            # sends the default RC command to the intermediate arduino (default RC is set by self.use_rc)
+            self.send_serial_low_priority(debug=debug)  # sends serial messages - low rate
+        self.send_osc_status(debug=debug)               # publishes status to OSC listeners
         self.update_ros()
-        self.serial_receive_update(debug=debug)        # receives data on serial connections...ensures that we receive data and the buffer does not overflow
+        self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
 
     def update_ros(self):
         self.ros_node.listen()
-        self.ros_node.pub_motors(self.motors)
-        self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
-        #self.ros_node.pub_battery(self.battery)
-        self.ros_node.pub_rc0(self.rc0)
-        self.ros_node.pub_rc1(self.rc1)
-        self.ros_node.pub_rc2(self.rc2)
+        if self.serial_multiwii:
+            self.ros_node.pub_motors(self.motors)
+            self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
+            self.ros_node.pub_rc2(self.rc2)
+            self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
+        if self.serial_intermediate:
+            self.ros_node.pub_battery(self.battery)
+            self.ros_node.pub_rc0(self.rc0)
+            self.ros_node.pub_rc1(self.rc1)
         self.ros_node.listen()
 
     def serial_receive_update(self, debug=False):
@@ -136,6 +141,8 @@ class copter:
                                  self.serial_multiwii.altitude['EstAlt']]
                 self.motors = [self.serial_multiwii.motor['0'], self.serial_multiwii.motor['1'], self.serial_multiwii.motor['2'],
                                self.serial_multiwii.motor['3']]
+                self.gps = [self.serial_multiwii.gps['coordLAT'], self.serial_multiwii.gps['coordLON'], self.serial_multiwii.gps['alt'],
+                            self.serial_multiwii.gps['speed'], self.serial_multiwii.gps['groundcourse']]
                 self.cycletime_0 = [self.serial_multiwii.status['cycleTime']]
                 self.rc2 = [self.serial_multiwii.rc['throttle'], self.serial_multiwii.rc['pitch'], self.serial_multiwii.rc['roll'],
                             self.serial_multiwii.rc['yaw'], self.serial_multiwii.rc['aux1'], self.serial_multiwii.rc['aux2'], self.serial_multiwii.rc['aux3'],
@@ -163,16 +170,18 @@ class copter:
         """
             this sends the current data to the monitoringPC.
         """
-        if self.timer_send_osc_status < time.time() and self.status_transmitter:
+        if self.status_transmitter and self.timer_send_osc_status < time.time():
             self.timer_send_osc_status = time.time() + self.interval_send_osc_status
-            self.status_transmitter.send_imu(self.imu_acc + self.imu_gyr + self.imu_mag + self.attitude, debug=debug)
-            self.status_transmitter.send_motors(self.motors)
-            self.status_transmitter.send_cycletime0(self.cycletime_0)
-            self.status_transmitter.send_cycletime1(self.cycletime_1)
-            self.status_transmitter.send_rc0(self.rc0)
-            self.status_transmitter.send_rc1(self.rc1)
-            self.status_transmitter.send_rc2(self.rc2)
-            self.status_transmitter.send_battery(self.battery)
+            if self.serial_multiwii:
+                self.status_transmitter.send_imu(self.imu_acc + self.imu_gyr + self.imu_mag + self.attitude, debug=debug)
+                self.status_transmitter.send_motors(self.motors)
+                self.status_transmitter.send_cycletime0(self.cycletime_0)
+                self.status_transmitter.send_rc2(self.rc2)
+            if self.serial_intermediate:
+                self.status_transmitter.send_cycletime1(self.cycletime_1)
+                self.status_transmitter.send_rc0(self.rc0)
+                self.status_transmitter.send_rc1(self.rc1)
+                self.status_transmitter.send_battery(self.battery)
 
     def send_serial_rc(self, remote_control=None, debug=False):
         """
@@ -180,7 +189,7 @@ class copter:
             In case a remote_control is set, this remote is used, otherwise the one in self.use_rc is used.
             If none of these is defined the fallback is the original rc0.
         """
-        if self.timer_send_serial_rc < time.time() and self.serial_intermediate:
+        if self.serial_intermediate and self.timer_send_serial_rc < time.time():
             self.timer_send_serial_rc = time.time() + self.interval_send_serial_rc
             if debug: print ' >>> copter send_serial_rc sending:'
             if remote_control:
@@ -192,12 +201,15 @@ class copter:
                 self.serial_intermediate.send_rc(sticks=self.rc0, pwm=True, debug=debug)
 
     def send_serial_low_priority(self, debug=False):
-        if self.timer_send_serial_low_priority < time.time():
+        if self.serial_intermediate and self.timer_send_serial_low_priority < time.time():
             self.timer_send_serial_low_priority = time.time() + self.interval_send_serial_low_priority
             # send local ip to intermediate
             if self.copter_receiver:
                 self.serial_intermediate.send_ip(self.copter_receiver.local_ip, debug=debug)
             else:
-                self.serial_intermediate.send_ip('000.000.000.000', debug=debug)
+                self.serial_intermediate.send_ip('0.0.0.0', debug=debug)
             # send position light to intermediate
             self.serial_intermediate.send_position_light(self.position_led, debug=debug)
+
+    def send_serial_motor(self, motor_values=(1050, 1050, 1050, 1050), debug=False):
+        print 'this function send_serial_motor() is not jet implemented.', motor_values
