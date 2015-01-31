@@ -35,21 +35,40 @@ class ros_communication():
             rc_2
         """
         try:
-            rospy.init_node('MultiWiiBridge')
-            self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
-            self.imu_msg = Imu()
-            self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
-            self.motor_msg = Motor()
-            self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
-            self.NavSatFix_msg = NavSatFix()
-            self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-            self.diagnostic_msg = DiagnosticArray()
-            self.ros_publish_rc0 = rospy.Publisher('/phoenix/rc_0', Joy, queue_size=10)
-            self.Joy_0_msg = Joy()
-            self.ros_publish_rc1 = rospy.Publisher('/phoenix/rc_1', Joy, queue_size=10)
-            self.Joy_1_msg = Joy()
-            self.ros_publish_rc2 = rospy.Publisher('/phoenix/rc_2', Joy, queue_size=10)
-            self.Joy_2_msg = Joy()
+            if copter.serial_multiwii and not copter.serial_intermediate:
+                rospy.init_node('MultiWii_Bridge')
+                self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
+                self.imu_msg = Imu()
+                self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
+                self.motor_msg = Motor()
+                self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
+                self.NavSatFix_msg = NavSatFix()
+                self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
+                self.Joy_2_msg = Joy()
+            elif copter.serial_intermediate and not copter.serial_multiwii:
+                rospy.init_node('MARVIC_Bridge')
+                self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
+                self.diagnostic_msg = DiagnosticArray()
+                self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
+                self.Joy_0_msg = Joy()
+                self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
+                self.Joy_1_msg = Joy()
+            else:
+                rospy.init_node('MultiWii_MARVIC_Bridge')
+                self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
+                self.imu_msg = Imu()
+                self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
+                self.motor_msg = Motor()
+                self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
+                self.NavSatFix_msg = NavSatFix()
+                self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
+                self.diagnostic_msg = DiagnosticArray()
+                self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
+                self.Joy_0_msg = Joy()
+                self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
+                self.Joy_1_msg = Joy()
+                self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
+                self.Joy_2_msg = Joy()
             self.freq = 50     # Hz
             self.rate = rospy.Rate(self.freq)
         except:
@@ -59,10 +78,11 @@ class ros_communication():
         else:
             self.copter = copter
             # subscribe to the different topics of interest: simple_directions, commands
-            self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
-            self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_cmd_motor)
-            self.ros_subscribe_cmd_rc_2 = rospy.Subscriber('/phoenix/cmd_rc_2', Joy, self.callback_cmd_rc_2)
-
+            if copter.serial_multiwii:
+                self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_cmd_motor)
+            elif copter.serial_intermediate:
+                self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
+                self.ros_subscribe_cmd_rc_2 = rospy.Subscriber('/phoenix/cmd_rc2', Joy, self.callback_cmd_rc_2)
         """
             raw values:
             throttle           0  -   100
@@ -100,6 +120,9 @@ class ros_communication():
         self.pwm_midpoint_aux3 = 1000
         self.pwm_midpoint_aux4 = 1000
 
+        self.simple_directions = [0, 0, 0, 0]   # backward-forward, left-right, up-down, left-right-turn
+        self.simple_directions_linear = [10, 10, 10, 10]
+
     def listen(self):
         """
             this makes rospy look for incoming messages which will be received by their callback functions.
@@ -108,10 +131,13 @@ class ros_communication():
 
     def callback_cmd_motor(self, stuff):
         print ' >>> ROS_callback: received cmd_motor', stuff
-        print ' >>> this is not implemented jet...', self.copter
+        self.copter.send_serial_motor(motor_values=stuff)
 
     def callback_cmd_vel(self, stuff):
         print ' >>> ROS_callback: received cmd_vel', stuff
+        self.simple_directions = stuff
+        self.calc_rc_from_simple_directions()
+        print '     >>> not implemented jet'
 
     def callback_cmd_rc_2(self, stuff):
         """
@@ -269,6 +295,32 @@ class ros_communication():
         if self.pwm_aux2 > upper_end:       self.pwm_aux2 = upper_end
         if self.pwm_aux3 > upper_end:       self.pwm_aux3 = upper_end
         if self.pwm_aux4 > upper_end:       self.pwm_aux4 = upper_end
+
+    def calc_rc_from_simple_directions(self, throttle=None, debug=False):
+        """
+            setting the raw values based on self.simple_directions
+            simple_directions = [0, 0, 0, 0]   # backward-forward, left-right, up-down, left-right-turn
+        """
+        if not throttle:
+            self.throttle = self.throttle
+        else:
+            self.throttle = throttle
+
+        self.pitch = self.simple_directions[0] * self.simple_directions_linear[0]
+        if abs(self.pitch) > 25:
+            self.pitch = 25.0 * (self.pitch/abs(self.pitch))
+
+        self.roll = self.simple_directions[1] * self.simple_directions_linear[1]
+        if abs(self.roll) > 25:
+            self.roll = 25.0 * (self.roll/abs(self.roll))
+
+        self.throttle += self.simple_directions[3] * self.simple_directions_linear[3]
+
+        self.yaw = self.simple_directions[3] * self.simple_directions_linear[3]
+        if abs(self.yaw) < 10:
+            self.yaw = 0
+        elif abs(self.yaw) > 35:
+            self.yaw = 30
 
     def calc_pwm_from_raw(self, debug=False):
         if debug: print ' >>> calc_pwm_from_raw()'
