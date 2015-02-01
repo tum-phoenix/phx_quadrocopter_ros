@@ -62,6 +62,8 @@ class copter:
         self.battery = [0, 0, 0, 0]
         self.position_led = [0]
 
+        self.local_ip = network_com.get_local_ip()
+
         # define default rc for serial out
         self.use_rc = None
 
@@ -204,10 +206,7 @@ class copter:
         if self.serial_intermediate and self.timer_send_serial_low_priority < time.time():
             self.timer_send_serial_low_priority = time.time() + self.interval_send_serial_low_priority
             # send local ip to intermediate
-            if self.copter_receiver:
-                self.serial_intermediate.send_ip(self.copter_receiver.local_ip, debug=debug)
-            else:
-                self.serial_intermediate.send_ip('0.0.0.0', debug=debug)
+            self.serial_intermediate.send_ip(self.local_ip, debug=debug)
             # send position light to intermediate
             self.serial_intermediate.send_position_light(self.position_led, debug=debug)
 
