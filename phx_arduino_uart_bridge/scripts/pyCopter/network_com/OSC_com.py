@@ -238,12 +238,15 @@ def get_local_ip():
     """
         returns a string of the first local ip
     """
-    ip_task = os.popen("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'")
-    local_ip = ip_task.read().strip()
-    ip_task.close()
-    if '\n' in local_ip:
-        local_ip = local_ip.split('\n')[0]
-    return local_ip
+    try:
+        ip_task = os.popen("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'")
+        local_ip = ip_task.read().strip()
+        ip_task.close()
+        if '\n' in local_ip:
+            local_ip = local_ip.split('\n')[0]
+        return local_ip
+    except:
+        return '0.0.0.0'
 
 # just a short example how this is meant to be used
 if __name__ == "__main__":
