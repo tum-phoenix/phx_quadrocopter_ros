@@ -34,6 +34,8 @@ class copter:
         # start ros node
         if con_ros:
             self.ros_node = ros_com.ros_communication(self)
+        else:
+            self.ros_node = None
 
         # define some timing variables
         self.interval_read_serial = 1./100.
@@ -104,7 +106,8 @@ class copter:
             self.send_serial_rc(debug=debug)            # sends the default RC command to the intermediate arduino (default RC is set by self.use_rc)
             self.send_serial_low_priority(debug=debug)  # sends serial messages - low rate
         self.send_osc_status(debug=debug)               # publishes status to OSC listeners
-        self.update_ros()
+        if self.ros_node:
+            self.update_ros()
         self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
 
     def update_ros(self):

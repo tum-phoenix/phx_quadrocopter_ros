@@ -35,54 +35,73 @@ class ros_communication():
             rc_2
         """
         try:
-            if copter.serial_multiwii and not copter.serial_intermediate:
-                rospy.init_node('MultiWii_Bridge')
-                self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
-                self.imu_msg = Imu()
-                self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
-                self.motor_msg = Motor()
-                self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
-                self.NavSatFix_msg = NavSatFix()
-                self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
-                self.Joy_2_msg = Joy()
-            elif copter.serial_intermediate and not copter.serial_multiwii:
-                rospy.init_node('MARVIC_Bridge')
-                self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                self.diagnostic_msg = DiagnosticArray()
-                self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
-                self.Joy_0_msg = Joy()
-                self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
-                self.Joy_1_msg = Joy()
+            if not copter:
+                print 'you are in listening only mode, which is unfortunately not implemented jet'
+                rospy.init_node('pyROS_listener')
+#                self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_listen_cmd_motor)
+#                self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_listen_cmd_vel)
+#                self.ros_subscribe_cmd_rc_2 = rospy.Subscriber('/phoenix/cmd_rc2', Joy, self.callback_listen_cmd_rc_2)
+#                self.ros_subscribe_stat_imu = rospy.Subscriber('/phoenix/stat_imu', Joy, self.callback_listen_stat_imu)
+#                self.ros_subscribe_stat_motor = rospy.Subscriber('/phoenix/stat_motor', Joy, self.callback_listen_stat_motor)
+#                self.ros_subscribe_stat_gps = rospy.Subscriber('/phoenix/stat_gps', Joy, self.callback_listen_stat_gps)
+#                self.ros_subscribe_stat_rc0 = rospy.Subscriber('/phoenix/stat_rc0', Joy, self.callback_listen_stat_rc0)
+#                self.ros_subscribe_stat_rc1 = rospy.Subscriber('/phoenix/stat_rc1', Joy, self.callback_listen_stat_rc1)
+#                self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_listen_stat_rc2)
+#                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', Joy, self.callback_listen_stat_battery)
+
+                self.copter = None
+                self.freq = 50     # Hz
+                self.rate = rospy.Rate(self.freq)
             else:
-                rospy.init_node('MultiWii_MARVIC_Bridge')
-                self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
-                self.imu_msg = Imu()
-                self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
-                self.motor_msg = Motor()
-                self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
-                self.NavSatFix_msg = NavSatFix()
-                self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                self.diagnostic_msg = DiagnosticArray()
-                self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
-                self.Joy_0_msg = Joy()
-                self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
-                self.Joy_1_msg = Joy()
-                self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
-                self.Joy_2_msg = Joy()
-            self.freq = 50     # Hz
-            self.rate = rospy.Rate(self.freq)
+                if copter.serial_multiwii and not copter.serial_intermediate:
+                    rospy.init_node('MultiWii_Bridge')
+                    self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
+                    self.imu_msg = Imu()
+                    self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
+                    self.motor_msg = Motor()
+                    self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
+                    self.NavSatFix_msg = NavSatFix()
+                    self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
+                    self.Joy_2_msg = Joy()
+                    # TODO: add a topic for cycletime0
+                elif copter.serial_intermediate and not copter.serial_multiwii:
+                    rospy.init_node('MARVIC_Bridge')
+                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
+                    self.diagnostic_msg = DiagnosticArray()
+                    self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
+                    self.Joy_0_msg = Joy()
+                    self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
+                    self.Joy_1_msg = Joy()
+                    # TODO: add a topic for cycletime1
+                else:
+                    rospy.init_node('MultiWii_MARVIC_Bridge')
+                    self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
+                    self.imu_msg = Imu()
+                    self.ros_publish_motor = rospy.Publisher('/phoenix/stat_motor', Motor, queue_size=10)
+                    self.motor_msg = Motor()
+                    self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
+                    self.NavSatFix_msg = NavSatFix()
+                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
+                    self.diagnostic_msg = DiagnosticArray()
+                    self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
+                    self.Joy_0_msg = Joy()
+                    self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
+                    self.Joy_1_msg = Joy()
+                    self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
+                    self.Joy_2_msg = Joy()
+                    # TODO: add a topic for cycletime0
+                    # TODO: add a topic for cycletime1
+                self.copter = copter
+                # subscribe to the different topics of interest: simple_directions, commands
+                if copter.serial_multiwii:
+                    self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_cmd_motor)
+                elif copter.serial_intermediate:
+                    self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
+                    self.ros_subscribe_cmd_rc_1 = rospy.Subscriber('/phoenix/cmd_rc1', Joy, self.callback_cmd_rc_1)
+                self.freq = 50     # Hz
+                self.rate = rospy.Rate(self.freq)
         except:
             print ' >>> error in ros __init__'
-        if not copter:
-            print 'you have to define an copter to subscribe a ros topic'
-        else:
-            self.copter = copter
-            # subscribe to the different topics of interest: simple_directions, commands
-            if copter.serial_multiwii:
-                self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_cmd_motor)
-            elif copter.serial_intermediate:
-                self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
-                self.ros_subscribe_cmd_rc_2 = rospy.Subscriber('/phoenix/cmd_rc2', Joy, self.callback_cmd_rc_2)
         """
             raw values:
             throttle           0  -   100
@@ -139,14 +158,14 @@ class ros_communication():
         self.calc_rc_from_simple_directions()
         print '     >>> not implemented jet'
 
-    def callback_cmd_rc_2(self, stuff):
+    def callback_cmd_rc_1(self, stuff):
         """
             in case stuff = [ self.throttle, self.pitch, self.roll, self.yaw, self.aux1, self.aux2, self.aux3, self.aux4 ]
         """
         try:
             self.set_sticks(sticks=stuff)
         except:
-            print ' >>> ROS_callback: receive callback_cmd_rc_2 failed', stuff
+            print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
 
     def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=False):
         """
