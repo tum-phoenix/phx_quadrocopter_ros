@@ -6,7 +6,6 @@ import numpy as np
 
 import rospy
 import tf
-from copter_status import copter
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import NavSatFix, NavSatStatus
 from sensor_msgs.msg import Joy
@@ -50,7 +49,7 @@ class ros_communication():
 #                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', Joy, self.callback_listen_stat_battery)
 
                 self.copter = None
-                self.freq = 50     # Hz
+                self.freq = 250     # Hz
                 self.rate = rospy.Rate(self.freq)
             else:
                 if copter.serial_multiwii and not copter.serial_intermediate:
@@ -177,8 +176,8 @@ class ros_communication():
             if debug: print 'imu did angular_velocity'
             self.imu_msg.linear_acceleration = acc
             if debug: print 'imu did linear_acceleration'
-            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
-            self.imu_msg.orientation = Quaternion(*q)
+#            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
+#            self.imu_msg.orientation = Quaternion(*q)
             if debug: print 'imu did orientation'
             self.ros_publish_imu.publish(self.imu_msg)
             if debug: print ' >>> sent imu'

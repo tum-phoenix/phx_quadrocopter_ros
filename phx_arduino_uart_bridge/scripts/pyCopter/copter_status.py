@@ -5,7 +5,7 @@ import serial_com
 import network_com
 import time
 import numpy as np
-
+import speed
 
 class copter:
     def __init__(self, con_multiwii=True, con_intermediate=True, con_ros=False, osc_transmit=(None, 10000), osc_receive=10001):
@@ -26,7 +26,7 @@ class copter:
 
         # connect to serial intermediate
         if con_intermediate:
-            self.serial_intermediate = serial_com.multiwii_protocol('/dev/arduino', 115200)
+            self.serial_intermediate = serial_com.multiwii_protocol('/dev/marvic', 115200)
             self.serial_intermediate.startup_delay = 10.
         else:
             self.serial_intermediate = None
@@ -38,16 +38,18 @@ class copter:
             self.ros_node = None
 
         # define some timing variables
-        self.interval_read_serial = 1./100.
+        self.interval_read_serial = 1./70.
         self.interval_send_serial_low_priority = 10.0   # IP, position_LED
-        self.interval_send_serial_rc = 1./50.
-        self.interval_send_osc_status = 1./25.
-        self.interval_update_status = 1./75.
+        self.interval_send_serial_rc = 1./40.
+        self.interval_send_osc_status = 1./15.
+        self.interval_update_status = 1./50.
+        self.interval_update_ros = 1./70.
         self.timer_read_serial = 0
         self.timer_send_serial_low_priority = 0
         self.timer_send_serial_rc = 0
         self.timer_send_osc_status = 0
         self.timer_update_status = 0
+        self.timer_update_ros = 0
 
         # define the copter status variables
         self.imu_acc = [0, 0, 0]
@@ -83,6 +85,12 @@ class copter:
         else:
             self.osc_remote = None
             self.copter_receiver = None
+        self.speed_1 = speed.speedtest()
+        self.speed_2 = speed.speedtest()
+        self.speed_3 = speed.speedtest()
+        self.speed_4 = speed.speedtest()
+        self.speed_5 = speed.speedtest()
+        self.speed_6 = speed.speedtest()
 
     def stop(self):
         """
@@ -100,28 +108,55 @@ class copter:
             The timings are defined in the copters init section about timings.
             --> This can not be called too often since it handles its rate on it's own.
         """
+        self.speed_1.start()
         self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
+        self.speed_1.stop()
+        
+        self.speed_2.start()
         self.update_status(debug=debug)                 # sends requests and receives the answers if they are replied instantly
+        self.speed_2.stop()
+        
+        self.speed_3.start()
         if self.serial_intermediate:
             self.send_serial_rc(debug=debug)            # sends the default RC command to the intermediate arduino (default RC is set by self.use_rc)
             self.send_serial_low_priority(debug=debug)  # sends serial messages - low rate
-        self.send_osc_status(debug=debug)               # publishes status to OSC listeners
+        self.speed_3.stop()
+        
+        self.speed_4.start()
+        if self.status_transmitter:
+            self.send_osc_status(debug=debug)               # publishes status to OSC listeners
+        self.speed_4.stop()
+        
+        self.speed_5.start()
         if self.ros_node:
             self.update_ros()
+        self.speed_5.stop()
+        
+        self.speed_6.start()
         self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
+        self.speed_6.stop()
+        
+        self.speed_1.print_result(rate=1., text=' > copterstatus speed_1 takes')
+        self.speed_2.print_result(rate=1., text=' > copterstatus speed_2 takes')
+        self.speed_3.print_result(rate=1., text=' > copterstatus speed_3 takes')
+        self.speed_4.print_result(rate=1., text=' > copterstatus speed_4 takes')
+        self.speed_5.print_result(rate=1., text=' > copterstatus speed_5 takes')
+        self.speed_6.print_result(rate=1., text=' > copterstatus speed_6 takes')
 
     def update_ros(self):
-        self.ros_node.listen()
-        if self.serial_multiwii:
-            self.ros_node.pub_motors(self.motors)
-            self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
-            self.ros_node.pub_rc2(self.rc2)
-            self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
-        if self.serial_intermediate:
-            self.ros_node.pub_battery(self.battery)
-            self.ros_node.pub_rc0(self.rc0)
-            self.ros_node.pub_rc1(self.rc1)
-        self.ros_node.listen()
+        if self.timer_update_ros < time.time():
+            self.time_update_ros = time.time() + self.interval_update_ros
+            self.ros_node.listen()
+            if self.serial_multiwii:
+                self.ros_node.pub_motors(self.motors)
+                self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
+                self.ros_node.pub_rc2(self.rc2)
+                self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
+            if self.serial_intermediate:
+                self.ros_node.pub_battery(self.battery)
+                self.ros_node.pub_rc0(self.rc0)
+                self.ros_node.pub_rc1(self.rc1)
+#            self.ros_node.listen()
 
     def serial_receive_update(self, debug=False):
         """

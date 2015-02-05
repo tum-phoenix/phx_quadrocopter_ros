@@ -1,3 +1,4 @@
 <launch>
-  <node name="MultiWiiUartBridgeNode" pkg="phx_arduino_uart_bridge" type="phoenix_os_1.py" output="screen" />
+  <node name="MultiWii_Bridge" pkg="phx_arduino_uart_bridge" type="multiwii_ros_interface.py" output="screen" />
+  <node name="MARVIC_Bridge" pkg="phx_arduino_uart_bridge" type="marvic_ros_interface.py" output="screen" />
 </launch>
