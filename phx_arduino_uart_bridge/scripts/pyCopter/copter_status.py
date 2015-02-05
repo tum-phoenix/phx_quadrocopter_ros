@@ -43,7 +43,7 @@ class copter:
         self.interval_send_serial_rc = 1./40.
         self.interval_send_osc_status = 1./15.
         self.interval_update_status = 1./50.
-        self.interval_update_ros = 1./70.
+        self.interval_update_ros = 1./50.
         self.timer_read_serial = 0
         self.timer_send_serial_low_priority = 0
         self.timer_send_serial_rc = 0
