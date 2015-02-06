@@ -33,7 +33,7 @@ class copter:
 
         # start ros node
         if con_ros:
-            self.ros_node = ros_com.ros_communication(self)
+            self.ros_node = ros_com.ros_communication(copter=self)
         else:
             self.ros_node = None
 
@@ -124,7 +124,7 @@ class copter:
         
         self.speed_4.start()
         if self.status_transmitter:
-            self.send_osc_status(debug=debug)               # publishes status to OSC listeners
+            self.send_osc_status(debug=debug)           # publishes status to OSC listeners
         self.speed_4.stop()
         
         self.speed_5.start()
