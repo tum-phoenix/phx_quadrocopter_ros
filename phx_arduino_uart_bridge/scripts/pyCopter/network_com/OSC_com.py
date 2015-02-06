@@ -32,25 +32,25 @@ class OSC_receiver:
         self.osc_receiver.addDefaultHandlers()
         # connecting handlers to functions
         if self.osc_rc:
-            self.osc_receiver.addMsgHandler("/gyrosc/gyro"      , self.osc_rc.handle_gyro)      # from gyrosc App
-            self.osc_receiver.addMsgHandler("/gyrosc/accel"     , self.osc_rc.handle_acc)       # from gyrosc App
-            self.osc_receiver.addMsgHandler("/gyrosc/ipport"    , self.osc_rc.handle_ip)        # from gyrosc App
-            self.osc_receiver.addMsgHandler("/gyrosc/gps"       , self.osc_rc.handle_gps)       # from gyrosc App
+            self.osc_receiver.addMsgHandler("/gyrosc/gyro", self.osc_rc.handle_gyro)       # from gyrosc App
+            self.osc_receiver.addMsgHandler("/gyrosc/accel", self.osc_rc.handle_acc)       # from gyrosc App
+            self.osc_receiver.addMsgHandler("/gyrosc/ipport", self.osc_rc.handle_ip)       # from gyrosc App
+            self.osc_receiver.addMsgHandler("/gyrosc/gps", self.osc_rc.handle_gps)         # from gyrosc App
+            self.osc_receiver.addMsgHandler("/osc_base_station/directions", self.osc_rc.handle_directions)
+            self.osc_receiver.addMsgHandler("/osc_base_station/commands", self.osc_rc.handle_commands)
             print ' osc_receiver attached osc_rc handlers'
         if self.osc_base_station:
-            self.osc_receiver.addMsgHandler("/status/time",  self.osc_base_station.handle_status_time)
-            self.osc_receiver.addMsgHandler("/status/rc0",    self.osc_base_station.handle_status_rc0)
-            self.osc_receiver.addMsgHandler("/status/rc1",    self.osc_base_station.handle_status_rc1)
-            self.osc_receiver.addMsgHandler("/status/rc2",    self.osc_base_station.handle_status_rc2)
-            self.osc_receiver.addMsgHandler("/status/imu",   self.osc_base_station.handle_status_imu)
-            self.osc_receiver.addMsgHandler("/status/cycletime0",    self.osc_base_station.handle_status_cycletime0)
-            self.osc_receiver.addMsgHandler("/status/cycletime1",   self.osc_base_station.handle_status_cycletime1)
-            self.osc_receiver.addMsgHandler("/status/motors",   self.osc_base_station.handle_status_motors)
+            self.osc_receiver.addMsgHandler("/status/time", self.osc_base_station.handle_status_time)
+            self.osc_receiver.addMsgHandler("/status/rc0", self.osc_base_station.handle_status_rc0)
+            self.osc_receiver.addMsgHandler("/status/rc1", self.osc_base_station.handle_status_rc1)
+            self.osc_receiver.addMsgHandler("/status/rc2", self.osc_base_station.handle_status_rc2)
+            self.osc_receiver.addMsgHandler("/status/imu", self.osc_base_station.handle_status_imu)
+            self.osc_receiver.addMsgHandler("/status/cycletime0", self.osc_base_station.handle_status_cycletime0)
+            self.osc_receiver.addMsgHandler("/status/cycletime1", self.osc_base_station.handle_status_cycletime1)
+            self.osc_receiver.addMsgHandler("/status/motors", self.osc_base_station.handle_status_motors)
             print ' osc_receiver attached osc_base_station handlers'
         if self.osc_status_transmitter:
-            self.osc_receiver.addMsgHandler("/osc_base_station/connect",  self.osc_status_transmitter.handle_connect)
-            self.osc_receiver.addMsgHandler("/osc_base_station/directions",  self.osc_rc.handle_directions)
-            self.osc_receiver.addMsgHandler("/osc_base_station/commands",  self.osc_rc.handle_commands)
+            self.osc_receiver.addMsgHandler("/osc_base_station/connect", self.osc_status_transmitter.handle_connect)
     
     def start(self):
         print " >>> Starting OSCServer. Use ctrl-C to quit."
