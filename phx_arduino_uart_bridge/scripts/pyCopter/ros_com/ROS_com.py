@@ -18,40 +18,33 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For
 
 
 class ros_communication():
-    def __init__(self, copter=None):
+    def __init__(self, copter=None, osc=None):
         """
-            this publishes:
-            imu
-            gps
-            magnetometer
-            rc0 pilot's rc
-            rc1 current flying rc signals
-            rc2 computer's rc
-
-            this receives:
-            motor messages
-            vel
-            rc_2
+            If copter is defined this is either a node which is connected to multiwii
+                publish stat_imu
+                publish stat_motor
+                publish stat_gps
+                publish stat_rc2        (multiwii rc for feedback)
+                subscribe com_motor     (not fully implemented jet)
+            or connected to the marvic
+                publish stat_battery
+                publish stat_rc0        (sudo rc)
+                publish stat_rc1        (computer rc for feedback)
+                subscribe com_rc1       (computer rc)
+                subscribe com_vel
+            In case osc is defined the node will
+                publish com_vel         (sent by the base station)
+                publish com_rc1         (sent by the base station)
+                subscribe stat_imu
+                subscribe stat_motor
+                subscribe stat_gps
+                subscribe stat_battery
+                subscribe stat_rc0
+                subscribe stat_rc1
+                subscribe stat_rc2
         """
         try:
-            if not copter:
-                print 'you are in listening only mode, which is unfortunately not implemented jet'
-                rospy.init_node('pyROS_listener')
-#                self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_listen_cmd_motor)
-#                self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_listen_cmd_vel)
-#                self.ros_subscribe_cmd_rc_2 = rospy.Subscriber('/phoenix/cmd_rc2', Joy, self.callback_listen_cmd_rc_2)
-#                self.ros_subscribe_stat_imu = rospy.Subscriber('/phoenix/stat_imu', Joy, self.callback_listen_stat_imu)
-#                self.ros_subscribe_stat_motor = rospy.Subscriber('/phoenix/stat_motor', Joy, self.callback_listen_stat_motor)
-#                self.ros_subscribe_stat_gps = rospy.Subscriber('/phoenix/stat_gps', Joy, self.callback_listen_stat_gps)
-#                self.ros_subscribe_stat_rc0 = rospy.Subscriber('/phoenix/stat_rc0', Joy, self.callback_listen_stat_rc0)
-#                self.ros_subscribe_stat_rc1 = rospy.Subscriber('/phoenix/stat_rc1', Joy, self.callback_listen_stat_rc1)
-#                self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_listen_stat_rc2)
-#                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', Joy, self.callback_listen_stat_battery)
-
-                self.copter = None
-                self.freq = 250     # Hz
-                self.rate = rospy.Rate(self.freq)
-            else:
+            if copter:
                 if copter.serial_multiwii and not copter.serial_intermediate:
                     rospy.init_node('MultiWii_Bridge')
                     self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
@@ -72,7 +65,7 @@ class ros_communication():
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
                     self.Joy_1_msg = Joy()
                     # TODO: add a topic for cycletime1
-                else:
+                elif copter.serial_intermediate and copter.serial_multiwii:
                     rospy.init_node('MultiWii_MARVIC_Bridge')
                     self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
                     self.imu_msg = Imu()
@@ -91,14 +84,32 @@ class ros_communication():
                     # TODO: add a topic for cycletime0
                     # TODO: add a topic for cycletime1
                 self.copter = copter
+                self.osc_transmitter = None
                 # subscribe to the different topics of interest: simple_directions, commands
                 if copter.serial_multiwii:
                     self.ros_subscribe_cmd_motor = rospy.Subscriber('/phoenix/cmd_motor', Motor, self.callback_cmd_motor)
-                elif copter.serial_intermediate:
+                if copter.serial_intermediate:
                     self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
                     self.ros_subscribe_cmd_rc_1 = rospy.Subscriber('/phoenix/cmd_rc1', Joy, self.callback_cmd_rc_1)
-                self.freq = 50     # Hz
-                self.rate = rospy.Rate(self.freq)
+            elif osc:
+                rospy.init_node('OSC_Bridge')
+                self.ros_publish_cmd_rc1 = rospy.Publisher('/phoenix/cmd_rc1', Joy, queue_size=10)
+                self.Joy_1_cmd_msg = Joy()
+                self.ros_publish_cmd_vel = rospy.Publisher('/phoenix/cmd_vel', Joy, queue_size=10)
+                self.cmd_vel_msg = Twist()
+                self.ros_subscribe_stat_imu = rospy.Subscriber('/phoenix/stat_imu', Imu, self.callback_stat_imu)
+                self.ros_subscribe_stat_motor = rospy.Subscriber('/phoenix/stat_motor', Motor, self.callback_stat_motor)
+                self.ros_subscribe_stat_gps = rospy.Subscriber('/phoenix/stat_gps', NavSatFix, self.callback_stat_gps)
+                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', DiagnosticArray, self.callback_stat_battery)
+                self.ros_subscribe_stat_rc0 = rospy.Subscriber('/phoenix/stat_rc0', Joy, self.callback_stat_rc0)
+                self.ros_subscribe_stat_rc1 = rospy.Subscriber('/phoenix/stat_rc1', Joy, self.callback_stat_rc1)
+                self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_stat_rc2)
+                # TODO: add subscriber on cycletime topics.
+                self.copter = None
+                self.osc_transmitter = osc
+
+            self.freq = 50     # Hz
+            self.rate = rospy.Rate(self.freq)
         except:
             print ' >>> error in ros __init__'
         """
@@ -147,6 +158,63 @@ class ros_communication():
         """
         self.rate.sleep()
 
+    # Callbacks:
+
+    def callback_stat_imu(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the imu stuff and send it
+            # imu = [ accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY. magZ, pitch, roll, heading, altitude ]
+            # self.osc_transmitter.send_imu(imu=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), debug=False):
+            pass
+        print ' > not implemented jet, imu', stuff
+
+    def callback_stat_motor(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the motor stuff and send it
+            # motors = [ motor0, motor1, motor2, motor3 ]
+            # self.osc_transmitter.send_motors(motors=(1, 2, 3, 4), debug=False):
+            pass
+        print ' > not implemented jet, motor', stuff
+
+    def callback_stat_gps(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the gps stuff and send it
+            # This has to be implemented in osc_com first.
+            pass
+        print ' > not implemented jet, gps', stuff
+
+    def callback_stat_battery(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the battery stuff and send it
+            # battery = [ cell1, cell2, cell3, cell4 ]
+            # self.osc_transmitter.send_battery(battery=(1, 2, 3, 0), debug=False):
+            pass
+        print ' > not implemented jet, battery', stuff
+
+    def callback_stat_rc0(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the rc0 stuff and send it
+            # rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
+            # self.osc_transmitter.send_rc0(rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
+            pass
+        print ' > not implemented jet, rc0', stuff
+
+    def callback_stat_rc1(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the rc1 stuff and send it
+            # rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
+            # self.osc_transmitter.send_rc1(rc1=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
+            pass
+        print ' > not implemented jet, rc1', stuff
+
+    def callback_stat_rc2(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the rc2 stuff and send it
+            # rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
+            # self.osc_transmitter.send_rc2(rc2=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
+            pass
+        print ' > not implemented jet, rc2', stuff
+
     def callback_cmd_motor(self, stuff):
         print ' >>> ROS_callback: received cmd_motor', stuff
         self.copter.send_serial_motor(motor_values=stuff)
@@ -166,15 +234,21 @@ class ros_communication():
         except:
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
 
+    # Publishers:
+
     def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=False):
         """
             acc=(accX, accY, accZ), gyr=(gyrX, gyrY, gyrZ), mag=(magX, magY. magZ), attitude=(pitch, roll, heading, altitude)
         """
         try:
             if debug: print 'trying to send imu'
-            self.imu_msg.angular_velocity = gyr
+            self.imu_msg.angular_velocity.x = gyr[0]
+            self.imu_msg.angular_velocity.y = gyr[1]
+            self.imu_msg.angular_velocity.z = gyr[2]
             if debug: print 'imu did angular_velocity'
-            self.imu_msg.linear_acceleration = acc
+            self.imu_msg.linear_acceleration.x = acc[0]
+            self.imu_msg.linear_acceleration.y = acc[1]
+            self.imu_msg.linear_acceleration.z = acc[2]
             if debug: print 'imu did linear_acceleration'
 #            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
 #            self.imu_msg.orientation = Quaternion(*q)
@@ -207,6 +281,21 @@ class ros_communication():
             if debug: print ' >>> sent pub_gps'
         except:
             print '>>> error in ros pub_gps!'
+
+    def pub_battery(self, battery=(1, 2, 3, 0), debug=False):
+        """
+            battery = [ cell1, cell2, cell3, cell4 ]
+        """
+        try:
+            self.diagnostic_msg.status = DiagnosticStatus(name="Battery", level=DiagnosticStatus.OK, message="OK")
+            self.diagnostic_msg.status.values = [KeyValue("Cell 1", str(battery[0])),
+                                                 KeyValue("Cell 2", str(battery[1])),
+                                                 KeyValue("Cell 3", str(battery[2])),
+                                                 KeyValue("Cell 4", str(battery[3]))]
+            self.ros_publish_battery.publish(self.diagnostic_msg)
+            if debug: print ' >>> sent pub_battery'
+        except:
+            print '>>> error in ros pub_battery!'
 
     def pub_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """
@@ -247,23 +336,27 @@ class ros_communication():
         except:
             print '>>> error in ros pub_rc2!'
 
-    def pub_battery(self, battery=(1, 2, 3, 0), debug=False):
+    def pub_cmd_vel(self, simple_directions=(0, 0, 0, 0), debug=False):
+        # TODO: write this publisher! very important for testing!
+        print 'not implemented jet, pub_cmd_vel', simple_directions
+
+    def pub_cmd_rc1(self, rc1=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """
-            battery = [ cell1, cell2, cell3, cell4 ]
+            rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            self.diagnostic_msg.status = DiagnosticStatus(name="Battery", level=DiagnosticStatus.OK, message="OK")
-            self.diagnostic_msg.status.values = [KeyValue("Cell 1", str(battery[0])),
-                                                 KeyValue("Cell 2", str(battery[1])),
-                                                 KeyValue("Cell 3", str(battery[2])),
-                                                 KeyValue("Cell 4", str(battery[3]))]
-            self.ros_publish_battery.publish(self.diagnostic_msg)
-            if debug: print ' >>> sent pub_battery'
+            self.Joy_1_cmd_msg.axes = rc1[:4]
+            self.Joy_1_cmd_msg.buttons = rc1[4:]
+            self.ros_publish_cmd_rc1.publish(self.Joy_1_cmd_msg)
+            if debug: print ' >>> sent rc1'
         except:
-            print '>>> error in ros pub_battery!'
+            print '>>> error in ros pub_rc1!'
+
+    # RC stuff:
 
     def update_rc(self, debug=False):
-        self.copter.send_serial_rc(remote_control=self, debug=debug)
+        if self.copter:
+            self.copter.send_serial_rc(remote_control=self, debug=debug)
 
     def stick_curve(self, raw_val, mid_point=1500, mode=0):
         if mode == 0:
@@ -454,6 +547,31 @@ class ros_communication():
         else:
             print ' >>> virtual_remote_control set_stick(', name, ') could not be set since this stick name is not available'
 
+    def handle_gyro(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/gyro fff [0.48758959770202637, 0.06476165354251862, -0.19856473803520203] ('192.168.0.33', 57527)
+        self.gyro = stuff
+
+    def handle_acc(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/accel fff [0.48758959770202637, 0.06476165354251862, -0.19856473803520203] ('192.168.0.3$
+        self.acc = stuff
+
+    def handle_gps(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/gps fff
+        self.gps = stuff
+
+    def handle_ip(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/ipport fff
+        self.ip = stuff
+
+    def handle_directions(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/ipport fff
+        print 'received directions:', stuff, 'this is printed by ROS.handle_directions() needs further implementation'
+        self.simple_directions = stuff
+        self.pub_cmd_vel(simple_directions=stuff)
+
+    def handle_commands(self, add, tag, stuff, source):
+        # input looks like incoming OSC: /gyrosc/ipport fff
+        print 'received commands:', stuff
 
 if __name__ == '__main__':
     try:
