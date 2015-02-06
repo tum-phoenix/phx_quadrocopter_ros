@@ -1,4 +1,8 @@
 __author__ = 'manuelviermetz'
-from ROS_com import ros_communication
+try:
+    from ROS_com import ros_communication
 
-del ROS_com
+    del ROS_com
+except:
+    print ' >>>> NO ROS!'
+
