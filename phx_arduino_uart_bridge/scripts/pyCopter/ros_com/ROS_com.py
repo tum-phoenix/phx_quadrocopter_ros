@@ -9,6 +9,7 @@ import tf
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import NavSatFix, NavSatStatus
 from sensor_msgs.msg import Joy
+from std_msgs.msg import Int16
 from sensor_msgs.msg import FluidPressure #Barometer
 from sensor_msgs.msg import Temperature #For compensation gyrodrift
 from sensor_msgs.msg import Range #Distance to ground
@@ -55,7 +56,8 @@ class ros_communication():
                     self.NavSatFix_msg = NavSatFix()
                     self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
                     self.Joy_2_msg = Joy()
-                    # TODO: add a topic for cycletime0
+                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Int16, queue_size=10)
+                    self.cycletime_0_msg = Int16()
                 elif copter.serial_intermediate and not copter.serial_multiwii:
                     rospy.init_node('MARVIC_Bridge')
                     self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
@@ -64,7 +66,8 @@ class ros_communication():
                     self.Joy_0_msg = Joy()
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
                     self.Joy_1_msg = Joy()
-                    # TODO: add a topic for cycletime1
+                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Int16, queue_size=10)
+                    self.cycletime_1_msg = Int16()
                 elif copter.serial_intermediate and copter.serial_multiwii:
                     rospy.init_node('MultiWii_MARVIC_Bridge')
                     self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
@@ -81,8 +84,10 @@ class ros_communication():
                     self.Joy_1_msg = Joy()
                     self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
                     self.Joy_2_msg = Joy()
-                    # TODO: add a topic for cycletime0
-                    # TODO: add a topic for cycletime1
+                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Int16, queue_size=10)
+                    self.cycletime_0_msg = Int16()
+                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Int16, queue_size=10)
+                    self.cycletime_1_msg = Int16()
                 self.copter = copter
                 self.osc_transmitter = None
                 # subscribe to the different topics of interest: simple_directions, commands
@@ -104,7 +109,8 @@ class ros_communication():
                 self.ros_subscribe_stat_rc0 = rospy.Subscriber('/phoenix/stat_rc0', Joy, self.callback_stat_rc0)
                 self.ros_subscribe_stat_rc1 = rospy.Subscriber('/phoenix/stat_rc1', Joy, self.callback_stat_rc1)
                 self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_stat_rc2)
-                # TODO: add subscriber on cycletime topics.
+                self.ros_subscribe_stat_cycletime0 = rospy.Subscriber('/phoenix/cycletime0', Int16, self.callback_stat_cycletime0)
+                self.ros_subscribe_stat_cycletime1 = rospy.Subscriber('/phoenix/cycletime1', Int16, self.callback_stat_cycletime1)
                 self.copter = None
                 self.osc_transmitter = osc
 
@@ -215,9 +221,24 @@ class ros_communication():
             pass
         print ' > not implemented jet, rc2', stuff
 
+    def callback_stat_cycletime0(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the cycletime0 stuff and send it
+            # self.osc_transmitter.send_cycletime1(cycletime_1, debug=False):
+            pass
+        print ' > not implemented jet, cycletime0', stuff
+
+    def callback_stat_cycletime1(self, stuff):
+        if self.osc_transmitter:
+            # TODO: organize the cycletime1 stuff and send it
+            # self.osc_transmitter.send_cycletime1(cycletime_1, debug=False)
+            pass
+        print ' > not implemented jet, cycletime1', stuff
+
     def callback_cmd_motor(self, stuff):
         print ' >>> ROS_callback: received cmd_motor', stuff
-        self.copter.send_serial_motor(motor_values=stuff)
+        if self.copter:
+            self.copter.send_serial_motor(motor_values=stuff)
 
     def callback_cmd_vel(self, stuff):
         print ' >>> ROS_callback: received cmd_vel', stuff
@@ -235,7 +256,6 @@ class ros_communication():
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
 
     # Publishers:
-
     def pub_imu(self, acc=(1, 2, 3), gyr=(4, 5, 6), mag=(7, 8, 9), attitude=(10, 11, 12, 13), debug=False):
         """
             acc=(accX, accY, accZ), gyr=(gyrX, gyrY, gyrZ), mag=(magX, magY. magZ), attitude=(pitch, roll, heading, altitude)
@@ -335,6 +355,10 @@ class ros_communication():
             if debug: print ' >>> sent rc2'
         except:
             print '>>> error in ros pub_rc2!'
+
+    def pub_cmd_motor(self, motors=(0, 0, 0, 0), debug=False):
+        # TODO: write this publisher! very important for testing!
+        print 'not implemented jet, pub_cmd_motor', motors
 
     def pub_cmd_vel(self, simple_directions=(0, 0, 0, 0), debug=False):
         # TODO: write this publisher! very important for testing!
