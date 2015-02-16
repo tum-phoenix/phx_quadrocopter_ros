@@ -41,12 +41,13 @@ class OSC_receiver:
             print ' osc_receiver attached osc_rc handlers'
         if self.osc_base_station:
             self.osc_receiver.addMsgHandler("/status/time", self.osc_base_station.handle_status_time)
-            self.osc_receiver.addMsgHandler("/status/rc0", self.osc_base_station.handle_status_rc0)
-            self.osc_receiver.addMsgHandler("/status/rc1", self.osc_base_station.handle_status_rc1)
-            self.osc_receiver.addMsgHandler("/status/rc2", self.osc_base_station.handle_status_rc2)
+            self.osc_receiver.addMsgHandler("/status/rc0", self.osc_base_station.handle_status_rc0)         # human operated radio
+            self.osc_receiver.addMsgHandler("/status/rc1", self.osc_base_station.handle_status_rc1)         # computer control
+            self.osc_receiver.addMsgHandler("/status/rc2", self.osc_base_station.handle_status_rc2)         # current active signal on multiwii
             self.osc_receiver.addMsgHandler("/status/imu", self.osc_base_station.handle_status_imu)
-            self.osc_receiver.addMsgHandler("/status/cycletime0", self.osc_base_station.handle_status_cycletime0)
-            self.osc_receiver.addMsgHandler("/status/cycletime1", self.osc_base_station.handle_status_cycletime1)
+            self.osc_receiver.addMsgHandler("/status/imu_M", self.osc_base_station.handle_status_imu_M)     # IMU of MARVIC
+            self.osc_receiver.addMsgHandler("/status/cycletime0", self.osc_base_station.handle_status_cycletime0)   # cycletime of multiwii
+            self.osc_receiver.addMsgHandler("/status/cycletime1", self.osc_base_station.handle_status_cycletime1)   # cycletime of MARVIC
             self.osc_receiver.addMsgHandler("/status/motors", self.osc_base_station.handle_status_motors)
             print ' osc_receiver attached osc_base_station handlers'
         if self.osc_status_transmitter:
@@ -111,6 +112,20 @@ class OSC_transmitter:
                 if self.printout: print ' >>> sent imu -> but nobody is listening'
         else:
             print ' >>> imu array too short -> nothing sent'
+
+    def send_imu_M(self, imu_M=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), debug=False):
+        """
+            this is meant for sending the imu of marvic
+            imu_M = [ accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY. magZ, pitch, roll, heading, altitude ]
+        """
+        if len(imu_M) == 13:
+            try:
+                self.osc_transmitter.send(OSC.OSCMessage('/status/imu_M', imu_M))
+                if debug: print ' >>> sent imu_M'
+            except OSC.OSCClientError:
+                if self.printout: print ' >>> sent imu_M -> but nobody is listening'
+        else:
+            print ' >>> imu_M array too short -> nothing sent'
     
     def send_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """

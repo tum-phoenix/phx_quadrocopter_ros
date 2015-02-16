@@ -21,6 +21,7 @@ class status_monitor():
 
         # init data storage:
         self.status_data_keys = ['pitch', 'roll', 'yaw',
+                                 'pitch_M', 'roll_M', 'yaw_M',
                                  'altitude',
                                  'cycletime_0', 'cycletime_1',
                                  '0_throttle', '0_pitch', '0_roll', '0_yaw',
@@ -30,8 +31,11 @@ class status_monitor():
                                  '2_throttle', '2_pitch', '2_roll', '2_yaw',
                                  '2_aux1', '2_aux2', '2_aux3', '2_aux4',
                                  'accX', 'accY', 'accZ',
+                                 'accX_M', 'accY_M', 'accZ_M',
                                  'gyrX', 'gyrY', 'gyrZ',
+                                 'gyrX_M', 'gyrY_M', 'gyrZ_M',
                                  'magX', 'magY', 'magZ',
+                                 'magX_M', 'magY_M', 'magZ_M',
                                  'motor_0', 'motor_1', 'motor_2', 'motor_3',
                                  'cell1', 'cell2', 'cell3', 'cell4']
         self.status_data = {}
@@ -43,18 +47,18 @@ class status_monitor():
         pens = [pg.mkPen(width=1., color='r'), pg.mkPen(width=1., color='g'), pg.mkPen(width=1., color='b'), pg.mkPen(width=1., color='w')]
         colors = ['red', 'green', 'blue', 'grey']
 
-        self.screens = [ [ [ 'pitch','roll','yaw'                             ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ 'altitude'                                       ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ 'cycletime_0', 'cycletime_1'                     ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ 'cell1', 'cell2', 'cell3', 'cell4'               ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ '0_throttle', '0_pitch' , '0_roll' , '0_yaw'     ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ '1_throttle', '1_pitch' , '1_roll' , '1_yaw'     ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ '2_throttle', '2_pitch' , '2_roll' , '2_yaw'     ] , 'widget' , 'plots' , 'data' , 'labels' ] ,
-                         [ [ 'motor_0' , 'motor_1' , 'motor_2' , 'motor_3'    ] , 'widget' , 'plots' , 'data' , 'labels' ],
-                         [ [ 'accX', 'accY', 'accZ' ] , 'widget' , 'plots' , 'data' , 'labels' ],
-                         [ [ 'gyrX', 'gyrY', 'gyrZ' ] , 'widget' , 'plots' , 'data' , 'labels' ],
-                         [ [ 'magX', 'magY', 'magZ' ] , 'widget' , 'plots' , 'data' , 'labels' ]
-                       ]
+        self.screens = [[['pitch', 'roll', 'yaw'                           ], 'widget', 'plots', 'data', 'labels'],
+                        [['pitch_M', 'roll_M', 'yaw_M'                     ], 'widget', 'plots', 'data', 'labels'],
+                        [['altitude'                                       ], 'widget', 'plots', 'data', 'labels'],
+                        [['cycletime_0', 'cycletime_1'                     ], 'widget', 'plots', 'data', 'labels'],
+                        [['cell1', 'cell2', 'cell3', 'cell4'               ], 'widget', 'plots', 'data', 'labels'],
+                        [['0_throttle', '0_pitch', '0_roll', '0_yaw'       ], 'widget', 'plots', 'data', 'labels'],
+                        [['1_throttle', '1_pitch', '1_roll', '1_yaw'       ], 'widget', 'plots', 'data', 'labels'],
+                        [['2_throttle', '2_pitch', '2_roll', '2_yaw'       ], 'widget', 'plots', 'data', 'labels'],
+                        [['motor_0', 'motor_1', 'motor_2', 'motor_3'       ], 'widget', 'plots', 'data', 'labels'],
+                        [['accX', 'accY', 'accZ'], 'widget', 'plots', 'data', 'labels'],
+                        [['gyrX', 'gyrY', 'gyrZ'], 'widget', 'plots', 'data', 'labels'],
+                        [['magX', 'magY', 'magZ'], 'widget', 'plots', 'data', 'labels']]
 
         plot_height = 300
         box_width = 80
@@ -77,9 +81,12 @@ class status_monitor():
             labels = {}
             for plot_number in range(0,number_of_plots):
                 title = screen_config[0][plot_number]
-                label1 = QtGui.QLabel(box) ; label1.move(5, 25+plot_number*30)
-                label1.setText(title+":")  ; label1.setStyleSheet("color: "+colors[plot_number])
-                label2 = QtGui.QLabel(box) ; label2.move(5, 40+plot_number*30)
+                label1 = QtGui.QLabel(box)
+                label1.move(5, 25+plot_number*30)
+                label1.setText(title+":")
+                label1.setStyleSheet("color: "+colors[plot_number])
+                label2 = QtGui.QLabel(box)
+                label2.move(5, 40+plot_number*30)
                 label2.setText(" s       ")
                 labels[title] = [label1, label2]
             self.screens[screen_number][1] = [widget, box]
@@ -143,6 +150,17 @@ class status_monitor():
         """
         print ' >>> IMU:', add, tag, stuff, source
         stuff_labels = ['accX', 'accY', 'accZ', 'gyrX', 'gyrY', 'gyrZ', 'magX', 'magY', 'magZ', 'pitch', 'roll', 'yaw', 'altitude']
+        for i in range(0, len(stuff_labels)):
+            self.status_data[stuff_labels[i]].pop(0)
+            self.status_data[stuff_labels[i]].append(stuff[i])
+
+    def handle_status_imu_M(self, add, tag, stuff, source):
+        """
+            this is the imu of marvic!
+            imu = [ accX_M, accY_M, accZ_M, gyrX_M, gyrY_M, gyrZ_M, magX_M, magY_M, magZ_M, pitch_M, roll_M, yaw_M, altitude_M ]
+        """
+        print ' >>> IMU:', add, tag, stuff, source
+        stuff_labels = ['accX_M', 'accY_M', 'accZ_M', 'gyrX_M', 'gyrY_M', 'gyrZ_M', 'magX_M', 'magY_M', 'magZ_M', 'pitch_M', 'roll_M', 'yaw_M', 'altitude_M']
         for i in range(0, len(stuff_labels)):
             self.status_data[stuff_labels[i]].pop(0)
             self.status_data[stuff_labels[i]].append(stuff[i])
@@ -212,7 +230,7 @@ class status_monitor():
         if QtCore.Qt.Key_Escape in self.win.keysPressed:
             self.app.exit()
         if self.osc_transmitter:
-            directions = [0, 0, 0, 0]  # backward-forward, left-right, up-down, left-right-turn
+            directions = [0, 0, 0, 0]                                           # backward-forward, left-right, up-down, left-right-turn
             if QtCore.Qt.Key_Up in self.win.keysPressed:
                 directions[0] += 1
             if QtCore.Qt.Key_Down in self.win.keysPressed:
@@ -234,15 +252,15 @@ class status_monitor():
             if QtCore.Qt.Key_E in self.win.keysPressed:
                 directions[3] += 1
             self.osc_transmitter.send_keyboard_directions(directions)
-            if QtCore.Qt.Key_C in self.win.keysPressed:
+            if QtCore.Qt.Key_C in self.win.keysPressed:                     # on KeyPress [c] sending calibrate_accelerometer
                 self.osc_transmitter.send_keyboard_commands(['cal_acc'])
-            if QtCore.Qt.Key_1 in self.win.keysPressed:
+            if QtCore.Qt.Key_1 in self.win.keysPressed:                     # on KeyPress [1] sending pLED = 1
                 self.osc_transmitter.send_keyboard_command(['pLED=1'])
-            if QtCore.Qt.Key_2 in self.win.keysPressed:
+            if QtCore.Qt.Key_2 in self.win.keysPressed:                     # on KeyPress [2] sending pLED = 2
                 self.osc_transmitter.send_keyboard_command(['pLED=2'])
-            if QtCore.Qt.Key_3 in self.win.keysPressed:
+            if QtCore.Qt.Key_3 in self.win.keysPressed:                     # on KeyPress [3] sending pLED = 3
                 self.osc_transmitter.send_keyboard_command(['pLED=3'])
-            if QtCore.Qt.Key_4 in self.win.keysPressed:
+            if QtCore.Qt.Key_4 in self.win.keysPressed:                     # on KeyPress [4] sending pLED = 4
                 self.osc_transmitter.send_keyboard_command(['pLED=4'])
 
 
