@@ -254,7 +254,9 @@ def get_local_ip():
         returns a string of the first local ip
     """
     try:
-        ip_task = os.popen("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'")
+        ip_task = os.popen("ifconfig | grep -Eo 'inet (addr:)?(Adresse:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'")
+        local_ip = ip_task.read().strip()
+        ip_task.close()
         local_ip = ip_task.read().strip()
         ip_task.close()
         if '\n' in local_ip:
