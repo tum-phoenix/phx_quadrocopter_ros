@@ -113,7 +113,6 @@ class ros_communication():
                 self.ros_subscribe_stat_cycletime1 = rospy.Subscriber('/phoenix/cycletime1', Int16, self.callback_stat_cycletime1)
                 self.copter = None
                 self.osc_transmitter = osc
-
             self.freq = 50     # Hz
             self.rate = rospy.Rate(self.freq)
         except:
@@ -236,11 +235,19 @@ class ros_communication():
         print ' > not implemented jet, cycletime1', stuff
 
     def callback_cmd_motor(self, stuff):
+        """
+            This callback is used for incoming motor commands and it will directly send them to the copter!
+        """
         print ' >>> ROS_callback: received cmd_motor', stuff
         if self.copter:
             self.copter.send_serial_motor(motor_values=stuff)
+        else:
+            print 'no copter connected -> no motor commands sent'
 
     def callback_cmd_vel(self, stuff):
+        """
+            This callback is used for incoming com_vel commands and updates the ros RC to the new state.
+        """
         print ' >>> ROS_callback: received cmd_vel', stuff
         self.simple_directions = stuff
         self.calc_rc_from_simple_directions()
@@ -249,8 +256,11 @@ class ros_communication():
     def callback_cmd_rc_1(self, stuff):
         """
             in case stuff = [ self.throttle, self.pitch, self.roll, self.yaw, self.aux1, self.aux2, self.aux3, self.aux4 ]
+            This callback is used for incoming rc_1 commands and updates the ros RC to the new state.
         """
         try:
+            print stuff.axes
+            print stuff.buttons
             self.set_sticks(sticks=stuff)
         except:
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
@@ -325,11 +335,8 @@ class ros_communication():
             rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            if debug: print 'in pub_rc0:', rc0
             self.Joy_0_msg.axes = rc0[:4]
-            if debug: print 'added first 4 axes'
             self.Joy_0_msg.buttons = rc0[4:]
-            if debug: print 'added 4 buttons'
             self.ros_publish_rc0.publish(self.Joy_0_msg)
             if debug: print ' >>> sent rc0'
         except:
@@ -380,7 +387,6 @@ class ros_communication():
             print '>>> error in ros pub_rc1!'
 
     # RC stuff:
-
     def update_rc(self, debug=False):
         if self.copter:
             self.copter.send_serial_rc(remote_control=self, debug=debug)
