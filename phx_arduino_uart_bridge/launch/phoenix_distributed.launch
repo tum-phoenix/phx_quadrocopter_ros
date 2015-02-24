@@ -1,0 +1,19 @@
+<launch>
+	<machine name="phoenix" address="phoenix" user="phoenix" env-loader="/home/phoenix/ros_catkin_ws/src/phx_quadrocopter/phx_quadrocopter/env-$(arg hostname).sh" />
+  	<machine name="groundstation"  address="localhost" />
+  	
+  	<node name="MultiWiiBridge" pkg="phx_arduino_uart_bridge" type="multiwii_ros_interface.py" output="screen" machine="phoenix" />
+    <node name="MARVICBridge" pkg="phx_arduino_uart_bridge" type="marvic_ros_interface.py" output="screen" machine="phoenix" />
+    
+    <node name="Camera" pkg="raspicam" type="raspicam_node" output="screen" machine="phoenix" >
+      	<arg name="_framerate" value="90" />
+  		<arg name="_quality" value="10" />
+    </node>
+  	
+  	<node name="LiveFeed" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen" machine="groundstation" >
+  		<remap from="image" to="/camera/image/compressed"/>
+  	</node>
+  	
+  	<node pkg="rosservice" type="rosservice" name="global_loc" args="call --wait /camera/start_capture"/>
+  	
+</launch>
