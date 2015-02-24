@@ -10,7 +10,7 @@ print '> import done'
 phoenix = pyCopter.copter(con_multiwii=False, con_intermediate=True, con_ros=True, osc_transmit=False, osc_receive=False)
 
 # by starting the copter we can now access two 'read-only' remote_controls
-sudo_radio = phoenix.serial_multiwii        # this is a 'read-only' RC.
+sudo_radio = phoenix.serial_intermediate    # this is a 'read-only' RC.
 ros_radio = phoenix.ros_node                # this is a 'read-only' RC.
 
 # finally we tell the copter which RC should be used by default
