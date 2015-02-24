@@ -15,6 +15,8 @@ from sensor_msgs.msg import Temperature #For compensation gyrodrift
 from sensor_msgs.msg import Range #Distance to ground
 from geometry_msgs.msg import Twist, Quaternion
 from phx_arduino_uart_bridge.msg import Motor
+from phx_arduino_uart_bridge.msg import Battery
+from phx_arduino_uart_bridge.msg import Cycletime
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
 
 
@@ -56,18 +58,18 @@ class ros_communication():
                     self.NavSatFix_msg = NavSatFix()
                     self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
                     self.Joy_2_msg = Joy()
-                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Int16, queue_size=10)
-                    self.cycletime_0_msg = Int16()
+                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Cycletime, queue_size=10)
+                    self.cycletime_0_msg = Cycletime()
                 elif copter.serial_intermediate and not copter.serial_multiwii:
                     rospy.init_node('MARVIC_Bridge')
-                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                    self.diagnostic_array = DiagnosticArray()
+                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', Battery, queue_size=10)
+                    self.Battery = Battery()
                     self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
                     self.Joy_0_msg = Joy()
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
                     self.Joy_1_msg = Joy()
-                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Int16, queue_size=10)
-                    self.cycletime_1_msg = Int16()
+                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Cycletime, queue_size=10)
+                    self.cycletime_1_msg = Cycletime()
                 elif copter.serial_intermediate and copter.serial_multiwii:
                     rospy.init_node('MultiWii_MARVIC_Bridge')
                     self.ros_publish_imu = rospy.Publisher('/phoenix/stat_imu', Imu, queue_size=10)
@@ -76,18 +78,18 @@ class ros_communication():
                     self.motor_msg = Motor()
                     self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
                     self.NavSatFix_msg = NavSatFix()
-                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                    self.diagnostic_array = DiagnosticArray()
+                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', Battery, queue_size=10)
+                    self.Battery = Battery()
                     self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
                     self.Joy_0_msg = Joy()
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
                     self.Joy_1_msg = Joy()
                     self.ros_publish_rc2 = rospy.Publisher('/phoenix/stat_rc2', Joy, queue_size=10)
                     self.Joy_2_msg = Joy()
-                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Int16, queue_size=10)
-                    self.cycletime_0_msg = Int16()
-                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Int16, queue_size=10)
-                    self.cycletime_1_msg = Int16()
+                    self.ros_publish_cycletime0 = rospy.Publisher('/phoenix/cycletime0', Cycletime, queue_size=10)
+                    self.cycletime_0_msg = Cycletime()
+                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Cycletime, queue_size=10)
+                    self.cycletime_1_msg = Cycletime()
                 self.copter = copter
                 self.osc_transmitter = None
                 # subscribe to the different topics of interest: simple_directions, commands
@@ -105,7 +107,7 @@ class ros_communication():
                 self.ros_subscribe_stat_imu = rospy.Subscriber('/phoenix/stat_imu', Imu, self.callback_stat_imu)
                 self.ros_subscribe_stat_motor = rospy.Subscriber('/phoenix/stat_motor', Motor, self.callback_stat_motor)
                 self.ros_subscribe_stat_gps = rospy.Subscriber('/phoenix/stat_gps', NavSatFix, self.callback_stat_gps)
-                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', DiagnosticArray, self.callback_stat_battery)
+                self.ros_subscribe_stat_battery = rospy.Subscriber('/phoenix/stat_battery', Battery, self.callback_stat_battery)
                 self.ros_subscribe_stat_rc0 = rospy.Subscriber('/phoenix/stat_rc0', Joy, self.callback_stat_rc0)
                 self.ros_subscribe_stat_rc1 = rospy.Subscriber('/phoenix/stat_rc1', Joy, self.callback_stat_rc1)
                 self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_stat_rc2)
@@ -302,23 +304,35 @@ class ros_communication():
         except:
             print '>>> error in ros pub_gps!'
 
-    def pub_battery(self, battery=(1, 2, 3, 0), debug=True):
+    def pub_battery(self, battery=(1, 2, 3, 0), debug=False):
         """
             battery = [ cell1, cell2, cell3, cell4 ]
         """
         try:
-            power_stat = DiagnosticStatus(name="Battery", level=0, message="OK")
-            print '1'
-            power_stat.values = [KeyValue("Cell 1", str(battery[0])),
-                                 KeyValue("Cell 2", str(battery[1])),
-                                 KeyValue("Cell 3", str(battery[2])),
-                                 KeyValue("Cell 4", str(battery[3]))]
-            self.diagnostic_array = [power_stat]
-            print '2'
-            self.ros_publish_battery.publish(self.diagnostic_array)
+            self.Battery.cell1 = battery[0]
+            self.Battery.cell2 = battery[1]
+            self.Battery.cell3 = battery[2]
+            self.Battery.cell4 = battery[3]
+            self.ros_publish_battery.publish(self.Battery)
             if debug: print ' >>> sent pub_battery'
         except:
             print '>>> error in ros pub_battery!'
+    
+    def pub_cycletime0(self, cycletime0, debug=False):
+        try:
+            self.cycletime_0_msg.cycletime = cycletime0
+            self.ros_publish_cycletime0.publish(self.cycletime_0_msg)
+            if debug: print ' >>> sent pub_cycletime_0'
+        except:
+            print '>>> error in ros pub_cycletime_0!', cycletime0
+    
+    def pub_cycletime1(self, cycletime1, debug=False):
+        try:
+            self.cycletime_1_msg.cycletime = cycletime1
+            self.ros_publish_cycletime1.publish(self.cycletime_1_msg)
+            if debug: print ' >>> sent pub_cycletime_1'
+        except:
+            print '>>> error in ros pub_cycletime_1!', cycletime1
 
     def pub_rc0(self, rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
         """

@@ -153,10 +153,12 @@ class copter:
                 self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
                 self.ros_node.pub_rc2(self.rc2)
                 self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
+                self.ros_node.pub_cycletime0(self.cycletime_0[0])
             if self.serial_intermediate:
-                # self.ros_node.pub_battery(self.battery)
+                self.ros_node.pub_battery(self.battery)
                 self.ros_node.pub_rc0(self.rc0)
                 self.ros_node.pub_rc1(self.rc1)
+                self.ros_node.pub_cycletime1(self.cycletime_1[0])
 #            self.ros_node.listen()
 
     def serial_receive_update(self, debug=False):
