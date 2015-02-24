@@ -61,7 +61,7 @@ class ros_communication():
                 elif copter.serial_intermediate and not copter.serial_multiwii:
                     rospy.init_node('MARVIC_Bridge')
                     self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                    self.diagnostic_msg = DiagnosticArray()
+                    self.diagnostic_array = DiagnosticArray()
                     self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
                     self.Joy_0_msg = Joy()
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
@@ -77,7 +77,7 @@ class ros_communication():
                     self.ros_publish_gps = rospy.Publisher('/phoenix/stat_gps', NavSatFix, queue_size=10)
                     self.NavSatFix_msg = NavSatFix()
                     self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', DiagnosticArray, queue_size=10)
-                    self.diagnostic_msg = DiagnosticArray()
+                    self.diagnostic_array = DiagnosticArray()
                     self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
                     self.Joy_0_msg = Joy()
                     self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
@@ -270,8 +270,8 @@ class ros_communication():
             self.imu_msg.linear_acceleration.y = acc[1]
             self.imu_msg.linear_acceleration.z = acc[2]
             if debug: print 'imu did linear_acceleration'
-#            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
-#            self.imu_msg.orientation = Quaternion(*q)
+            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
+            self.imu_msg.orientation = Quaternion(*q)
             if debug: print 'imu did orientation'
             self.ros_publish_imu.publish(self.imu_msg)
             if debug: print ' >>> sent imu'
@@ -302,17 +302,20 @@ class ros_communication():
         except:
             print '>>> error in ros pub_gps!'
 
-    def pub_battery(self, battery=(1, 2, 3, 0), debug=False):
+    def pub_battery(self, battery=(1, 2, 3, 0), debug=True):
         """
             battery = [ cell1, cell2, cell3, cell4 ]
         """
         try:
-            self.diagnostic_msg.status = DiagnosticStatus(name="Battery", level=DiagnosticStatus.OK, message="OK")
-            self.diagnostic_msg.status.values = [KeyValue("Cell 1", str(battery[0])),
-                                                 KeyValue("Cell 2", str(battery[1])),
-                                                 KeyValue("Cell 3", str(battery[2])),
-                                                 KeyValue("Cell 4", str(battery[3]))]
-            self.ros_publish_battery.publish(self.diagnostic_msg)
+            power_stat = DiagnosticStatus(name="Battery", level=0, message="OK")
+            print '1'
+            power_stat.values = [KeyValue("Cell 1", str(battery[0])),
+                                 KeyValue("Cell 2", str(battery[1])),
+                                 KeyValue("Cell 3", str(battery[2])),
+                                 KeyValue("Cell 4", str(battery[3]))]
+            self.diagnostic_array = [power_stat]
+            print '2'
+            self.ros_publish_battery.publish(self.diagnostic_array)
             if debug: print ' >>> sent pub_battery'
         except:
             print '>>> error in ros pub_battery!'

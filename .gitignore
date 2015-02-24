@@ -1,1 +1,4 @@
 *.pyc
+.AppleDouble
+.DS_Store
+.idea

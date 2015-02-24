@@ -23,6 +23,7 @@ class copter:
             self.serial_multiwii.startup_delay = 15.0
         else:
             self.serial_multiwii = None
+        self.serial_multiwii_request_counter = 0
 
         # connect to serial intermediate
         if con_intermediate:
@@ -153,7 +154,7 @@ class copter:
                 self.ros_node.pub_rc2(self.rc2)
                 self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
             if self.serial_intermediate:
-                self.ros_node.pub_battery(self.battery)
+                # self.ros_node.pub_battery(self.battery)
                 self.ros_node.pub_rc0(self.rc0)
                 self.ros_node.pub_rc1(self.rc1)
 #            self.ros_node.listen()
@@ -173,7 +174,30 @@ class copter:
 
             # update from multiwii
             if self.serial_multiwii:
-                self.serial_multiwii.get_msg(cmd_list=[101, 102, 104, 105, 106, 108, 109], debug=debug)
+                if self.serial_multiwii_request_counter == 0:                               # get rc2 and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[105, 108], debug=debug)
+                    self.serial_multiwii_request_counter = 1
+                elif self.serial_multiwii_request_counter == 1:                             # get imu, rc2 and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 108], debug=debug)
+                    self.serial_multiwii_request_counter = 2
+                elif self.serial_multiwii_request_counter == 2:                             # get rc2 and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[105, 108], debug=debug)
+                    self.serial_multiwii_request_counter = 3
+                elif self.serial_multiwii_request_counter == 3:                             # get imu, rc2 and status
+                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 101], debug=debug)
+                    self.serial_multiwii_request_counter = 4
+                elif self.serial_multiwii_request_counter == 4:                             # get imu, rc2 and motor
+                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 104], debug=debug)
+                    self.serial_multiwii_request_counter = 5
+                elif self.serial_multiwii_request_counter == 5:                             # get imu, rc2 and gps
+                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 106], debug=debug)
+                    self.serial_multiwii_request_counter = 6
+                elif self.serial_multiwii_request_counter == 7:                             # get imu, rc2 and altitude
+                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 109], debug=debug)
+                    self.serial_multiwii_request_counter = 0
+                else:
+                    self.serial_multiwii_request_counter = 0
+                #self.serial_multiwii.get_msg(cmd_list=[101, 102, 104, 105, 106, 108, 109], debug=debug)
                 self.imu_acc = [self.serial_multiwii.raw_imu['acc_0'], self.serial_multiwii.raw_imu['acc_1'], self.serial_multiwii.raw_imu['acc_2']]
                 self.imu_gyr = [self.serial_multiwii.raw_imu['gyr_0'],  self.serial_multiwii.raw_imu['gyr_1'], self.serial_multiwii.raw_imu['gyr_2']]
                 self.imu_mag = [self.serial_multiwii.raw_imu['mag_0'], self.serial_multiwii.raw_imu['mag_1'], self.serial_multiwii.raw_imu['mag_2']]
