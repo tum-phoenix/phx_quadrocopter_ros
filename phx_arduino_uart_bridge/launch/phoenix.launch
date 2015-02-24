@@ -1,4 +1,5 @@
 <launch>
   <node name="MultiWii_Bridge" pkg="phx_arduino_uart_bridge" type="multiwii_ros_interface.py" output="screen" />
   <node name="MARVIC_Bridge" pkg="phx_arduino_uart_bridge" type="marvic_ros_interface.py" output="screen" />
+  <node name="Camera" pkg="raspicam" type="raspicam_node" output="screen" />
 </launch>
