@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import pyCopter
 print '> import done'
 
@@ -23,6 +22,7 @@ try:
     while True:
         # fist thing to do in the main loop is to update all variables of the copter, including updates to the serial clients.
         # This is all done by the pyCopter.update() method. You do not have to worry about timings, just call this line very often.
+        # Timings are hardcoded in pyCopter.copter_status.init()
         phoenix_update_speed_test.start()
         phoenix.update()
         phoenix_update_speed_test.stop()
