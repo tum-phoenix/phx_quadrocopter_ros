@@ -1,7 +1,8 @@
 <launch>
 	<machine name="phoenix" address="localhost" />
-	<node name="MultiWii_Bridge" pkg="phx_arduino_uart_bridge" type="multiwii_ros_interface.py" output="screen" machine="phoenix" />
-	<node name="MARVIC_Bridge" pkg="phx_arduino_uart_bridge" type="marvic_ros_interface.py" output="screen" machine="phoenix" />
+	<node name="FlightLogger" pkg="rosbag" type="rosbag" args="record -o /home/phoenix/flightlog" machine="phoenix" />
+	<node name="MultiWiiBridge" pkg="phx_arduino_uart_bridge" type="multiwii_ros_interface.py" output="screen" machine="phoenix" />
+	<node name="MARVICBridge" pkg="phx_arduino_uart_bridge" type="marvic_ros_interface.py" output="screen" machine="phoenix" />
 	<node name="Camera" pkg="raspicam" type="raspicam_node" output="screen" machine="phoenix" />
 	<node name="CaptureStarter" pkg="rosservice" type="rosservice"  args="call --wait /camera/start_capture" machine="phoenix" />
 </launch>
