@@ -1,4 +1,6 @@
 *.pyc
 .AppleDouble
 .DS_Store
-.idea
+.idee
+.project
+.pydevproject

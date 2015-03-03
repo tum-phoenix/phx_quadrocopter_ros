@@ -1,0 +1,9 @@
+<!-- This should be run on the groundstation -->
+<!-- make sure ROS_MASTER_URI is set -->
+
+<launch>
+  	<machine name="groundstation"  address="localhost" />
+  	<node name="LiveFeed" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen" machine="groundstation" >
+  		<remap from="image" to="/camera/image/compressed"/>
+  	</node>
+</launch>
