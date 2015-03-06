@@ -7,4 +7,6 @@
   	<node name="LiveFeed" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen" machine="groundstation" >
   		<remap from="image" to="/camera/image/compressed"/>
   	</node>
+  	<node name="LsdSlamViewer" pkg="lsd_slam_viewer" type="viewer" respawn="false" output="screen" machine="groundstation" />
+  	<node name="LsdSlamCore" pkg="lsd_slam_core" type="live_slam" args="image:=/camera/image/compressed camera_info:=/camera/camera_info" respawn="false" output="screen" machine="groundstation" />  	
 </launch>
