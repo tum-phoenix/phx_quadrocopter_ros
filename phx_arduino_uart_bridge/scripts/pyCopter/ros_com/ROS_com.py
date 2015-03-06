@@ -319,6 +319,7 @@ class ros_communication():
             battery = [ cell1, cell2, cell3, cell4 ]
         """
         try:
+            print 'battery:', battery
             self.Battery.cell1 = battery[0]
             self.Battery.cell2 = battery[1]
             self.Battery.cell3 = battery[2]

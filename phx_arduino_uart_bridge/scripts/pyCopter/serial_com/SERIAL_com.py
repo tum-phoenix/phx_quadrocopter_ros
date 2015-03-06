@@ -31,7 +31,7 @@ class multiwii_protocol:
         self.rc = {'throttle': 0, 'pitch': 0, 'roll': 0, 'yaw': 0, 'aux1': 0, 'aux2': 0, 'aux3': 0, 'aux4': 0}
         self.sticks = [0, 0, 0, 0, 0, 0, 0, 0]
         self.motor = {'0': 99, '1': 99, '2': 98, '3': 99}
-        self.battery = {'cell0': [1, 0, 0], 'cell1': [2, 0, 0], 'cell2': [3, 0, 0], 'cell3': [4, 0, 0], 'cell4': [5, 0, 0]}
+        self.battery = {'cell1': [1, 0, 0], 'cell2': [2, 0, 0], 'cell3': [3, 0, 0], 'cell4': [4, 0, 0]}
         self.status = {'cycleTime': 0}
         self.altitude = {'EstAlt': 0}
         self.attitude = {'pitch': 10, 'roll': 11, 'heading': 12}
@@ -91,9 +91,9 @@ class multiwii_protocol:
     def receive(self, debug=False):
         # a wide try except is necessary since it can happen that the connection is broken while receiving.
         # in this case the script would break.
-        try:
+#        try:
             if self.connection_check() == 1:
-                while self.ser.inWaiting() > 5:
+                while self.ser.inWaiting() > 30: #5:
                     start_byte = self.ser.read(1)
                     if debug: print 'start_byte', start_byte
                     if start_byte == "$":
@@ -101,7 +101,7 @@ class multiwii_protocol:
                         header = start_byte + self.ser.read(2)
                         length = ord(self.ser.read(1))
                         calc_checksum ^= length
-                        code = ord(self.ser.read())
+                        code = ord(self.ser.read(1))
                         calc_checksum ^= code
                         start_waiting = time.time()
                         while self.ser.inWaiting() < length+1:
@@ -110,9 +110,9 @@ class multiwii_protocol:
                                 return 0
                         data = []
                         for i in range(0, length):
-                            data.append(ord(self.ser.read()))
+                            data.append(ord(self.ser.read(1)))
                             calc_checksum = calc_checksum ^ data[-1]
-                        check_sum = ord(self.ser.read())
+                        check_sum = ord(self.ser.read(1))
                         if debug: print ' > serial input:', header, length, code, data, check_sum, '<->', calc_checksum,
                         self.time_of_last_receive = time.time()
                         if check_sum == calc_checksum:
@@ -123,12 +123,12 @@ class multiwii_protocol:
                                 print ' >>> error in interpretation of msg', header, code, length, data, check_sum, ' <-> ', calc_checksum
                                 return 0
                         if debug: print '\n\n'
-        except:
-            try:
-                self.ser.close()
-                print '>>> closed', self.ser.getPort(), 'because of error in receive loop. connection_check will clean this up.'
-            except:
-                pass
+#        except:
+#            try:
+#                self.ser.close()
+#                print '>>> closed', self.ser.getPort(), 'because of error in receive loop. connection_check will clean this up.'
+#            except:
+#                pass
 
     def receive_loop(self, debug=False):
         """
@@ -267,13 +267,18 @@ class multiwii_protocol:
             return 1
         if code == 66:
             # BATTERY - intermediate
-            tupel_length = 7
+            tupel_length = 6
             data.append(0)
+            cell_number = 0
             for cell in range( 0, len(data)/tupel_length ):
-                cell_number = data[cell*tupel_length+0]
-                cell_mean = read_uint16(data[cell*tupel_length+1:cell*tupel_length+3])
-                cell_min = read_uint16(data[cell*tupel_length+3:cell*tupel_length+5])
-                cell_max = read_uint16(data[cell*tupel_length+5:cell*tupel_length+7])
+                cell_number += 1
+                cell_mean = read_uint16(data[cell*tupel_length:cell*tupel_length+2])
+                cell_min = read_uint16(data[cell*tupel_length+2:cell*tupel_length+4])
+                cell_max = read_uint16(data[cell*tupel_length+4:cell*tupel_length+6])
+#
+#                cell_mean = read_uint16(data[cell*tupel_length+1:cell*tupel_length+3])
+#                cell_min = read_uint16(data[cell*tupel_length+3:cell*tupel_length+5])
+#                cell_max = read_uint16(data[cell*tupel_length+5:cell*tupel_length+7])
                 self.battery['cell'+str(cell_number)] = [cell_mean, cell_min, cell_max]
             if debug: print 'battery updated',  self.battery
             return 1

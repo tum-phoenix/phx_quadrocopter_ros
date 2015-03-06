@@ -217,8 +217,8 @@ class copter:
             # update from intermediate
             if self.serial_intermediate:
                 self.serial_intermediate.get_msg(cmd_list=[66, 101, 102, 105], debug=debug)
-                self.battery = [self.serial_intermediate.battery['cell0'][0], self.serial_intermediate.battery['cell1'][0],
-                                self.serial_intermediate.battery['cell2'][0], self.serial_intermediate.battery['cell4'][0]]
+                self.battery = [self.serial_intermediate.battery['cell1'][0], self.serial_intermediate.battery['cell2'][0],
+                                self.serial_intermediate.battery['cell3'][0], self.serial_intermediate.battery['cell4'][0]]
                 self.cycletime_1 = [self.serial_intermediate.status['cycleTime']]
                 self.rc0 = [self.serial_intermediate.rc['throttle'], self.serial_intermediate.rc['pitch'], self.serial_intermediate.rc['roll'],
                             self.serial_intermediate.rc['yaw'], self.serial_intermediate.rc['aux1'], self.serial_intermediate.rc['aux2'],

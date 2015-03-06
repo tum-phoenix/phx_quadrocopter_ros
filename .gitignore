@@ -2,3 +2,5 @@
 .AppleDouble
 .DS_Store
 .idea
+.project
+.pydevproject
