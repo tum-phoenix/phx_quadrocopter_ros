@@ -5,4 +5,4 @@ try:
     del ROS_com
 except:
     print ' >>>> NO ROS!'
-
+#from ROS_com import ros_communication

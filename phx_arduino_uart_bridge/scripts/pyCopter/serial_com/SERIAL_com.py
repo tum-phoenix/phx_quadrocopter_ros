@@ -26,7 +26,7 @@ class multiwii_protocol:
         self.startup_delay = 10.0
         self.time_of_last_receive = 0.0
         self.time_of_last_receive_timeout = 2.0
-        self.startup_time = 0.0
+        self.startup_time = time.time()
         
         self.rc = {'throttle': 0, 'pitch': 0, 'roll': 0, 'yaw': 0, 'aux1': 0, 'aux2': 0, 'aux3': 0, 'aux4': 0}
         self.sticks = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -39,6 +39,7 @@ class multiwii_protocol:
                         'gyr_0': 0, 'gyr_1': 0, 'gyr_2': 0,
                         'mag_0': 0, 'mag_1': 0, 'mag_2': 0}
         self.gps = {'fix': 0, 'numSat': 0, 'coordLAT': 0, 'coordLON': 0, 'alt': 0, 'speed': 0, 'groundcourse': 0}
+        self.ser.open()
         self.connection_check()
     
     def connection_check(self):
@@ -49,6 +50,9 @@ class multiwii_protocol:
             # in case we are just starting the connection we have to wait for some startup_time
             self.time_of_last_receive = time.time()
             return 0
+        return 1       # this prevents any reconnecting during opperation
+        
+        """
         if time.time() > self.time_of_last_receive + self.time_of_last_receive_timeout:
             # no contact since a long time! let's try a reconnect
             try:
@@ -70,7 +74,8 @@ class multiwii_protocol:
         else:
             # connection is down...after self.time_of_last_contact_timeout seconds a reconnect will be initiated
             return 0
-    
+        """
+ 
     def check_startup(self, debug=True):
         """
             this is only for debugging, do not use this in any program code. Only for command line!

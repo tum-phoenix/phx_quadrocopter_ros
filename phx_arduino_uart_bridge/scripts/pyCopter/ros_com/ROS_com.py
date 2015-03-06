@@ -172,55 +172,76 @@ class ros_communication():
             # TODO: organize the imu stuff and send it
             # imu = [ accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY. magZ, pitch, roll, heading, altitude ]
             # self.osc_transmitter.send_imu(imu=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), debug=False):
-            pass
-        print ' > not implemented jet, imu', stuff
+            attitude = tf.transformations.euler_from_quaternion([stuff.orientation.x, stuff.orientation.y, stuff.orientation.z, stuff.orientation.w])
+            imu = [stuff.linear_acceleration.x, stuff.linear_acceleration.y, stuff.linear_acceleration.z,
+                   stuff.angular_velocity.x, stuff.angular_velocity.y, stuff.angular_velocity.z,
+                   0, 0, 0,
+                   attitude[0], attitude[1], attitude[2], 0, 0]
+            print ' > imu:', imu
+#            pass
+#        print ' > not implemented jet, imu', stuff
 
     def callback_stat_motor(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the motor stuff and send it
             # motors = [ motor0, motor1, motor2, motor3 ]
             # self.osc_transmitter.send_motors(motors=(1, 2, 3, 4), debug=False):
-            pass
-        print ' > not implemented jet, motor', stuff
+            motors = [stuff.motor0, stuff.motor1, stuff.motor2, stuff.motor3]
+            print ' > motors:', motors
+#            pass
+#        print ' > not implemented jet, motor', stuff
 
     def callback_stat_gps(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the gps stuff and send it
             # This has to be implemented in osc_com first.
-            pass
-        print ' > not implemented jet, gps', stuff
+            latitude = stuff.latitude
+            longitude = stuff.longitude
+            altitude = stuff.altitude
+#            pass
+#        print ' > not implemented jet, gps', stuff
 
     def callback_stat_battery(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the battery stuff and send it
             # battery = [ cell1, cell2, cell3, cell4 ]
+            battery = [stuff.cell1, stuff.cell2, stuff.cell3, stuff.cell4]
+            print ' > battery:', battery
             # self.osc_transmitter.send_battery(battery=(1, 2, 3, 0), debug=False):
-            pass
-        print ' > not implemented jet, battery', stuff
+#            pass
+#        print ' > not implemented jet, battery', stuff
 
     def callback_stat_rc0(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the rc0 stuff and send it
             # rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
+            rc0 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
+            print ' > rc0:', rc0
+            self.osc_transmitter.send_rc0(rc0)
+            print ' >> rc0 sent'
             # self.osc_transmitter.send_rc0(rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
-            pass
-        print ' > not implemented jet, rc0', stuff
+#            pass
+#        print ' > not implemented jet, rc0', stuff.axes
 
     def callback_stat_rc1(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the rc1 stuff and send it
             # rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
             # self.osc_transmitter.send_rc1(rc1=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
-            pass
-        print ' > not implemented jet, rc1', stuff
+            rc1 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
+            print ' > rc1:', rc1
+#            pass
+#        print ' > not implemented jet, rc1', stuff
 
     def callback_stat_rc2(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the rc2 stuff and send it
             # rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
             # self.osc_transmitter.send_rc2(rc2=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
-            pass
-        print ' > not implemented jet, rc2', stuff
+            rc2 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
+            print ' > rc2:', rc2
+#            pass
+#        print ' > not implemented jet, rc2', stuff
 
     def callback_stat_cycletime0(self, stuff):
         if self.osc_transmitter:
