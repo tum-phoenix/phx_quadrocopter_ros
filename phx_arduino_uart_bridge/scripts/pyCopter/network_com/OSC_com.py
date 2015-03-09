@@ -94,6 +94,9 @@ class OSC_transmitter:
             print ' >>> new osc transmitter connection established', self.destination_address
 
     def send_connect(self, ip='0.0.0.0', debug=False):
+        if ip == '0.0.0.0':
+            ip = self.destination_ip
+            print ' >>> using self.destination_ip', self.destination_ip
         try:
             self.osc_transmitter.send(OSC.OSCMessage('/osc_base_station/connect', ip))
             if debug: print ' >>> sent connection request'
