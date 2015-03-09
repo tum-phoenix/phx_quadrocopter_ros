@@ -6,7 +6,7 @@ import sys
 if len(sys.argv) > 1:
     copter_ip = sys.argv[1]
 else:
-    copter_ip = '10.152.196.151'
+    copter_ip = '10.152.196.33'
 
 monitor = pyCopter.status_monitor()
 osc_transmitter = pyCopter.network_com.OSC_transmitter(destination=copter_ip, port=10001)
