@@ -167,7 +167,6 @@ class ros_communication():
         self.rate.sleep()
 
     # Callbacks:
-
     def callback_stat_imu(self, stuff):
         if self.osc_transmitter:
             # TODO: organize the imu stuff and send it
@@ -179,7 +178,6 @@ class ros_communication():
                    0, 0, 0,
                    attitude[0], attitude[1], attitude[2], 0, 0]
             print ' > imu:', imu
-#            pass
 #        print ' > not implemented jet, imu', stuff
 
     def callback_stat_motor(self, stuff):
@@ -189,7 +187,6 @@ class ros_communication():
             # self.osc_transmitter.send_motors(motors=(1, 2, 3, 4), debug=False):
             motors = [stuff.motor0, stuff.motor1, stuff.motor2, stuff.motor3]
             print ' > motors:', motors
-#            pass
 #        print ' > not implemented jet, motor', stuff
 
     def callback_stat_gps(self, stuff):
@@ -199,7 +196,6 @@ class ros_communication():
             latitude = stuff.latitude
             longitude = stuff.longitude
             altitude = stuff.altitude
-#            pass
 #        print ' > not implemented jet, gps', stuff
 
     def callback_stat_battery(self, stuff):
@@ -209,7 +205,6 @@ class ros_communication():
             battery = [stuff.cell1, stuff.cell2, stuff.cell3, stuff.cell4]
             print ' > battery:', battery
             # self.osc_transmitter.send_battery(battery=(1, 2, 3, 0), debug=False):
-#            pass
 #        print ' > not implemented jet, battery', stuff
 
     def callback_stat_rc0(self, stuff):
@@ -221,7 +216,6 @@ class ros_communication():
             self.osc_transmitter.send_rc0(rc0, debug=self.debug_osc)
             print ' >> rc0 sent'
             # self.osc_transmitter.send_rc0(rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
-#            pass
 #        print ' > not implemented jet, rc0', stuff.axes
 
     def callback_stat_rc1(self, stuff):
@@ -231,7 +225,8 @@ class ros_communication():
             # self.osc_transmitter.send_rc1(rc1=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
             rc1 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
             print ' > rc1:', rc1
-#            pass
+            self.osc_transmitter.send_rc1(rc1, debug=self.debug_osc)
+            print ' >> rc1 sent'
 #        print ' > not implemented jet, rc1', stuff
 
     def callback_stat_rc2(self, stuff):
@@ -241,7 +236,8 @@ class ros_communication():
             # self.osc_transmitter.send_rc2(rc2=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
             rc2 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
             print ' > rc2:', rc2
-#            pass
+            self.osc_transmitter.send_rc2(rc2, debug=self.debug_osc)
+            print ' >> rc2 sent'
 #        print ' > not implemented jet, rc2', stuff
 
     def callback_stat_cycletime0(self, stuff):
@@ -277,6 +273,7 @@ class ros_communication():
             This callback is used for incoming com_vel commands and updates the ros RC to the new state.
         """
         print ' >>> ROS_callback: received cmd_vel', stuff
+        # TODO: link this correctly
         self.simple_directions = stuff
         self.calc_rc_from_simple_directions()
         print '     >>> not implemented jet'
