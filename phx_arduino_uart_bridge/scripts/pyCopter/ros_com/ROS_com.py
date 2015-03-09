@@ -114,6 +114,7 @@ class ros_communication():
                 self.ros_subscribe_stat_cycletime0 = rospy.Subscriber('/phoenix/cycletime0', Int16, self.callback_stat_cycletime0)
                 self.ros_subscribe_stat_cycletime1 = rospy.Subscriber('/phoenix/cycletime1', Int16, self.callback_stat_cycletime1)
                 self.copter = None
+                self.debug_osc = True
                 self.osc_transmitter = osc
             self.freq = 50     # Hz
             self.rate = rospy.Rate(self.freq)
@@ -217,7 +218,7 @@ class ros_communication():
             # rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
             rc0 = [stuff.axes[0], stuff.axes[1], stuff.axes[2], stuff.axes[3], stuff.buttons[0], stuff.buttons[1], stuff.buttons[2], stuff.buttons[3]]
             print ' > rc0:', rc0
-            self.osc_transmitter.send_rc0(rc0)
+            self.osc_transmitter.send_rc0(rc0, debug=self.debug_osc)
             print ' >> rc0 sent'
             # self.osc_transmitter.send_rc0(rc0=(1, 2, 3, 4, 5, 6, 7, 8), debug=False):
 #            pass
@@ -262,8 +263,12 @@ class ros_communication():
             This callback is used for incoming motor commands and it will directly send them to the copter!
         """
         print ' >>> ROS_callback: received cmd_motor', stuff
+        # TODO: link this correctly
+        motors = [stuff.motor0, stuff.motor1, stuff.motor2, stuff.motor3]
+        print motors
+        # probably like this
         if self.copter:
-            self.copter.send_serial_motor(motor_values=stuff)
+            self.copter.send_serial_motor(motor_values=motors)
         else:
             print 'no copter connected -> no motor commands sent'
 
