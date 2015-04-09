@@ -297,6 +297,9 @@ class ros_communication():
         """
         try:
             if debug: print 'trying to send imu'
+            now = rospy.get_rostime()
+            self.imu_msg.header.timestamp = now.secs
+            
             self.imu_msg.angular_velocity.x = gyr[0]
             self.imu_msg.angular_velocity.y = gyr[1]
             self.imu_msg.angular_velocity.z = gyr[2]
