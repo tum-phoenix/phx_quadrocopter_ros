@@ -297,6 +297,7 @@ class ros_communication():
         """
         try:
             if debug: print 'trying to send imu'
+            
             now = rospy.get_rostime()
             self.imu_msg.header.stamp.secs = now.secs
             self.imu_msg.header.stamp.nsecs = now.nsecs
@@ -321,6 +322,9 @@ class ros_communication():
             motors = [ motor0, motor1, motor2, motor3 ]
         """
         try:
+            now = rospy.get_rostime()
+            self.motor_msg.header.stamp.secs = now.secs
+            self.motor_msg.header.stamp.nsecs = now.nsecs
             self.motor_msg.motor0 = motors[0]
             self.motor_msg.motor1 = motors[1]
             self.motor_msg.motor2 = motors[2]
@@ -332,6 +336,9 @@ class ros_communication():
 
     def pub_gps(self, gps_lat, gps_lon, gps_alt, debug=False):
         try:
+            now = rospy.get_rostime()
+            self.NavSatFix_msg.header.stamp.secs = now.secs
+            self.NavSatFix_msg.header.stamp.nsecs = now.nsecs
             self.NavSatFix_msg.latitude = gps_lat
             self.NavSatFix_msg.longitude = gps_lon
             self.NavSatFix_msg.altitude = gps_alt
@@ -346,6 +353,9 @@ class ros_communication():
         """
         try:
             print 'battery:', battery
+            now = rospy.get_rostime()
+            self.Battery.header.stamp.secs = now.secs
+            self.Battery.header.stamp.nsecs = now.nsecs
             self.Battery.cell1 = battery[0]
             self.Battery.cell2 = battery[1]
             self.Battery.cell3 = battery[2]
@@ -357,6 +367,9 @@ class ros_communication():
     
     def pub_cycletime0(self, cycletime0, debug=False):
         try:
+            now = rospy.get_rostime()
+            self.cycletime_0_msg.header.stamp.secs = now.secs
+            self.cycletime_0_msg.header.stamp.nsecs = now.nsecs
             self.cycletime_0_msg.cycletime = cycletime0
             self.ros_publish_cycletime0.publish(self.cycletime_0_msg)
             if debug: print ' >>> sent pub_cycletime_0'
@@ -365,6 +378,9 @@ class ros_communication():
     
     def pub_cycletime1(self, cycletime1, debug=False):
         try:
+            now = rospy.get_rostime()
+            self.cycletime_1_msg.header.stamp.secs = now.secs
+            self.cycletime_1_msg.header.stamp.nsecs = now.nsecs
             self.cycletime_1_msg.cycletime = cycletime1
             self.ros_publish_cycletime1.publish(self.cycletime_1_msg)
             if debug: print ' >>> sent pub_cycletime_1'
@@ -376,6 +392,9 @@ class ros_communication():
             rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
+            now = rospy.get_rostime()
+            self.Joy_0_msg.header.stamp.secs = now.secs
+            self.Joy_0_msg.header.stamp.nsecs = now.nsecs
             self.Joy_0_msg.axes = rc0[:4]
             self.Joy_0_msg.buttons = rc0[4:]
             self.ros_publish_rc0.publish(self.Joy_0_msg)
@@ -388,6 +407,9 @@ class ros_communication():
             rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
+            now = rospy.get_rostime()
+            self.Joy_1_msg.header.stamp.secs = now.secs
+            self.Joy_1_msg.header.stamp.nsecs = now.nsecs
             self.Joy_1_msg.axes = rc1[:4]
             self.Joy_1_msg.buttons = rc1[4:]
             self.ros_publish_rc1.publish(self.Joy_1_msg)
@@ -400,6 +422,9 @@ class ros_communication():
          rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
+            now = rospy.get_rostime()
+            self.Joy_2_msg.header.stamp.secs = now.secs
+            self.Joy_2_msg.header.stamp.nsecs = now.nsecs
             self.Joy_2_msg.axes = rc2[:4]
             self.Joy_2_msg.buttons = rc2[4:]
             self.ros_publish_rc2.publish(self.Joy_2_msg)
