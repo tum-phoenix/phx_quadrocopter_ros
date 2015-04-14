@@ -322,9 +322,9 @@ class ros_communication():
             motors = [ motor0, motor1, motor2, motor3 ]
         """
         try:
-            now = rospy.get_rostime()
-            self.motor_msg.header.stamp.secs = now.secs
-            self.motor_msg.header.stamp.nsecs = now.nsecs
+            #now = rospy.get_rostime()
+            #self.motor_msg.header.stamp.secs = now.secs
+            #self.motor_msg.header.stamp.nsecs = now.nsecs
             self.motor_msg.motor0 = motors[0]
             self.motor_msg.motor1 = motors[1]
             self.motor_msg.motor2 = motors[2]
@@ -367,9 +367,9 @@ class ros_communication():
     
     def pub_cycletime0(self, cycletime0, debug=False):
         try:
-            now = rospy.get_rostime()
-            self.cycletime_0_msg.header.stamp.secs = now.secs
-            self.cycletime_0_msg.header.stamp.nsecs = now.nsecs
+            #now = rospy.get_rostime()
+            #self.cycletime_0_msg.header.stamp.secs = now.secs
+            #self.cycletime_0_msg.header.stamp.nsecs = now.nsecs
             self.cycletime_0_msg.cycletime = cycletime0
             self.ros_publish_cycletime0.publish(self.cycletime_0_msg)
             if debug: print ' >>> sent pub_cycletime_0'
