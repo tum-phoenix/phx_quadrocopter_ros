@@ -19,7 +19,7 @@ class copter:
         """
         # connect to serial multiwii
         if con_multiwii:
-            self.serial_multiwii = serial_com.multiwii_protocol('/dev/multiwii', 115200)
+            self.serial_multiwii = serial_com.multiwii_protocol('/dev/marvic', 115200)
             self.serial_multiwii.startup_delay = 15.0
         else:
             self.serial_multiwii = None
