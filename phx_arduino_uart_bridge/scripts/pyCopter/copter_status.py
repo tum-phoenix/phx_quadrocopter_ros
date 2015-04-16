@@ -7,6 +7,7 @@ import time
 import numpy as np
 import speed
 
+
 class copter:
     def __init__(self, con_multiwii=True, con_intermediate=True, con_ros=False, osc_transmit=(None, 10000), osc_receive=10001):
         """
@@ -148,6 +149,7 @@ class copter:
         if self.timer_update_ros < time.time():
             self.time_update_ros = time.time() + self.interval_update_ros
             self.ros_node.listen()
+            self.update_time_stamp()
             if self.serial_multiwii:
                 self.ros_node.pub_motors(self.motors)
                 self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
