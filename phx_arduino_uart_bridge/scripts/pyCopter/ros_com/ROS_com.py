@@ -161,6 +161,19 @@ class ros_communication():
         self.simple_directions = [0, 0, 0, 0]   # backward-forward, left-right, up-down, left-right-turn
         self.simple_directions_linear = [10, 10, 10, 10]
 
+    def set_pwm_midpoints(self, throttle=1000, pitch=1500, roll=1500, yaw=1500, aux1=1000, aux2=1000, aux3=1000, aux4=1000):
+        self.pwm_midpoint_throttle = throttle
+        self.pwm_midpoint_pitch = pitch
+        self.pwm_midpoint_roll = roll
+        self.pwm_midpoint_yaw = yaw
+        self.pwm_midpoint_aux1 = aux1
+        self.pwm_midpoint_aux2 = aux2
+        self.pwm_midpoint_aux3 = aux3
+        self.pwm_midpoint_aux4 = aux4
+
+    def set_simple_directions_linear_factors(self, throttle=10, pitch=10, roll=10, yaw=10):
+        self.simple_directions_linear = [pitch, roll, throttle, yaw]
+
     def listen(self):
         """
             this makes rospy look for incoming messages which will be received by their callback functions.
@@ -263,9 +276,9 @@ class ros_communication():
             This callback is used for incoming motor commands and it will directly send them to the copter!
         """
         print ' >>> ROS_callback: received cmd_motor', stuff
-        # TODO: link this correctly
+        # TODO: link this correctly, and test it (linking might be ok!)
         motors = [stuff.motor0, stuff.motor1, stuff.motor2, stuff.motor3]
-        print motors
+        print 'ros_callback: callback_cmd_motor:', motors
         # probably like this
         if self.copter:
             self.copter.send_serial_motor(motor_values=motors)
@@ -277,10 +290,10 @@ class ros_communication():
             This callback is used for incoming com_vel commands and updates the ros RC to the new state.
         """
         print ' >>> ROS_callback: received cmd_vel', stuff
-        # TODO: link this correctly
-        self.simple_directions = stuff
+        print '     this stuff needs to be organised to fit into a list of [pitch, roll, throttle, yaw]'
+        # TODO: link this correctly, and test it (linking might be ok!)
+        self.simple_directions = stuff          # this list needs to be like [pitch, roll, throttle, yaw]
         self.calc_rc_from_simple_directions()
-        print '     >>> not implemented jet'
 
     def callback_cmd_rc_1(self, stuff):
         """
@@ -288,8 +301,7 @@ class ros_communication():
             This callback is used for incoming rc_1 commands and updates the ros RC to the new state.
         """
         try:
-            print stuff.axes
-            print stuff.buttons
+            print 'ros_callback: callback_cmd_rc_1: axes:', stuff.axes, 'buttons', stuff.buttons
             self.set_sticks(sticks=stuff)
         except:
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
@@ -518,7 +530,7 @@ class ros_communication():
         if abs(self.roll) > 25:
             self.roll = 25.0 * (self.roll/abs(self.roll))
 
-        self.throttle += self.simple_directions[3] * self.simple_directions_linear[3]
+        self.throttle += self.simple_directions[2] * self.simple_directions_linear[2]
 
         self.yaw = self.simple_directions[3] * self.simple_directions_linear[3]
         if abs(self.yaw) < 10:
