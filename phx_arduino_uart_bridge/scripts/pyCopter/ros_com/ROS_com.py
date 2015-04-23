@@ -318,15 +318,18 @@ class ros_communication():
             if debug: print 'trying to send imu'
             self.imu_msg.header.stamp.secs = self.current_time_stamp.secs
             self.imu_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
-            self.imu_msg.angular_velocity.x = gyr[0]
-            self.imu_msg.angular_velocity.y = gyr[1]
-            self.imu_msg.angular_velocity.z = gyr[2]
+            self.imu_msg.angular_velocity.x = -gyr[0]
+            self.imu_msg.angular_velocity.y = -gyr[1]
+            self.imu_msg.angular_velocity.z = -gyr[2]
             if debug: print 'imu did angular_velocity'
             self.imu_msg.linear_acceleration.x = acc[0]
             self.imu_msg.linear_acceleration.y = acc[1]
             self.imu_msg.linear_acceleration.z = acc[2]
             if debug: print 'imu did linear_acceleration'
-            q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
+            # attitude[0]: pitch + vorne
+            # attitude[1]: roll  + rechts
+            # attitude[2]: yaw
+            q = tf.transformations.quaternion_from_euler(0.1*attitude[1]/180*np.pi, 0.1*attitude[0]/180*np.pi, 0.1*attitude[2]/180*np.pi)
             self.imu_msg.orientation = Quaternion(*q)
             if debug: print 'imu did orientation'
             self.ros_publish_imu.publish(self.imu_msg)
