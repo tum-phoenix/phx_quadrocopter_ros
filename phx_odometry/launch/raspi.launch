@@ -1,28 +1,13 @@
 <launch>
-	<machine name="phoenix" address="raspberrypi" user="pi" env-loader="/home/pi/env-$(arg hostname).sh" />
-  	<machine name="local"  address="localhost" />
+
   	
   	<param name="robot_description" command="$(find xacro)/xacro.py $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
  	<param name="use_gui" value="False"/>
-  	
-	<node name="imu" pkg="phx_imu" type="imu_node" output="screen" machine="phoenix"/>
-	
-	<node name="uart_bridge" pkg="phx_uart_bridge"  type="UARTWriterNode" output="screen" machine="phoenix">
-		<param name="/UARTInterface/baudrate" value="38400" type="int" />
-		<param name="/UARTInterface/path" value="/dev/ttyUSB0" type="string" />
-	</node>
-	
-	<node name="controller" pkg="phx_controller" type="controller_node.py" output="screen" machine="local"/>
 
-	<!--<node name="odometry" pkg="phx_odometry" type="odometry_node" output="screen" machine="local"/>-->
-	
-
- 	
-	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" machine="local" />
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" machine="local" />
-	<!--
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find phx_odometry)/launch/urdf.rviz" required="true" machine="local" />
-	-->
+	<node name="odometry" pkg="phx_odometry" type="odometry_node" output="screen" />
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"  />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find phx_odometry)/launch/urdf.rviz" required="true" />
 
 		
 </launch>
