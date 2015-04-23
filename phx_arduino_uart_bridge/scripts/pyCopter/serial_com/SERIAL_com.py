@@ -275,7 +275,7 @@ class multiwii_protocol:
             tupel_length = 6
             data.append(0)
             cell_number = 0
-            for cell in range( 0, len(data)/tupel_length ):
+            for cell in range(0, len(data)/tupel_length):
                 cell_number += 1
                 cell_mean = read_uint16(data[cell*tupel_length:cell*tupel_length+2])
                 cell_min = read_uint16(data[cell*tupel_length+2:cell*tupel_length+4])

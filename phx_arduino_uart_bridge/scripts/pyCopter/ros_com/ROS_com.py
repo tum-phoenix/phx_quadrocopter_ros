@@ -47,6 +47,7 @@ class ros_communication():
                 subscribe stat_rc2
         """
         try:
+            self.current_time_stamp = rospy.get_rostime()
             if copter:
                 if copter.serial_multiwii and not copter.serial_intermediate:
                     rospy.init_node('MultiWii_Bridge')
@@ -160,11 +161,27 @@ class ros_communication():
         self.simple_directions = [0, 0, 0, 0]   # backward-forward, left-right, up-down, left-right-turn
         self.simple_directions_linear = [10, 10, 10, 10]
 
+    def set_pwm_midpoints(self, throttle=1000, pitch=1500, roll=1500, yaw=1500, aux1=1000, aux2=1000, aux3=1000, aux4=1000):
+        self.pwm_midpoint_throttle = throttle
+        self.pwm_midpoint_pitch = pitch
+        self.pwm_midpoint_roll = roll
+        self.pwm_midpoint_yaw = yaw
+        self.pwm_midpoint_aux1 = aux1
+        self.pwm_midpoint_aux2 = aux2
+        self.pwm_midpoint_aux3 = aux3
+        self.pwm_midpoint_aux4 = aux4
+
+    def set_simple_directions_linear_factors(self, throttle=10, pitch=10, roll=10, yaw=10):
+        self.simple_directions_linear = [pitch, roll, throttle, yaw]
+
     def listen(self):
         """
             this makes rospy look for incoming messages which will be received by their callback functions.
         """
         self.rate.sleep()
+
+    def update_time_stamp(self):
+        self.current_time_stamp = rospy.get_rostime()
 
     # Callbacks:
     def callback_stat_imu(self, stuff):
@@ -259,9 +276,9 @@ class ros_communication():
             This callback is used for incoming motor commands and it will directly send them to the copter!
         """
         print ' >>> ROS_callback: received cmd_motor', stuff
-        # TODO: link this correctly
+        # TODO: link this correctly, and test it (linking might be ok!)
         motors = [stuff.motor0, stuff.motor1, stuff.motor2, stuff.motor3]
-        print motors
+        print 'ros_callback: callback_cmd_motor:', motors
         # probably like this
         if self.copter:
             self.copter.send_serial_motor(motor_values=motors)
@@ -273,10 +290,10 @@ class ros_communication():
             This callback is used for incoming com_vel commands and updates the ros RC to the new state.
         """
         print ' >>> ROS_callback: received cmd_vel', stuff
-        # TODO: link this correctly
-        self.simple_directions = stuff
+        print '     this stuff needs to be organised to fit into a list of [pitch, roll, throttle, yaw]'
+        # TODO: link this correctly, and test it (linking might be ok!)
+        self.simple_directions = stuff          # this list needs to be like [pitch, roll, throttle, yaw]
         self.calc_rc_from_simple_directions()
-        print '     >>> not implemented jet'
 
     def callback_cmd_rc_1(self, stuff):
         """
@@ -284,8 +301,7 @@ class ros_communication():
             This callback is used for incoming rc_1 commands and updates the ros RC to the new state.
         """
         try:
-            print stuff.axes
-            print stuff.buttons
+            print 'ros_callback: callback_cmd_rc_1: axes:', stuff.axes, 'buttons', stuff.buttons
             self.set_sticks(sticks=stuff)
         except:
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
@@ -297,10 +313,8 @@ class ros_communication():
         """
         try:
             if debug: print 'trying to send imu'
-            
-            now = rospy.get_rostime()
-            self.imu_msg.header.stamp.secs = now.secs
-            self.imu_msg.header.stamp.nsecs = now.nsecs
+            self.imu_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.imu_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.imu_msg.angular_velocity.x = gyr[0]
             self.imu_msg.angular_velocity.y = gyr[1]
             self.imu_msg.angular_velocity.z = gyr[2]
@@ -322,9 +336,8 @@ class ros_communication():
             motors = [ motor0, motor1, motor2, motor3 ]
         """
         try:
-            #now = rospy.get_rostime()
-            #self.motor_msg.header.stamp.secs = now.secs
-            #self.motor_msg.header.stamp.nsecs = now.nsecs
+            self.motor_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.motor_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.motor_msg.motor0 = motors[0]
             self.motor_msg.motor1 = motors[1]
             self.motor_msg.motor2 = motors[2]
@@ -336,9 +349,8 @@ class ros_communication():
 
     def pub_gps(self, gps_lat, gps_lon, gps_alt, debug=False):
         try:
-            now = rospy.get_rostime()
-            self.NavSatFix_msg.header.stamp.secs = now.secs
-            self.NavSatFix_msg.header.stamp.nsecs = now.nsecs
+            self.NavSatFix_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.NavSatFix_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.NavSatFix_msg.latitude = gps_lat
             self.NavSatFix_msg.longitude = gps_lon
             self.NavSatFix_msg.altitude = gps_alt
@@ -353,9 +365,8 @@ class ros_communication():
         """
         try:
             print 'battery:', battery
-            now = rospy.get_rostime()
-            self.Battery.header.stamp.secs = now.secs
-            self.Battery.header.stamp.nsecs = now.nsecs
+            self.Battery.header.stamp.secs = self.current_time_stamp.secs
+            self.Battery.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Battery.cell1 = battery[0]
             self.Battery.cell2 = battery[1]
             self.Battery.cell3 = battery[2]
@@ -367,9 +378,8 @@ class ros_communication():
     
     def pub_cycletime0(self, cycletime0, debug=False):
         try:
-            #now = rospy.get_rostime()
-            #self.cycletime_0_msg.header.stamp.secs = now.secs
-            #self.cycletime_0_msg.header.stamp.nsecs = now.nsecs
+            self.cycletime_0_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.cycletime_0_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.cycletime_0_msg.cycletime = cycletime0
             self.ros_publish_cycletime0.publish(self.cycletime_0_msg)
             if debug: print ' >>> sent pub_cycletime_0'
@@ -378,9 +388,8 @@ class ros_communication():
     
     def pub_cycletime1(self, cycletime1, debug=False):
         try:
-            now = rospy.get_rostime()
-            self.cycletime_1_msg.header.stamp.secs = now.secs
-            self.cycletime_1_msg.header.stamp.nsecs = now.nsecs
+            self.cycletime_1_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.cycletime_1_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.cycletime_1_msg.cycletime = cycletime1
             self.ros_publish_cycletime1.publish(self.cycletime_1_msg)
             if debug: print ' >>> sent pub_cycletime_1'
@@ -392,9 +401,8 @@ class ros_communication():
             rc0 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            now = rospy.get_rostime()
-            self.Joy_0_msg.header.stamp.secs = now.secs
-            self.Joy_0_msg.header.stamp.nsecs = now.nsecs
+            self.Joy_0_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.Joy_0_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Joy_0_msg.axes = rc0[:4]
             self.Joy_0_msg.buttons = rc0[4:]
             self.ros_publish_rc0.publish(self.Joy_0_msg)
@@ -407,9 +415,8 @@ class ros_communication():
             rc1 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            now = rospy.get_rostime()
-            self.Joy_1_msg.header.stamp.secs = now.secs
-            self.Joy_1_msg.header.stamp.nsecs = now.nsecs
+            self.Joy_1_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.Joy_1_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Joy_1_msg.axes = rc1[:4]
             self.Joy_1_msg.buttons = rc1[4:]
             self.ros_publish_rc1.publish(self.Joy_1_msg)
@@ -422,9 +429,8 @@ class ros_communication():
          rc2 = [ throttle, pitch, roll, yaw, aux1, aux2, aux3, aux4 ]
         """
         try:
-            now = rospy.get_rostime()
-            self.Joy_2_msg.header.stamp.secs = now.secs
-            self.Joy_2_msg.header.stamp.nsecs = now.nsecs
+            self.Joy_2_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.Joy_2_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Joy_2_msg.axes = rc2[:4]
             self.Joy_2_msg.buttons = rc2[4:]
             self.ros_publish_rc2.publish(self.Joy_2_msg)
@@ -524,7 +530,7 @@ class ros_communication():
         if abs(self.roll) > 25:
             self.roll = 25.0 * (self.roll/abs(self.roll))
 
-        self.throttle += self.simple_directions[3] * self.simple_directions_linear[3]
+        self.throttle += self.simple_directions[2] * self.simple_directions_linear[2]
 
         self.yaw = self.simple_directions[3] * self.simple_directions_linear[3]
         if abs(self.yaw) < 10:

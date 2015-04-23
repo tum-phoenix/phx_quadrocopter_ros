@@ -7,6 +7,7 @@ import time
 import numpy as np
 import speed
 
+
 class copter:
     def __init__(self, con_multiwii=True, con_intermediate=True, con_ros=False, osc_transmit=(None, 10000), osc_receive=10001):
         """
@@ -67,6 +68,8 @@ class copter:
         self.battery = [0, 0, 0, 0]
         self.position_led = [0]
 
+        self.last_sent_motor_values = [10, 11, 12, 13]
+
         self.local_ip = network_com.get_local_ip()
 
         # define default rc for serial out
@@ -112,17 +115,17 @@ class copter:
         self.speed_1.start()
         self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
         self.speed_1.stop()
-        
+
         self.speed_2.start()
         self.update_status(debug=debug)                 # sends requests and receives the answers if they are replied instantly
         self.speed_2.stop()
-        
+
         self.speed_3.start()
         if self.serial_intermediate:
             self.send_serial_rc(debug=debug)            # sends the default RC command to the intermediate arduino (default RC is set by self.use_rc)
             self.send_serial_low_priority(debug=debug)  # sends serial messages - low rate
         self.speed_3.stop()
-        
+
         self.speed_4.start()
         if self.status_transmitter:
             self.send_osc_status(debug=debug)           # publishes status to OSC listeners
@@ -148,6 +151,7 @@ class copter:
         if self.timer_update_ros < time.time():
             self.time_update_ros = time.time() + self.interval_update_ros
             self.ros_node.listen()
+            self.update_time_stamp()
             if self.serial_multiwii:
                 self.ros_node.pub_motors(self.motors)
                 self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
@@ -275,4 +279,5 @@ class copter:
             self.serial_intermediate.send_position_light(self.position_led, debug=debug)
 
     def send_serial_motor(self, motor_values=(1050, 1050, 1050, 1050), debug=False):
+        self.last_sent_motor_values = motor_values
         print 'this function send_serial_motor() is not jet implemented.', motor_values
