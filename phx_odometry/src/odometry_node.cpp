@@ -52,9 +52,9 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_msg)
     geometry_msgs::Transform transform;
     
     if (!(x != x || y != y || z != z)) {
-        transform.translation.x=x;
-        transform.translation.y=y;
-        transform.translation.z=z;
+        transform.translation.x=0;
+        transform.translation.y=0;
+        transform.translation.z=0;
     } else {
         ROS_WARN("Translation NaN");
         ROS_WARN("%f, %f, %f", x, y, z);
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "odometry_node");
     ros::NodeHandle n;
-    ros::Subscriber imuSubscriber = n.subscribe("/phoenix/imu", 1000, imuCallback);
+    ros::Subscriber imuSubscriber = n.subscribe("/phoenix/stat_imu", 1000, imuCallback);
     odometryPublisher = n.advertise<nav_msgs::Odometry>("/phoenix/odom", 50);
     transformBroadcaster.reset(new tf2_ros::TransformBroadcaster());
     current_time = ros::Time::now();
