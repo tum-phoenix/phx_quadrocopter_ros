@@ -46,8 +46,9 @@ class ros_communication():
                 subscribe stat_rc1
                 subscribe stat_rc2
         """
-        try:
-            self.current_time_stamp = rospy.get_rostime()
+        if True==True:
+#        try:
+            self.current_time_stamp = None   #rospy.get_rostime()
             if copter:
                 if copter.serial_multiwii and not copter.serial_intermediate:
                     rospy.init_node('MultiWii_Bridge')
@@ -100,11 +101,15 @@ class ros_communication():
                     self.ros_subscribe_cmd_vel = rospy.Subscriber('/phoenix/cmd_vel', Twist, self.callback_cmd_vel)
                     self.ros_subscribe_cmd_rc_1 = rospy.Subscriber('/phoenix/cmd_rc1', Joy, self.callback_cmd_rc_1)
             elif osc:
+                print 'init osc'
+                self.copter = None
+                self.debug_osc = True
+                self.osc_transmitter = osc
                 rospy.init_node('OSC_Bridge')
-                self.ros_publish_cmd_rc1 = rospy.Publisher('/phoenix/cmd_rc1', Joy, queue_size=10)
-                self.Joy_1_cmd_msg = Joy()
-                self.ros_publish_cmd_vel = rospy.Publisher('/phoenix/cmd_vel', Joy, queue_size=10)
-                self.cmd_vel_msg = Twist()
+#                self.ros_publish_cmd_rc1 = rospy.Publisher('/phoenix/cmd_rc1', Joy, queue_size=10)
+#                self.Joy_1_cmd_msg = Joy()
+#                self.ros_publish_cmd_vel = rospy.Publisher('/phoenix/cmd_vel', Joy, queue_size=10)
+#                self.cmd_vel_msg = Twist()
                 self.ros_subscribe_stat_imu = rospy.Subscriber('/phoenix/stat_imu', Imu, self.callback_stat_imu)
                 self.ros_subscribe_stat_motor = rospy.Subscriber('/phoenix/stat_motor', Motor, self.callback_stat_motor)
                 self.ros_subscribe_stat_gps = rospy.Subscriber('/phoenix/stat_gps', NavSatFix, self.callback_stat_gps)
@@ -114,13 +119,11 @@ class ros_communication():
                 self.ros_subscribe_stat_rc2 = rospy.Subscriber('/phoenix/stat_rc2', Joy, self.callback_stat_rc2)
                 self.ros_subscribe_stat_cycletime0 = rospy.Subscriber('/phoenix/cycletime0', Int16, self.callback_stat_cycletime0)
                 self.ros_subscribe_stat_cycletime1 = rospy.Subscriber('/phoenix/cycletime1', Int16, self.callback_stat_cycletime1)
-                self.copter = None
-                self.debug_osc = True
-                self.osc_transmitter = osc
+                print 'init done'
             self.freq = 50     # Hz
             self.rate = rospy.Rate(self.freq)
-        except:
-            print ' >>> error in ros __init__'
+#        except:
+#            print ' >>> error in ros __init__'
         """
             raw values:
             throttle           0  -   100
@@ -336,8 +339,8 @@ class ros_communication():
             motors = [ motor0, motor1, motor2, motor3 ]
         """
         try:
-            self.motor_msg.header.stamp.secs = self.current_time_stamp.secs
-            self.motor_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
+#            self.motor_msg.header.stamp.secs = self.current_time_stamp.secs
+#            self.motor_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.motor_msg.motor0 = motors[0]
             self.motor_msg.motor1 = motors[1]
             self.motor_msg.motor2 = motors[2]
@@ -365,8 +368,8 @@ class ros_communication():
         """
         try:
             print 'battery:', battery
-            self.Battery.header.stamp.secs = self.current_time_stamp.secs
-            self.Battery.header.stamp.nsecs = self.current_time_stamp.nsecs
+#            self.Battery.header.stamp.secs = self.current_time_stamp.secs
+#            self.Battery.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Battery.cell1 = battery[0]
             self.Battery.cell2 = battery[1]
             self.Battery.cell3 = battery[2]
@@ -378,8 +381,8 @@ class ros_communication():
     
     def pub_cycletime0(self, cycletime0, debug=False):
         try:
-            self.cycletime_0_msg.header.stamp.secs = self.current_time_stamp.secs
-            self.cycletime_0_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
+#            self.cycletime_0_msg.header.stamp.secs = self.current_time_stamp.secs
+#            self.cycletime_0_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.cycletime_0_msg.cycletime = cycletime0
             self.ros_publish_cycletime0.publish(self.cycletime_0_msg)
             if debug: print ' >>> sent pub_cycletime_0'
@@ -388,8 +391,8 @@ class ros_communication():
     
     def pub_cycletime1(self, cycletime1, debug=False):
         try:
-            self.cycletime_1_msg.header.stamp.secs = self.current_time_stamp.secs
-            self.cycletime_1_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
+#            self.cycletime_1_msg.header.stamp.secs = self.current_time_stamp.secs
+#            self.cycletime_1_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.cycletime_1_msg.cycletime = cycletime1
             self.ros_publish_cycletime1.publish(self.cycletime_1_msg)
             if debug: print ' >>> sent pub_cycletime_1'

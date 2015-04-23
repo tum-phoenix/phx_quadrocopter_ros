@@ -6,14 +6,14 @@ print '> import done'
 
 
 # start an OSC transmitter
-osc_out = pyCopter.network_com.OSC_transmitter()
+osc_out = pyCopter.network_com.OSC_transmitter(destination='192.168.2.96')
 
 # start a ros node
 osc_ros_node = pyCopter.ros_com.ros_communication(osc=osc_out)
 
 # start an OSC receiver
 osc_in = pyCopter.network_com.OSC_receiver(osc_rc=osc_ros_node, osc_status_transmitter=osc_out)
-osc_in.start()
+#osc_in.start()
 
 # speed test
 osc_speed_test = pyCopter.speedtest()

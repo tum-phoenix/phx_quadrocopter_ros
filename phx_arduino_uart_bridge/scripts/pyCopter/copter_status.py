@@ -20,7 +20,7 @@ class copter:
         """
         # connect to serial multiwii
         if con_multiwii:
-            self.serial_multiwii = serial_com.multiwii_protocol('/dev/marvic', 115200)
+            self.serial_multiwii = serial_com.multiwii_protocol('/dev/multiwii', 115200)
             self.serial_multiwii.startup_delay = 15.0
         else:
             self.serial_multiwii = None
@@ -151,7 +151,7 @@ class copter:
         if self.timer_update_ros < time.time():
             self.time_update_ros = time.time() + self.interval_update_ros
             self.ros_node.listen()
-            self.update_time_stamp()
+            self.ros_node.update_time_stamp()
             if self.serial_multiwii:
                 self.ros_node.pub_motors(self.motors)
                 self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
