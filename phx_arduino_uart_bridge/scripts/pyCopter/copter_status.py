@@ -140,12 +140,12 @@ class copter:
         self.serial_receive_update(debug=debug)         # receives data on serial connections...ensures that we receive data and the buffer does not overflow
         self.speed_6.stop()
         
-        self.speed_1.print_result(rate=1., text=' > copterstatus speed_1 takes')
-        self.speed_2.print_result(rate=1., text=' > copterstatus speed_2 takes')
-        self.speed_3.print_result(rate=1., text=' > copterstatus speed_3 takes')
-        self.speed_4.print_result(rate=1., text=' > copterstatus speed_4 takes')
-        self.speed_5.print_result(rate=1., text=' > copterstatus speed_5 takes')
-        self.speed_6.print_result(rate=1., text=' > copterstatus speed_6 takes')
+        self.speed_1.print_result(rate=1., text=' > copter status speed_1 takes')
+        self.speed_2.print_result(rate=1., text=' > copter status speed_2 takes')
+        self.speed_3.print_result(rate=1., text=' > copter status speed_3 takes')
+        self.speed_4.print_result(rate=1., text=' > copter status speed_4 takes')
+        self.speed_5.print_result(rate=1., text=' > copter status speed_5 takes')
+        self.speed_6.print_result(rate=1., text=' > copter status speed_6 takes')
 
     def update_ros(self):
         if self.timer_update_ros < time.time():
