@@ -74,7 +74,7 @@ class multiwii_protocol:
         # in this case the script would break.
 #        try:
             if self.connection_check() == 1:
-                while self.ser.inWaiting() > 30: #5:
+                while self.ser.inWaiting() > 5:
                     start_byte = self.ser.read(1)
                     if debug: print 'start_byte', start_byte
                     if start_byte == "$":
@@ -87,6 +87,7 @@ class multiwii_protocol:
                         start_waiting = time.time()
                         while self.ser.inWaiting() < length+1:
                             if start_waiting < time.time() - 0.1:
+                                print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.1 sec'
                                 self.ser.flushInput()
                                 return 0
                         data = []
@@ -144,7 +145,7 @@ class multiwii_protocol:
             return 0
         if bytes_sent != len(total_data):
             print 'not everything sent!'
-        self.ser.flush()
+        #self.ser.flush()
         return 1
     
     def send_request(self, cmd, debug=False):
@@ -256,10 +257,6 @@ class multiwii_protocol:
                 cell_mean = read_uint16(data[cell*tupel_length:cell*tupel_length+2])
                 cell_min = read_uint16(data[cell*tupel_length+2:cell*tupel_length+4])
                 cell_max = read_uint16(data[cell*tupel_length+4:cell*tupel_length+6])
-#
-#                cell_mean = read_uint16(data[cell*tupel_length+1:cell*tupel_length+3])
-#                cell_min = read_uint16(data[cell*tupel_length+3:cell*tupel_length+5])
-#                cell_max = read_uint16(data[cell*tupel_length+5:cell*tupel_length+7])
                 self.battery['cell'+str(cell_number)] = [cell_mean, cell_min, cell_max]
             if debug: print 'battery updated',  self.battery
             return 1
