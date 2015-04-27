@@ -324,7 +324,11 @@ class ros_communication():
             self.imu_msg.linear_acceleration.z = acc[2]
             if debug: print 'imu did linear_acceleration'
             q = tf.transformations.quaternion_from_euler(attitude[0], attitude[1], attitude[2])
-            self.imu_msg.orientation = Quaternion(*q)
+            #self.imu_msg.orientation = Quaternion(*q)
+            self.imu_msg.orientation.x = quaternion[0]
+            self.imu_msg.orientation.y = quaternion[1]
+            self.imu_msg.orientation.z = quaternion[2]
+            self.imu_msg.orientation.w = quaternion[3]
             if debug: print 'imu did orientation'
             self.ros_publish_imu.publish(self.imu_msg)
             if debug: print ' >>> sent imu'
