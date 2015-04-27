@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#import pyCopter
+import pyCopter
 print '> import done'
 
 # we first start the copter by connecting to intermediate_arduino and multiwii.

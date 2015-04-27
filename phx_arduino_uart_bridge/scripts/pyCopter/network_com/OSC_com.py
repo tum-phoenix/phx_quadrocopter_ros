@@ -262,6 +262,7 @@ def get_local_ip():
         ip_task.close()
         if '\n' in local_ip:
             local_ip = local_ip.split('\n')[0]
+        print ' >> got local ip:', local_ip
         return local_ip
     except:
         return '0.0.0.0'

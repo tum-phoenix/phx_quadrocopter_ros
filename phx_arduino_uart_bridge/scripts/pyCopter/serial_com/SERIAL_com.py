@@ -50,31 +50,7 @@ class multiwii_protocol:
             # in case we are just starting the connection we have to wait for some startup_time
             self.time_of_last_receive = time.time()
             return 0
-        return 1       # this prevents any reconnecting during opperation
-        
-        """
-        if time.time() > self.time_of_last_receive + self.time_of_last_receive_timeout:
-            # no contact since a long time! let's try a reconnect
-            try:
-                print 'reconnecting ', self.ser.getPort()
-                self.ser.open()
-                self.ser.flushOutput()
-                self.ser.flushInput()
-                self.time_of_last_receive = time.time()
-                self.startup_time = time.time()
-                print 'reconnected!', self.ser.getPort(), 'startup_time is set to', self.startup_time, 'seconds'
-            except:
-                print '>>> serial port', self.ser.getPort(), 'down...probably disconnected! next check in', self.time_of_last_receive_timeout, 'seconds'
-                self.ser.close()
-                print '>>> closed', self.ser.getPort()
-                self.time_of_last_receive = time.time()
-        if self.ser.isOpen():
-            # everything is fine
-            return 1
-        else:
-            # connection is down...after self.time_of_last_contact_timeout seconds a reconnect will be initiated
-            return 0
-        """
+        return 1       # this prevents any reconnecting during operation
  
     def check_startup(self, debug=True):
         """
@@ -98,7 +74,7 @@ class multiwii_protocol:
         # in this case the script would break.
 #        try:
             if self.connection_check() == 1:
-                while self.ser.inWaiting() > 30: #5:
+                while self.ser.inWaiting() > 5:
                     start_byte = self.ser.read(1)
                     if debug: print 'start_byte', start_byte
                     if start_byte == "$":
@@ -111,6 +87,7 @@ class multiwii_protocol:
                         start_waiting = time.time()
                         while self.ser.inWaiting() < length+1:
                             if start_waiting < time.time() - 0.1:
+                                print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.1 sec'
                                 self.ser.flushInput()
                                 return 0
                         data = []
@@ -168,7 +145,7 @@ class multiwii_protocol:
             return 0
         if bytes_sent != len(total_data):
             print 'not everything sent!'
-        self.ser.flush()
+        #self.ser.flush()
         return 1
     
     def send_request(self, cmd, debug=False):
@@ -280,10 +257,6 @@ class multiwii_protocol:
                 cell_mean = read_uint16(data[cell*tupel_length:cell*tupel_length+2])
                 cell_min = read_uint16(data[cell*tupel_length+2:cell*tupel_length+4])
                 cell_max = read_uint16(data[cell*tupel_length+4:cell*tupel_length+6])
-#
-#                cell_mean = read_uint16(data[cell*tupel_length+1:cell*tupel_length+3])
-#                cell_min = read_uint16(data[cell*tupel_length+3:cell*tupel_length+5])
-#                cell_max = read_uint16(data[cell*tupel_length+5:cell*tupel_length+7])
                 self.battery['cell'+str(cell_number)] = [cell_mean, cell_min, cell_max]
             if debug: print 'battery updated',  self.battery
             return 1
