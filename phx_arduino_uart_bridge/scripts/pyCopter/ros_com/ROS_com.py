@@ -329,6 +329,7 @@ class ros_communication():
             self.imu_msg.linear_acceleration.y = acc[1]
             self.imu_msg.linear_acceleration.z = acc[2]
             if debug: print 'imu did linear_acceleration'
+
             # attitude[0]: pitch + vorne
             # attitude[1]: roll  + rechts
             # attitude[2]: yaw
