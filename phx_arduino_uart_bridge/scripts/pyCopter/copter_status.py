@@ -28,10 +28,11 @@ class copter:
 
         # connect to serial intermediate
         if con_intermediate:
-            self.serial_intermediate = serial_com.multiwii_protocol('/dev/marvic', 115200)
+            self.serial_intermediate = serial_com.multiwii_protocol('/dev/marvic', 2000000) #115200)
             self.serial_intermediate.startup_delay = 10.
         else:
             self.serial_intermediate = None
+        self.serial_marvic_request_counter = 0
 
         # start ros node
         if con_ros:
@@ -39,13 +40,16 @@ class copter:
         else:
             self.ros_node = None
 
+        if con_multiwii:
+            self.serial_multiwii.ros_callback = self.ros_node
+
         # define some timing variables
-        self.interval_read_serial = 1./70.
+        #self.interval_read_serial = 1./70.
         self.interval_send_serial_low_priority = 10.0   # IP, position_LED
-        self.interval_send_serial_rc = 1./40.
+        self.interval_send_serial_rc = 1./50.
         self.interval_send_osc_status = 1./15.
-        self.interval_update_status = 1./50.
-        self.interval_update_ros = 1./50.
+        self.interval_update_status = 1./200.   # 1./50.
+        self.interval_update_ros = 1./60.       # 1./50.
         self.timer_read_serial = 0
         self.timer_send_serial_low_priority = 0
         self.timer_send_serial_rc = 0
@@ -143,7 +147,7 @@ class copter:
         self.speed_1.print_result(rate=1., text=' > copter status speed_1 takes')
         self.speed_2.print_result(rate=1., text=' > copter status speed_2 takes')
         self.speed_3.print_result(rate=1., text=' > copter status speed_3 takes')
-        self.speed_4.print_result(rate=1., text=' > copter status speed_4 takes')
+        #self.speed_4.print_result(rate=1., text=' > copter status speed_4 takes')
         self.speed_5.print_result(rate=1., text=' > copter status speed_5 takes')
         self.speed_6.print_result(rate=1., text=' > copter status speed_6 takes')
 
@@ -153,8 +157,8 @@ class copter:
             self.ros_node.listen()
             self.ros_node.update_time_stamp()
             if self.serial_multiwii:
-                self.ros_node.pub_motors(self.motors)
-                self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
+                #self.ros_node.pub_motors(self.motors)
+                #self.ros_node.pub_imu(acc=self.imu_acc, gyr=self.imu_gyr, mag=self.imu_mag, attitude=self.attitude)
                 self.ros_node.pub_rc2(self.rc2)
                 self.ros_node.pub_gps(gps_lat=self.gps[0], gps_lon=self.gps[1], gps_alt=self.gps[2])
                 self.ros_node.pub_cycletime0(self.cycletime_0[0])
@@ -163,7 +167,7 @@ class copter:
                 self.ros_node.pub_rc0(self.rc0)
                 self.ros_node.pub_rc1(self.rc1)
                 self.ros_node.pub_cycletime1(self.cycletime_1[0])
-#            self.ros_node.listen()
+            #self.ros_node.listen()
 
     def serial_receive_update(self, debug=False):
         """
@@ -179,27 +183,34 @@ class copter:
             self.timer_update_status = time.time() + self.interval_update_status
 
             # update from multiwii
+            # status     101
+            # imu        102
+            # motor      104
+            # rc2        105
+            # gps        106
+            # attitude   108
+            # altitude   109
             if self.serial_multiwii:
                 if self.serial_multiwii_request_counter == 0:                               # get rc2 and attitude
                     self.serial_multiwii.get_msg(cmd_list=[105, 108], debug=debug)
                     self.serial_multiwii_request_counter = 1
-                elif self.serial_multiwii_request_counter == 1:                             # get imu, rc2 and attitude
-                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 108], debug=debug)
+                elif self.serial_multiwii_request_counter == 1:                             # get imu and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[102, 108], debug=debug)
                     self.serial_multiwii_request_counter = 2
-                elif self.serial_multiwii_request_counter == 2:                             # get rc2 and attitude
-                    self.serial_multiwii.get_msg(cmd_list=[105, 108], debug=debug)
+                elif self.serial_multiwii_request_counter == 2:                             # get attitude
+                    self.serial_multiwii.get_msg(cmd_list=[108], debug=debug)
                     self.serial_multiwii_request_counter = 3
-                elif self.serial_multiwii_request_counter == 3:                             # get imu, rc2 and status
-                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 101], debug=debug)
+                elif self.serial_multiwii_request_counter == 3:                             # get status and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[101, 108], debug=debug)
                     self.serial_multiwii_request_counter = 4
-                elif self.serial_multiwii_request_counter == 4:                             # get imu, rc2 and motor
-                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 104], debug=debug)
+                elif self.serial_multiwii_request_counter == 4:                             # get attitude
+                    self.serial_multiwii.get_msg(cmd_list=[108], debug=debug)
                     self.serial_multiwii_request_counter = 5
-                elif self.serial_multiwii_request_counter == 5:                             # get imu, rc2 and gps
-                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 106], debug=debug)
+                elif self.serial_multiwii_request_counter == 5:                             # get gps and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[106, 108], debug=debug)
                     self.serial_multiwii_request_counter = 6
-                elif self.serial_multiwii_request_counter == 7:                             # get imu, rc2 and altitude
-                    self.serial_multiwii.get_msg(cmd_list=[102, 105, 109], debug=debug)
+                elif self.serial_multiwii_request_counter == 7:                             # get altitude and attitude
+                    self.serial_multiwii.get_msg(cmd_list=[109, 108], debug=debug)
                     self.serial_multiwii_request_counter = 0
                 else:
                     self.serial_multiwii_request_counter = 0
@@ -220,7 +231,23 @@ class copter:
 
             # update from intermediate
             if self.serial_intermediate:
-                self.serial_intermediate.get_msg(cmd_list=[66, 101, 102, 105], debug=debug)
+            # update from marvic
+            # status     101
+            # imu        102
+            # rc1        105
+            # battery    66
+                if self.serial_marvic_request_counter == 0:                               # get rc1
+                    self.serial_intermediate.get_msg(cmd_list=[105], debug=debug)
+                    self.serial_marvic_request_counter = 1
+                elif self.serial_marvic_request_counter == 1:                             # get battery
+                    self.serial_intermediate.get_msg(cmd_list=[66], debug=debug)
+                    self.serial_marvic_request_counter = 2
+                elif self.serial_marvic_request_counter == 2:                             # get imu
+                    self.serial_intermediate.get_msg(cmd_list=[102], debug=debug)
+                    self.serial_marvic_request_counter = 3
+                elif self.serial_marvic_request_counter == 3:                             # get status
+                    self.serial_intermediate.get_msg(cmd_list=[101], debug=debug)
+                    self.serial_marvic_request_counter = 0
                 self.battery = [self.serial_intermediate.battery['cell1'][0], self.serial_intermediate.battery['cell2'][0],
                                 self.serial_intermediate.battery['cell3'][0], self.serial_intermediate.battery['cell4'][0]]
                 self.cycletime_1 = [self.serial_intermediate.status['cycleTime']]
@@ -266,7 +293,7 @@ class copter:
                 self.serial_intermediate.send_rc(sticks=remote_control.get_pwm_sticks(), pwm=True, debug=debug)
             elif self.use_rc:
                 if debug: print '      via use_rc defined rc is used'
-                self.serial_intermediate.send_rc(sticks=self.use_rc.get_pwm_sticks(), pwm=True, debug=debug)
+                self.serial_intermediate.send_rc(sticks=self.use_rc.get_pwm_sticks(), pwm=True, debug=False)
             else:
                 self.serial_intermediate.send_rc(sticks=self.rc0, pwm=True, debug=debug)
 

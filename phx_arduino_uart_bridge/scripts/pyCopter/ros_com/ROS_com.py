@@ -64,13 +64,15 @@ class ros_communication():
                     self.cycletime_0_msg = Cycletime()
                 elif copter.serial_intermediate and not copter.serial_multiwii:
                     rospy.init_node('MARVIC_Bridge')
-                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', Battery, queue_size=10)
+                    self.ros_publish_battery = rospy.Publisher('/phoenix/stat_battery', Battery, queue_size=1)
                     self.Battery = Battery()
-                    self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=10)
+                    self.ros_publish_rc0 = rospy.Publisher('/phoenix/stat_rc0', Joy, queue_size=1)
                     self.Joy_0_msg = Joy()
-                    self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=10)
+                    self.ros_publish_cmd_rc1 = rospy.Publisher('/phoenix/cmd_rc1', Joy, queue_size=1)
+                    self.Joy_cmd_1_msg = Joy()
+                    self.ros_publish_rc1 = rospy.Publisher('/phoenix/stat_rc1', Joy, queue_size=1)
                     self.Joy_1_msg = Joy()
-                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Cycletime, queue_size=10)
+                    self.ros_publish_cycletime1 = rospy.Publisher('/phoenix/cycletime1', Cycletime, queue_size=1)
                     self.cycletime_1_msg = Cycletime()
                 elif copter.serial_intermediate and copter.serial_multiwii:
                     rospy.init_node('MultiWii_MARVIC_Bridge')
@@ -120,7 +122,7 @@ class ros_communication():
                 self.ros_subscribe_stat_cycletime0 = rospy.Subscriber('/phoenix/cycletime0', Int16, self.callback_stat_cycletime0)
                 self.ros_subscribe_stat_cycletime1 = rospy.Subscriber('/phoenix/cycletime1', Int16, self.callback_stat_cycletime1)
                 print 'init done'
-            self.freq = 50     # Hz
+            self.freq = 80     # Hz
             self.rate = rospy.Rate(self.freq)
 #        except:
 #            print ' >>> error in ros __init__'
@@ -304,8 +306,9 @@ class ros_communication():
             This callback is used for incoming rc_1 commands and updates the ros RC to the new state.
         """
         try:
-            print 'ros_callback: callback_cmd_rc_1: axes:', stuff.axes, 'buttons', stuff.buttons
-            self.set_sticks(sticks=stuff)
+            #print 'ros_callback: callback_cmd_rc_1: axes:', stuff.axes, 'buttons', stuff.buttons
+            #print (stuff.axes + stuff.buttons)
+            self.set_sticks_from_pwm(pwm_sticks=(stuff.axes + stuff.buttons))
         except:
             print ' >>> ROS_callback: receive callback_cmd_rc_1 failed', stuff
 
@@ -370,7 +373,7 @@ class ros_communication():
             battery = [ cell1, cell2, cell3, cell4 ]
         """
         try:
-            print 'battery:', battery
+            #print 'battery:', battery
 #            self.Battery.header.stamp.secs = self.current_time_stamp.secs
 #            self.Battery.header.stamp.nsecs = self.current_time_stamp.nsecs
             self.Battery.cell1 = battery[0]
@@ -412,6 +415,13 @@ class ros_communication():
             self.Joy_0_msg.axes = rc0[:4]
             self.Joy_0_msg.buttons = rc0[4:]
             self.ros_publish_rc0.publish(self.Joy_0_msg)
+
+            self.Joy_cmd_1_msg.header.stamp.secs = self.current_time_stamp.secs
+            self.Joy_cmd_1_msg.header.stamp.nsecs = self.current_time_stamp.nsecs
+            self.Joy_cmd_1_msg.axes = rc0[:4]
+            self.Joy_cmd_1_msg.buttons = rc0[4:]
+            self.ros_publish_cmd_rc1.publish(self.Joy_cmd_1_msg)
+
             if debug: print ' >>> sent rc0'
         except:
             print '>>> error in ros pub_rc0!'
@@ -567,6 +577,7 @@ class ros_communication():
         """
         if update_from_raw_sticks:
             self.calc_pwm_from_raw()
+        #print 'returning pwm sticks', [self.pwm_throttle, self.pwm_pitch, self.pwm_roll, self.pwm_yaw, self.pwm_aux1, self.pwm_aux2, self.pwm_aux3, self.pwm_aux4]
         return [self.pwm_throttle, self.pwm_pitch, self.pwm_roll, self.pwm_yaw, self.pwm_aux1, self.pwm_aux2, self.pwm_aux3, self.pwm_aux4]
 
     def get_pwm_stick(self, name, update_from_raw_sticks=True):
@@ -634,6 +645,21 @@ class ros_communication():
             self.throttle, self.pitch, self.roll, self.yaw, self.aux1, self.aux2, self.aux3, self.aux4 = sticks
         else:
             print ' >>> set_sticks with wrong shape!', sticks
+
+    def set_sticks_from_pwm(self, pwm_sticks, debug=False):
+        """
+            sets the raw sticks on a scale between 0 and 100 or -50 to 50
+        """
+        if len(pwm_sticks) == 8:
+            if debug: print ' >>> setting sticks to:', pwm_sticks
+            sticks = (1.0*np.array(pwm_sticks) - 1000)/10.
+            sticks[1] -= 50
+            sticks[2] -= 50
+            sticks[3] -= 50
+            self.throttle, self.pitch, self.roll, self.yaw, self.aux1, self.aux2, self.aux3, self.aux4 = sticks.tolist()
+            #print 'setting rc1 sticks to ', self.throttle, self.pitch, self.roll, self.yaw, self.aux1, self.aux2, self.aux3, self.aux4
+        else:
+            print ' >>> set_sticks with wrong shape!', pwm_sticks
 
     def set_stick(self, name, value, debug=False):
         """

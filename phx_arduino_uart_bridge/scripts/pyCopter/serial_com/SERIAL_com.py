@@ -11,6 +11,8 @@ class multiwii_protocol:
           
           see http://www.multiwii.com/wiki/index.php?title=Multiwii_Serial_Protocol
         """
+        self.ros_callback = None
+        
         self.ser = serial.Serial()
         self.ser.port = serial_port
         self.ser.baudrate = baudrate
@@ -98,12 +100,12 @@ class multiwii_protocol:
                         if debug: print ' > serial input:', header, length, code, data, check_sum, '<->', calc_checksum,
                         self.time_of_last_receive = time.time()
                         if check_sum == calc_checksum:
-                            if debug: print '-> valid msg, doing interpretation'
-                            try:
+                            #if debug: print '-> valid msg, doing interpretation'
+                            #try:
                                 return self.interpret(code, data, header)
-                            except:
-                                print ' >>> error in interpretation of msg', header, code, length, data, check_sum, ' <-> ', calc_checksum
-                                return 0
+                            #except:
+                            #    print ' >>> error in interpretation of msg', header, code, length, data, check_sum, ' <-> ', calc_checksum
+                            #    return 0
                         if debug: print '\n\n'
 #        except:
 #            try:
@@ -156,7 +158,7 @@ class multiwii_protocol:
     def get_msg(self, cmd_list=(66, 101, 102, 104, 105, 106, 108, 109), debug=False):
         for cmd in cmd_list:
             self.send_request(cmd, debug=debug)
-        self.receive(debug=debug)
+        #self.receive(debug=debug)
         if debug: print ' >>> get_msg done'
     
     def send_rc(self, sticks, pwm=False, debug=False):
@@ -185,6 +187,17 @@ class multiwii_protocol:
         serial_msg_length = len(serial_msg_data)
         serial_msg_cmd = 200
         if debug: print 'sending rc', serial_msg_cmd, serial_msg_length, [serial_roll, serial_pitch, serial_yaw, serial_throttle, serial_aux1, serial_aux2, serial_aux3, serial_aux4]
+        self.send_msg(code=serial_msg_cmd, data=serial_msg_data)
+
+    def send_motors(self, motors=(0, 1, 2, 3), debug=False):
+        """
+            motors = [ front_left, front_right, rear_right, rear_left ]
+               values between 0 and 1.0
+        """
+        serial_msg_data = write_uint16(1000+motors[0]*1000) + write_uint16(1000+motors[1]*1000) + write_uint16(1000+motors[2]*1000) + write_uint16(1000+motors[3]*1000)
+        serial_msg_length = len(serial_msg_data)
+        serial_msg_cmd = 214
+        if debug: print 'sending motors', serial_msg_cmd, serial_msg_length, [1000+motors[0]*1000, 1000+motors[1]*1000, 1000+motors[2]*1000, 1000+motors[3]*1000]
         self.send_msg(code=serial_msg_cmd, data=serial_msg_data)
 
     def send_flight_directions(self, directions, debug=False):
@@ -280,6 +293,21 @@ class multiwii_protocol:
             self.raw_imu['mag_0'] = read_int16(data[12:14])
             self.raw_imu['mag_1'] = read_int16(data[14:16])
             self.raw_imu['mag_2'] = read_int16(data[16:])
+            
+            if self.ros_callback:
+                self.ros_callback.pub_imu(acc=(self.raw_imu['acc_0'],
+                                               self.raw_imu['acc_1'],
+                                               self.raw_imu['acc_2']),
+                                          gyr=(self.raw_imu['gyr_0'],
+                                               self.raw_imu['gyr_1'],
+                                               self.raw_imu['gyr_2']),
+                                          mag=(self.raw_imu['mag_0'],
+                                               self.raw_imu['mag_1'],
+                                               self.raw_imu['mag_2']),
+                                          attitude=(self.attitude['pitch'],
+                                                    self.attitude['roll'],
+                                                    self.attitude['heading'],
+                                                    self.altitude['EstAlt']))
             if debug: print 'raw imu updated', self.raw_imu
         elif code == 104:
             # MSP_Motor
@@ -287,6 +315,13 @@ class multiwii_protocol:
             self.motor['1'] = read_uint16(data[2:4])
             self.motor['2'] = read_uint16(data[4:6])
             self.motor['3'] = read_uint16(data[6:])
+
+            if self.ros_callback:
+                self.ros_callback.pub_motors(motors=(self.motor['0'],
+                                                     self.motor['1'],
+                                                     self.motor['2'],
+                                                     self.motor['3']))
+
             if debug: print 'motors updated', self.motor
             return 1
         elif code == 105:
@@ -299,6 +334,7 @@ class multiwii_protocol:
             self.rc['aux2'] = read_uint16(data[10:12])
             self.rc['aux3'] = read_uint16(data[12:14])
             self.rc['aux4'] = read_uint16(data[14:])
+
             if debug: print 'rc updated', self.rc
             return 1
         elif code == 106:
@@ -317,12 +353,27 @@ class multiwii_protocol:
             self.attitude['roll'] = read_int16(data[0:2])
             self.attitude['pitch'] = read_int16(data[2:4])
             self.attitude['heading'] = read_int16(data[4:])
+            if self.ros_callback:
+                self.ros_callback.pub_imu(acc=(self.raw_imu['acc_0'],
+                                               self.raw_imu['acc_1'],
+                                               self.raw_imu['acc_2']),
+                                          gyr=(self.raw_imu['gyr_0'],
+                                               self.raw_imu['gyr_1'],
+                                               self.raw_imu['gyr_2']),
+                                          mag=(self.raw_imu['mag_0'],
+                                               self.raw_imu['mag_1'],
+                                               self.raw_imu['mag_2']),
+                                          attitude=(self.attitude['pitch'],
+                                                    self.attitude['roll'],
+                                                    self.attitude['heading'],
+                                                    self.altitude['EstAlt']))
             if debug: print 'attitude updated', self.attitude
             return 1
         elif code == 109:
             # ALTITUDE
             self.altitude['EstAlt'] = 0.01* read_int32(data[0:4])
             self.altitude['vario'] = 0.01 * read_int16(data[4:])
+            
             if debug: print 'altitude updated', self.altitude
             return 1
         return 0
