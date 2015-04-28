@@ -37,7 +37,7 @@ class SerialCom:
                         'mag_0': 0, 'mag_1': 0, 'mag_2': 0}
         self.gps = {'fix': 0, 'numSat': 0, 'coordLAT': 0, 'coordLON': 0, 'alt': 0, 'speed': 0, 'groundcourse': 0}
         
-        self.startup_delay = 10.0
+        self.startup_delay = 15.0
         self.time_of_last_receive = 0.0
         self.time_of_last_receive_timeout = 2.0
         self.startup_time = time.time()
@@ -68,6 +68,8 @@ class SerialCom:
 
     def receive(self, debug=False):
         if self.connection_check() == 1:
+            if debug:
+                print 'SERIAL_COM.receive in waiting', self.ser.inWaiting()
             while self.ser.inWaiting() > 5:
                 start_byte = self.ser.read(1)
                 if debug:
@@ -81,7 +83,7 @@ class SerialCom:
                     calc_checksum ^= code
                     start_waiting = time.time()
                     while self.ser.inWaiting() < length+1:
-                        time.sleep(0.001)
+                        time.sleep(0.002)
                         if start_waiting < time.time() - 0.01:
                             print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.01 sec'
                             self.ser.flushInput()
@@ -96,8 +98,13 @@ class SerialCom:
                     self.time_of_last_receive = time.time()
                     if check_sum == calc_checksum:
                         return self.interpret(code, data, header)
+                else:
+                    print 'SERIAL_COM.receive did receive non start byte at start position'
+        else:
+            if debug:
+                print 'SERIAL_COM.receive connection check was bad'
 
-    def send_msg(self, data=(), code=0, debug=False):
+    def send_msg(self, data=[], code=0, debug=False):
         """
             Sends a message following the multiwii serial protocol:
                 $ M < %datalength %msg_code %%%data %checkbyte
@@ -107,30 +114,32 @@ class SerialCom:
         data_length = len(data)
         total_data = [ord('$'), ord('M'), ord('<'), data_length, code] + data
         checksum = checksum ^ data_length ^ code
+        for d in data:
+            checksum = checksum ^ d
+        total_data.append(checksum)
         if debug:
             print ' >>> sending serial data', total_data
         if self.connection_check() == 0:
             return 0
         for byte in total_data:
                 self.ser.write(chr(byte))
-                checksum = checksum ^ byte
-        self.ser.write(chr(checksum))
         return 1
     
     def send_request(self, cmd, debug=False):
-        self.send_msg(code=cmd)
+        r = self.send_msg(code=cmd, debug=debug)
         if debug:
-            print 'SERIAL_COM.send_request on command', cmd, 'sent'
+            print 'SERIAL_COM.send_request on command', cmd, 'sent', r
 
-    def request(self):
+    def request(self, debug=False):
         if self.request_rates:
             for msg in self.request_rates.items():
+                self.receive(debug=debug)
                 msg_code = msg[0]
                 msg_frequency = msg[1][0]
                 if msg_frequency != 0:
                     msg_next_request = msg[1][1]
-                    if time.time() > msg_next_request:
-                        self.send_request(cmd=msg_code)
+                    if time.time() >= msg_next_request:
+                        self.send_request(cmd=msg_code, debug=debug)
                         self.request_rates[msg_code][1] = time.time() + 1. / msg_frequency
 
     def get_msg(self, cmd_list=(66, 101, 102, 104, 105, 106, 108, 109), wait_for_answer=0.001, debug=False):
@@ -490,13 +499,13 @@ class RosCom():
             # gps                   [...]
             # motor_multiwii        [pwm]
             self.add_publisher(topic='/phoenix/imu_multiwii', msg_type='imu', queue_size=5)
-            self.add_publisher(topic='/phoenix/cycletime_multiwii', msg_type='cycletime', queue_size=1)
-            self.add_publisher(topic='/phoenix/rc_multiwii', msg_type='joy', queue_size=1)
-            self.add_publisher(topic='/phoenix/gps_multiwii', msg_type='gps', queue_size=1)
-            self.add_publisher(topic='/phoenix/motor_status_multiwii', msg_type='motor', queue_size=1)
+            self.add_publisher(topic='/phoenix/cycletime_multiwii', msg_type='cycletime', queue_size=3)
+            self.add_publisher(topic='/phoenix/rc_multiwii', msg_type='joy', queue_size=3)
+            self.add_publisher(topic='/phoenix/gps_multiwii', msg_type='gps', queue_size=3)
+            self.add_publisher(topic='/phoenix/motor_status_multiwii', msg_type='motor', queue_size=3)
 
             if callback_option:
-                callback_option.callback_imu = [self.publish_imu, '/phoenix/imu_multiwii']
+                callback_option.callback_attitude = [self.publish_imu, '/phoenix/imu_multiwii']
                 callback_option.callback_status = [self.publish_cycletime, '/phoenix/cycletime_multiwii']
                 callback_option.callback_rc = [self.publish_joy, '/phoenix/rc_multiwii']
                 callback_option.callback_gps = [self.publish_gps, '/phoenix/gps_multiwii']
@@ -606,6 +615,9 @@ class RosCom():
     def listen(self):
         self.rate.sleep()
 
+    def is_shutdown(self):
+        return rospy.is_shutdown()
+
     def update_time_stamp(self):
         if time.time() > self.next_time_stamp_update:
             self.next_time_stamp_update = time.time() + self.time_stamp_precision
@@ -659,12 +671,12 @@ class RosCom():
                 print 'ROSCOM.publish_imu error:', etype, evalue, etb
         return False
 
-    def publish_motor(self, topic, motors, debug=False):
+    def publish_motor(self, topic, motor, debug=False):
         """
         This publishes a motor message into the ros network on the given topic.
         :param topic: string
             a valid topic which was added via add_publisher
-        :param motors: list or tuple, (front_left, front_right, rear_right, rear_left)
+        :param motor: list or tuple, (front_left, front_right, rear_right, rear_left)
             this is in pwm, meaning numbers from 1000 to 2000
         :param debug: boolean
             some output will be generated
@@ -679,14 +691,14 @@ class RosCom():
                 #message.header.stamp.secs = self.current_time_stamp.secs
                 #message.header.stamp.nsecs = self.current_time_stamp.nsecs
 
-                message.motor0 = motors[0]
-                message.motor1 = motors[1]
-                message.motor2 = motors[2]
-                message.motor2 = motors[2]
+                message.motor0 = motor[0]
+                message.motor1 = motor[1]
+                message.motor2 = motor[2]
+                message.motor2 = motor[2]
 
                 publisher.publish(message)
                 if debug:
-                    print 'ROSCOM.publish_motor published motor:', motors
+                    print 'ROSCOM.publish_motor published motor:', motor
                 return True
             except:
                 etype, evalue, etb = sys.exc_info()

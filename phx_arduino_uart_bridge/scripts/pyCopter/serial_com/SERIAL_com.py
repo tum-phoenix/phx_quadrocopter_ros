@@ -121,7 +121,7 @@ class multiwii_protocol:
         while True:
             self.receive(debug=debug)
 
-    def send_msg(self, data=(), code=0, data_length=None, debug=False):
+    def send_msg(self, data=(), code=0, data_length=None, debug=True):
         """
             Sends a message following the multiwii serial protocol:
                 $ M < %datalength %msg_code %%%data %checkbyte
