@@ -55,6 +55,8 @@ class SerialCom:
         self.callback_rc = None
 
         self.request_rates = None
+
+        self.message_statistic = {}
     
     def connection_check(self):
         """
@@ -70,22 +72,30 @@ class SerialCom:
         if self.connection_check() == 1:
             if debug:
                 print 'SERIAL_COM.receive in waiting', self.ser.inWaiting()
-            while self.ser.inWaiting() > 5:
+            while self.ser.inWaiting():
                 start_byte = self.ser.read(1)
                 if debug:
                     print 'SERIAL_COM.receive start_byte', start_byte
                 if start_byte == "$":
+                    while self.ser.inWaiting() < 4:
+                        start_waiting = time.time()
+                        time.sleep(0.00001)
+                        if start_waiting < time.time() - 0.01:
+                            print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.01 sec A'
+                            self.ser.flushInput()
+                            return 0
+                    reading = self.ser.read(4)
                     calc_checksum = 0
-                    header = start_byte + self.ser.read(2)
-                    length = ord(self.ser.read(1))
+                    header = start_byte + reading[0:2]
+                    length = ord(reading[2])
                     calc_checksum ^= length
-                    code = ord(self.ser.read(1))
+                    code = ord(reading[3])
                     calc_checksum ^= code
                     start_waiting = time.time()
                     while self.ser.inWaiting() < length+1:
-                        time.sleep(0.002)
+                        time.sleep(0.00001)
                         if start_waiting < time.time() - 0.01:
-                            print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.01 sec'
+                            print 'SERIAL_COM.receive did receive msg start but no data in time. no response since 0.01 sec B'
                             self.ser.flushInput()
                             return 0
                     data = []
@@ -97,6 +107,8 @@ class SerialCom:
                         print 'SERIAL_COM.receive > serial input:', header, length, code, data, check_sum, '<->', calc_checksum
                     self.time_of_last_receive = time.time()
                     if check_sum == calc_checksum:
+                        if code in self.message_statistic.keys():
+                            self.message_statistic[code][1] += 1
                         return self.interpret(code, data, header)
                 else:
                     print 'SERIAL_COM.receive did receive non start byte at start position'
@@ -112,7 +124,7 @@ class SerialCom:
         """
         checksum = 0
         data_length = len(data)
-        total_data = [ord('$'), ord('M'), ord('<'), data_length, code] + data
+        total_data = bytearray([ord('$'), ord('M'), ord('<'), data_length, code] + data)
         checksum = checksum ^ data_length ^ code
         for d in data:
             checksum = checksum ^ d
@@ -121,11 +133,15 @@ class SerialCom:
             print ' >>> sending serial data', total_data
         if self.connection_check() == 0:
             return 0
-        for byte in total_data:
-                self.ser.write(chr(byte))
+        self.ser.write(total_data)
         return 1
     
     def send_request(self, cmd, debug=False):
+        if self.connection_check() != 0:
+            if cmd in self.message_statistic.keys():
+                self.message_statistic[cmd][0] += 1
+            else:
+                self.message_statistic[cmd] = [1, 0]
         r = self.send_msg(code=cmd, debug=debug)
         if debug:
             print 'SERIAL_COM.send_request on command', cmd, 'sent', r
@@ -133,7 +149,6 @@ class SerialCom:
     def request(self, debug=False):
         if self.request_rates:
             for msg in self.request_rates.items():
-                self.receive(debug=debug)
                 msg_code = msg[0]
                 msg_frequency = msg[1][0]
                 if msg_frequency != 0:
@@ -141,8 +156,9 @@ class SerialCom:
                     if time.time() >= msg_next_request:
                         self.send_request(cmd=msg_code, debug=debug)
                         self.request_rates[msg_code][1] = time.time() + 1. / msg_frequency
+                        self.receive(debug=debug)
 
-    def get_msg(self, cmd_list=(66, 101, 102, 104, 105, 106, 108, 109), wait_for_answer=0.001, debug=False):
+    def get_msg(self, cmd_list=(66, 101, 102, 104, 105, 106, 108, 109), wait_for_answer=0.00001, debug=False):
         for cmd in cmd_list:
             self.send_request(cmd, debug=debug)
         if wait_for_answer:
@@ -480,7 +496,7 @@ class RosCom():
     def __init__(self, node_name, update_rate=50, preset=None, callback_option=SerialCom):
         self.current_time_stamp = None
         self.next_time_stamp_update = time.time()
-        self.time_stamp_precision = 0.001
+        self.time_stamp_precision = 0.01
 
         self.node_name = node_name
         rospy.init_node(self.node_name)
@@ -618,8 +634,8 @@ class RosCom():
     def is_shutdown(self):
         return rospy.is_shutdown()
 
-    def update_time_stamp(self):
-        if time.time() > self.next_time_stamp_update:
+    def update_time_stamp(self, overwrite=False):
+        if time.time() > self.next_time_stamp_update or overwrite:
             self.next_time_stamp_update = time.time() + self.time_stamp_precision
             self.current_time_stamp = rospy.get_rostime()
 

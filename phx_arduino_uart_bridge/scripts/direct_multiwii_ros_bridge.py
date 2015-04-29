@@ -6,10 +6,10 @@ from direct_serial_ros_bridge import RosCom, SerialCom
 
 
 #serial_multiwii = SerialCom(serial_port='/dev/multiwii', baudrate=115200)
-serial_multiwii = SerialCom(serial_port='/dev/marvic', baudrate=2000000)
+serial_multiwii = SerialCom(serial_port='/dev/marvic', baudrate=250000)
 
 ros_node = RosCom(node_name='multiwii_direct',
-                  update_rate=100,
+                  update_rate=500,
                   preset='MultiwiiSerial',
                   callback_option=serial_multiwii)
 
@@ -26,21 +26,20 @@ ros_node = RosCom(node_name='multiwii_direct',
 serial_multiwii.request_rates = {66:  [0, 0],
                                  101: [2, 0],
                                  102: [20, 0],
-                                 104: [40, 0],
-                                 105: [40, 0],
-                                 106: [15, 0],
-                                 108: [40, 0],
-                                 109: [15, 0]}
+                                 104: [25, 0],
+                                 105: [50, 0],
+                                 106: [10, 0],
+                                 108: [150, 0],
+                                 109: [10, 0]}
 
 print 'start done'
-
+start_node_time = time.time()
 while not ros_node.is_shutdown():
     t0 = time.time()
-    serial_multiwii.request()
+    serial_multiwii.request(debug=False)
     t1 = time.time()
-    serial_multiwii.receive()
-    t2 = time.time()
     ros_node.listen()
-    print 'loop took', t1 - t0, t2 - t1, time.time() - t2
+    print 'loop took', t1 - t0, time.time() - t1
+    print int(time.time()-start_node_time), serial_multiwii.message_statistic
 
 print 'shutting down direct_multiwii_ros_bridge'
