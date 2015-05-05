@@ -1,5 +1,4 @@
-#include "serial_com.h"
-
+#include "phx_arduino_uart_bridge/serial_com.h"
 
 bool SerialCom::set_device(std::string device_path) {
     serial_device_path = device_path.c_str();
