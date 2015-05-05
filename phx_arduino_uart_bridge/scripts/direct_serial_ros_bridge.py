@@ -263,9 +263,9 @@ class SerialCom:
             if self.callback_battery:
                 self.callback_battery[0](topic=self.callback_battery[1],
                                          cell_voltages=(self.battery['cell1'][0],
-                                                        self.battery['cell1'][1],
-                                                        self.battery['cell1'][2],
-                                                        self.battery['cell1'][3]))
+                                                        self.battery['cell2'][0],
+                                                        self.battery['cell3'][0],
+                                                        self.battery['cell4'][0]))
             if debug:
                 print 'battery updated',  self.battery
             return 1
@@ -549,7 +549,7 @@ class RosCom():
             self.add_publisher(topic='/phoenix/battery', msg_type='battery', queue_size=1)
 
             if callback_option:
-                callback_option.callback_imu = [self.publish_imu, '/phoenix/imu_marvic']
+                callback_option.callback_attitude = [self.publish_imu, '/phoenix/imu_marvic']
                 callback_option.callback_status = [self.publish_cycletime, '/phoenix/cycletime_marvic']
                 callback_option.callback_rc = [self.publish_joy, '/phoenix/rc_ground']
                 callback_option.callback_gps = [self.publish_gps, '/phoenix/gps_marvic']

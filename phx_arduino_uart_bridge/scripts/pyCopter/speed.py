@@ -33,3 +33,5 @@ class speedtest:
         if time.time() > self.last_printout:
             print text, self.result_time(), 'sec', self.result_rate(), 'Hz'
             self.last_printout = time.time() + 1. / rate
+            return True
+        return False
