@@ -15,5 +15,5 @@ while True:
     #mw.get_msg(cmd_list=[105], debug=False)
     mw.get_msg(cmd_list=[101, 102, 104, 105, 106, 108, 109], debug=False)
     mw.receive(debug=False)
-    #print mw.attitude
+    print mw.attitude
     print time.time()-last_time#, mw.status, mw.raw_imu, mw.rc
