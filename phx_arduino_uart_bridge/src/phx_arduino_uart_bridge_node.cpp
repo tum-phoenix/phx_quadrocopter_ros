@@ -6,6 +6,7 @@
 #include "std_msgs/Header.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
+#include "sensor_msgs/NavSatFix.h"
 #include "phx_arduino_uart_bridge/Motor.h"
 #include "phx_arduino_uart_bridge/serial_com.h"
 
@@ -26,17 +27,18 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For
 
 int main(int argc, char **argv)
 {
-
     ros::init(argc, argv, "UARTBridge");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
     sensor_msgs::Imu imuMsg;
     sensor_msgs::Joy joyMsg;
     phx_arduino_uart_bridge::Motor motorMsg;
+    sensor_msgs::NavSatFix gpsMsg;
 
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu_multiwii", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/rc_multiwii", 1);
     ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_multiwii", 1);
+    ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_multiwii", 1);
 
     ros::Rate loop_rate(10);
     int count = 0;
@@ -56,6 +58,7 @@ int main(int argc, char **argv)
     uint16_t received_status = 0;
     uint16_t received_imu = 0;
     uint16_t received_motor = 0;
+    uint16_t received_gps = 0;
     Message input_msg;
     
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
@@ -112,6 +115,12 @@ int main(int argc, char **argv)
                 motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
                 motor_pub.publish(motorMsg);
                 received_motor++;
+            } else if (input_msg.msg_code == MULTIWII_GPS) {
+                gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
+                gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
+                gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
+                gps_pub.publish(gpsMsg);
+                received_gps++;
             }
             multiwii_serial.receive_to_buffer();
         }
@@ -152,11 +161,13 @@ int main(int argc, char **argv)
     std::cout << "received status " << received_status << std::endl;
     std::cout << "received imu    " << received_imu    << std::endl;
     std::cout << "received motor  " << received_motor  << std::endl;
+    std::cout << "received gps  " << received_gps  << std::endl;
     std::cout << "received total  " << received_total  << std::endl;
     
     std::cout << "freq status " << received_status / (duration / 1000000.) << " messages/s" << std::endl;
     std::cout << "freq imu    " << received_imu    / (duration / 1000000.) << " messages/s" << std::endl;
     std::cout << "freq motor  " << received_motor  / (duration / 1000000.) << " messages/s" << std::endl;
+    std::cout << "freq gps  " << received_gps  / (duration / 1000000.) << " messages/s" << std::endl;
     std::cout << "freq total  " << received_total  / (duration / 1000000.) << " messages/s" << std::endl;
     
     std::cout << "End " << std::endl;
