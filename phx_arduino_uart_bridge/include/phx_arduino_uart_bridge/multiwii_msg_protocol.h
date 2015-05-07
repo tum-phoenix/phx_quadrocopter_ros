@@ -160,11 +160,11 @@ void print_multiwii_message(Message* msg) {
         case MULTIWII_GPS:
             printf("   msg_data: MULTIWII_GPS\n");
             printf("        roll:     %i\n", msg->msg_data.multiwii_gps.fix);
-            printf("        numSat:     %i\n", msg->msg_data.multiwii_gps.numSat);
-            printf("        coordLAT:     %i\n", msg->msg_data.coordLAT.coordLAT);
-            printf("        coordLON:     %i\n", msg->msg_data.multiwii_gps.coordLON);
-            printf("        altitude:     %i\n", msg->msg_data.multiwii_gps.altitude);
-            printf("        speed:     %i\n", msg->msg_data.multiwii_gps.speed);
+            printf("        numSat:   %i\n", msg->msg_data.multiwii_gps.numSat);
+            printf("        coordLAT: %i\n", msg->msg_data.coordLAT.coordLAT);
+            printf("        coordLON: %i\n", msg->msg_data.multiwii_gps.coordLON);
+            printf("        altitude: %i\n", msg->msg_data.multiwii_gps.altitude);
+            printf("        speed:    %i\n", msg->msg_data.multiwii_gps.speed);
             break;
         default:
             break;
