@@ -106,6 +106,16 @@ struct Payload {
             uint16_t aux3;
             uint16_t aux4;
         } multiwii_rc_set;
+
+        struct {
+            uint8_t fix;
+            uint8_t numSat;
+            uint32_t coordLAT;
+            uint32_t coordLON;
+            uint16_t altitude;
+            uint16_t speed;
+            uint16_t ground_course;
+        } multiwii_gps;
     };
 };
 
@@ -146,6 +156,15 @@ void print_multiwii_message(Message* msg) {
             printf("        aux2:     %i\n", msg->msg_data.multiwii_rc.aux2);
             printf("        aux3:     %i\n", msg->msg_data.multiwii_rc.aux3);
             printf("        aux4:     %i\n", msg->msg_data.multiwii_rc.aux4);
+            break;
+        case MULTIWII_GPS:
+            printf("   msg_data: MULTIWII_GPS\n");
+            printf("        roll:     %i\n", msg->msg_data.multiwii_gps.fix);
+            printf("        numSat:     %i\n", msg->msg_data.multiwii_gps.numSat);
+            printf("        coordLAT:     %i\n", msg->msg_data.coordLAT.coordLAT);
+            printf("        coordLON:     %i\n", msg->msg_data.multiwii_gps.coordLON);
+            printf("        altitude:     %i\n", msg->msg_data.multiwii_gps.altitude);
+            printf("        speed:     %i\n", msg->msg_data.multiwii_gps.speed);
             break;
         default:
             break;
