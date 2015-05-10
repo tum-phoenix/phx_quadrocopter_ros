@@ -1,3 +1,5 @@
-prog: example.cpp
-	g++ -std=c++11 -o prog example.cpp
+test: test.cpp
+	g++ -std=c++0x -o test test.cpp serial_com.cpp -I "../include/"
 
+prestart: phx_arduino_uart_bridge_prestart.cpp
+	g++ -std=c++0x -o prestart phx_arduino_uart_bridge_prestart.cpp serial_com.cpp -I "../include/"

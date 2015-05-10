@@ -105,6 +105,10 @@ struct Payload {
             uint16_t aux2;
             uint16_t aux3;
             uint16_t aux4;
+            uint16_t aux5;
+            uint16_t aux6;
+            uint16_t aux7;
+            uint16_t aux8;
         } multiwii_rc_set;
 
         struct {
@@ -129,6 +133,7 @@ struct Message {
     uint8_t checksum;
 };
 
+/*
 void print_multiwii_message(Message* msg) {
     printf(" print_multiwii_message:\n");
     printf("   msg_header: %c %c %c\n", msg->msg_preamble, msg->msg_protocol, msg->msg_direction);
@@ -170,3 +175,4 @@ void print_multiwii_message(Message* msg) {
             break;
     }
 }
+*/

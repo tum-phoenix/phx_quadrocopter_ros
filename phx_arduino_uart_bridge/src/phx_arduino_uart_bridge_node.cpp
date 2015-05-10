@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <ctime>
-#include <chrono>
 #include <sstream>
 #include "ros/ros.h"
 #include "std_msgs/Header.h"
@@ -8,6 +7,9 @@
 #include "sensor_msgs/Joy.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "phx_arduino_uart_bridge/Motor.h"
+
+#include <chrono>
+#include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 /*
@@ -27,6 +29,8 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For
 
 int main(int argc, char **argv)
 {
+    // init ------------------------------------------------------------------------------------------------
+    // ros init
     ros::init(argc, argv, "UARTBridge");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
@@ -34,69 +38,112 @@ int main(int argc, char **argv)
     sensor_msgs::Joy joyMsg;
     phx_arduino_uart_bridge::Motor motorMsg;
     sensor_msgs::NavSatFix gpsMsg;
-
+    
+    // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu_multiwii", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/rc_multiwii", 1);
     ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_multiwii", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_multiwii", 1);
-
-    ros::Rate loop_rate(10);
-    int count = 0;
     
-    // establish connection:
+    // ros loopspeed (this might interfere with the serial reading and the size of the serial buffer!)
+    ros::Rate loop_rate(500);
+    
+    // serialcom init
     SerialCom multiwii_serial;                                              // create SerialCom instance
-    multiwii_serial.set_device("/dev/ttyUSB0");
-    multiwii_serial.set_baudrate(115200);
-    multiwii_serial.set_max_io(200);
-    multiwii_serial.init();                                                 // initialize serial connection
+    multiwii_serial.set_device("/dev/ttyUSB0");                             // select the device
+    multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
+    multiwii_serial.set_max_io(200);                                        // set maximum bytes per reading
+    multiwii_serial.init();                                                 // start serial connection
     sleep(2);                                                               // wait for arduino bootloader
-    multiwii_serial.receive_to_buffer();
-    multiwii_serial.receive_to_buffer();
-    multiwii_serial.clear_input_buffer();
-    uint16_t request_total = 0;
-    uint16_t received_total = 0;
-    uint16_t received_status = 0;
-    uint16_t received_imu = 0;
-    uint16_t received_motor = 0;
-    uint16_t received_gps = 0;
-    Message input_msg;
+    multiwii_serial.clear_input_buffer();                                   // clear serial buffer
+    Message input_msg;                                                      // the latest received message
+    uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
     
+    // init statistics
+    uint32_t request_total = 0;
+    uint32_t request_status = 0;
+    uint32_t request_rc = 0;
+    uint32_t request_imu = 0;
+    uint32_t request_motor = 0;
+    uint32_t request_gps = 0;
+    uint32_t received_total = 0;
+    uint32_t received_status = 0;
+    uint32_t received_rc = 0;
+    uint32_t received_imu = 0;
+    uint32_t received_motor = 0;
+    uint32_t received_gps = 0;
+    
+    // set start timestamps in real and in cpu time
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
     double begin_communication = double(clock()) / CLOCKS_PER_SEC;
+    double system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    auto real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
     
+    
+    // main loop -------------------------------------------------------------------------------------------
     while (ros::ok())
     {
-        // send requests
-        if (count % 3 == 0) {
-            multiwii_serial.send_request(MULTIWII_STATUS);
-        } else if (count % 3 == 1) {
-            multiwii_serial.send_request(MULTIWII_IMU);
-        } else {
-            multiwii_serial.send_request(MULTIWII_MOTOR);
+        loop_counter++;
+        // print statistics from while to while
+        if (loop_counter % 1000 == 0) {
+            system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
+            std::cout << "       request\tin\tloss" << std::endl;
+            std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
+            std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
+            std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
+            std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
+            std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
+            std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
+            
+            t1 = std::chrono::high_resolution_clock::now();
+            real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
+            std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
+            std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
+            
+            std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
+            std::cout << " communication took " << real_duration << " real seconds" << std::endl;
+            std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
         }
-        multiwii_serial.send_from_buffer();
+        
+        // serialcom send requests
+        if (loop_counter % 3 == 0) {
+            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
+            multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
+            multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
+            multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
+            multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(10);
+        }
         
         
-        // receive serial stuff
+        // serialcom receive serial stuff
         multiwii_serial.receive_to_buffer();
-        // > option one for handling input (no buffer overflow, but more slowly)
+        
+        
+        // interprete stuff
         while (multiwii_serial.read_msg_from_buffer(&input_msg) == true) {
-            //print_multiwii_message(&input_msg);
             received_total++;
-            usleep(1000);    // publishing stuff to ros here
             if (input_msg.msg_code == MULTIWII_STATUS) {
-                headerMsg.seq = count;
+                // publish to ros here
+                received_status++;
+            } else if (input_msg.msg_code == MULTIWII_RC) {
+                headerMsg.seq = received_rc;
                 headerMsg.stamp = ros::Time::now();
                 headerMsg.frame_id = "multiwii";
-                joyMsg.header = headerMsg;
-                joyMsg.axes[0] = input_msg.msg_data.multiwii_rc.roll;
-                joyMsg.axes[1] = input_msg.msg_data.multiwii_rc.pitch;
-                joyMsg.axes[2] = input_msg.msg_data.multiwii_rc.yaw;
-                joyMsg.axes[3] = input_msg.msg_data.multiwii_rc.throttle;
+//                joyMsg.header = headerMsg;
+//                joyMsg.axes[0] = 0; //input_msg.msg_data.multiwii_rc.roll;
+//                joyMsg.axes[1] = input_msg.msg_data.multiwii_rc.pitch;
+//                joyMsg.axes[2] = input_msg.msg_data.multiwii_rc.yaw;
+//                joyMsg.axes[3] = input_msg.msg_data.multiwii_rc.throttle;
                 joy_pub.publish(joyMsg);
-                received_status++;
+                received_rc++;
             } else if (input_msg.msg_code == MULTIWII_IMU) {
-                headerMsg.seq = count;
+                headerMsg.seq = received_imu;
                 headerMsg.stamp = ros::Time::now();
                 headerMsg.frame_id = "multiwii";
                 imuMsg.header = headerMsg;
@@ -124,53 +171,41 @@ int main(int argc, char **argv)
             }
             multiwii_serial.receive_to_buffer();
         }
-        // > option two for handling input (fast but can segfault in some cases)
-        /*
-         if (multiwii_serial.read_msg_from_buffer(&input_msg) == true) {
-         print_multiwii_message(&input_msg);
-         usleep(1000);    // publishing stuff to ros here
-         received++;
-         }
-         */
-    
-        double stop_communication = double(clock()) / CLOCKS_PER_SEC;
-        double elapsed_secs = stop_communication - begin_communication;
-        //std::cout << count << "  loop mean duration in cpu time " << elapsed_secs / received_total << " seconds" << std::endl;
         
-        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-        double duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count();
-        //std::cout << count << "  loop mean duration in real time " << duration / received_total << " us" << std::endl;
-
         ros::spinOnce();
         loop_rate.sleep();
-        ++count;
     }
     
     
-    double stop_communication = double(clock()) / CLOCKS_PER_SEC;
-    double time_of_active_communication = stop_communication - begin_communication;
-    std::cout << " communication took " << time_of_active_communication << " cpu seconds -> " << received_total / time_of_active_communication << " messages/s cpu_time" << std::endl;
+    // shutdown -------------------------------------------------------------------------------------------
+    ROS_INFO("uart bridge is shutting down");
     
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count();
-    std::cout << " communication took " << duration / 1000000. << " real seconds -> " << received_total / (duration / 1000000.) << " messages/s" << std::endl;
     
     multiwii_serial.deinitialize();
     
-    std::cout << "requested total: " << request_total << std::endl << std::endl;
-    std::cout << "received status " << received_status << std::endl;
-    std::cout << "received imu    " << received_imu    << std::endl;
-    std::cout << "received motor  " << received_motor  << std::endl;
-    std::cout << "received gps  " << received_gps  << std::endl;
-    std::cout << "received total  " << received_total  << std::endl;
     
-    std::cout << "freq status " << received_status / (duration / 1000000.) << " messages/s" << std::endl;
-    std::cout << "freq imu    " << received_imu    / (duration / 1000000.) << " messages/s" << std::endl;
-    std::cout << "freq motor  " << received_motor  / (duration / 1000000.) << " messages/s" << std::endl;
-    std::cout << "freq gps  " << received_gps  / (duration / 1000000.) << " messages/s" << std::endl;
-    std::cout << "freq total  " << received_total  / (duration / 1000000.) << " messages/s" << std::endl;
+    system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
+    std::cout << "       request\tin\tloss" << std::endl;
+    std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
+    std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
+    std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
+    std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
+    std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
+    std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
     
+    t1 = std::chrono::high_resolution_clock::now();
+    real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
+    std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
+    std::cout << "freq rc     " << received_rc     / real_duration << " msg/s" << std::endl;
+    std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
+    std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
+    std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
+    std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
     std::cout << "End " << std::endl;
+    
+    std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
+    std::cout << " communication took " << real_duration << " real seconds" << std::endl;
+    std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
     
     return 0;
 }

@@ -20,16 +20,18 @@ bool SerialCom::set_max_io(uint16_t max_io_bytes) {
 
 bool SerialCom::init() {
     std::cout << "SerialCom::init  initializing SerialCom on device " << serial_device_path << std::endl;
-    serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_SYNC);
+    //serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_SYNC);
+    serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_NDELAY);
 
     std::cout << "SerialCom::init  configuring serial device " << serial_interface << std::endl;
     tcgetattr(serial_interface, &usb_tio);
     usb_tio.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
+    //usb_tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | INPCK | ISTRIP | IXON);
     usb_tio.c_oflag = 0;
     usb_tio.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
     usb_tio.c_cflag &= ~(CSIZE | PARENB | HUPCL);
     usb_tio.c_cflag |= CS8;
-    usb_tio.c_cc[VMIN]  = 0;
+    usb_tio.c_cc[VMIN]  = 10;
     usb_tio.c_cc[VTIME] = 0;
     int input_baud_set, output_baud_set;
     if  (serial_device_baud_rate == 115200) {
@@ -81,22 +83,72 @@ bool SerialCom::clear_output_buffer() {
 
 bool SerialCom::receive_to_buffer() {
     //std::cout << "SerialCom::read_to_buffer  starts reading on serial port " << serial_device_path << std::endl;
+    int result = 0;
+    int loopCount = buffer_io_max;
+    
+    struct pollfd fds[1];
+    fds[0].fd = serial_interface;
+    fds[0].events = POLLIN;
+    int timeout_msecs = 2;  // 2 is works fine without double checking mode!
+    
+    while (poll(fds, 1, timeout_msecs) > 0) {
+        //std::cout << "SerialCom::read_to_buffer  positive poll " << std::endl;
+        char msg_buffer[loopCount];
+        result = read(serial_interface, &msg_buffer, loopCount);
+        //std::cout << "SerialCom::read_to_buffer  result " << result << std::endl;
+        if (result > 0) {
+            // if there was no error while reading
+            //std::cout << "SerialCom::read_to_buffer  input ";
+            //char cc;
+            for (uint8_t index = 0; index<result; index++) {
+                input_buffer[input_buffer_write_position] = msg_buffer[index];
+                
+                //cc = printf("%i ", input_buffer[input_buffer_write_position]);
+                //std::cout << cc;
+                
+                input_buffer_write_position++;
+                if (input_buffer_write_position == input_buffer_length) {
+                    input_buffer_write_position = 0;
+                }
+            }
+            //std::cout << std::endl;
+            //std::cout << "SerialCom::read_to_buffer  read " << result << std::endl;
+        } else if (result == 0) {
+            // no input available
+            std::cout << "SerialCom::read_to_buffer  nothing available" << std::endl;
+        } else {
+            // we will skip errors here
+            std::cout << "SerialCom::read_to_buffer  error" << std::endl;
+        }
+    }
+    // nothing polled
+    //std::cout << "SerialCom::read_to_buffer  negative poll" << std::endl;
+    if (result == 0) {
+        return true;    // no input waiting
+    } else {
+        return false;
+    }
+}
+
+/*
+bool SerialCom::receive_to_buffer() {
+    //std::cout << "SerialCom::read_to_buffer  starts reading on serial port " << serial_device_path << std::endl;
     int result, loopCount = buffer_io_max;
     struct pollfd fds[1];
     fds[0].fd = serial_interface;
     fds[0].events = POLLIN;
-    //int timeout_msecs = 2;  // 2 is works fine without double checking mode!
-    //int timeout_msecs_check = 2;
-    //int poll_return;
+    int timeout_msecs = 2;  // 2 is works fine without double checking mode!
+    int timeout_msecs_check = 1;
+    int poll_return = 1;
 
     while (loopCount-- > 0) {
         // polling in double checking mode! so if first poll is positive, a second poll is pervormed to verify the result!
-        //poll_return = poll(fds, 1, timeout_msecs);
-        //if (poll_return >0) {
-        //    poll_return = poll(fds, 1, timeout_msecs_check);
-        //}
+        poll_return = poll(fds, 1, timeout_msecs);
+//        if (poll_return > 0) {
+//            poll_return = poll(fds, 1, timeout_msecs_check);
+//        }
         //std::cout << "SerialCom::read_to_buffer  " << loopCount << " poll returned " << poll_return << std::endl;
-        //if (poll_return > 0) {
+        if (poll_return > 0) {
             char buf = 'h';
             result = read(serial_interface, &buf, 1);
             //std::cout << "SerialCom::read_to_buffer  " << loopCount << " read " << buf << " with result " << result << std::endl;
@@ -116,15 +168,18 @@ bool SerialCom::receive_to_buffer() {
             } else {
                 // we will skip errors here
                 std::cout << "SerialCom::read_to_buffer  error" << std::endl;
+                return true;
             }
-        //} else {
-        //    //std::cout << "SerialCom::read_to_buffer  all serial data was read to the input_buffer" << std::endl;
-        //    return true;
-        //}
+        } else {
+            //std::cout << "SerialCom::read_to_buffer  all serial data was read to the input_buffer" << std::endl;
+            return true;
+        }
     }
     std::cout << "SerialCom::read_to_buffer  reading repetition reached buffer_io_max " << buffer_io_max << std::endl;
     return false;
 }
+*/
+
 
 bool SerialCom::send_from_buffer() {
     //std::cout << "SerialCom::send_from_buffer  starts sending on serial port " << serial_device_path << std::endl;
@@ -151,7 +206,7 @@ bool SerialCom::send_from_buffer() {
             return true;
         }
     }
-    std::cout << "SerialCom::send_from_buffer  sending repetition reached buffer_io_max " << buffer_io_max << std::endl;
+    //std::cout << "SerialCom::send_from_buffer  sending repetition reached buffer_io_max " << buffer_io_max << std::endl;
     return false;
 }
 
@@ -282,6 +337,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         memcpy(&tmp, msg_data_bytes, sizeof(tmp));
                         msg->msg_data = tmp;
                         msg->checksum = checksum;
+                        //printf("SerialCom::read_msg_from_buffer  received message! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
                         //std::cout << "SerialCom::read_msg_from_buffer  returns true" << std::endl;
                         return true;
                     } else {
@@ -307,4 +363,47 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
     }
     //std::cout << "                         >> analysis reached real time" << std::endl;
     return false;   // exiting because there is now new data in the input_buffer
+}
+
+
+void print_multiwii_message(Message* msg) {
+    printf(" print_multiwii_message:\n");
+    printf(" msg_header: %c %c %c\n", msg->msg_preamble, msg->msg_protocol, msg->msg_direction);
+    printf(" msg_length: %i\n", msg->msg_length);
+    printf(" msg_code: %i\n", msg->msg_code);
+    switch (msg->msg_code){
+        case MULTIWII_STATUS:
+            printf(" msg_data: MULTIWII_STATUS\n");
+            printf(" cycleTime: %i\n", msg->msg_data.multiwii_status.cycleTime);
+            printf(" i2c_errors_count: %i\n", msg->msg_data.multiwii_status.i2c_errors_count);
+            break;
+        case MULTIWII_IMU:
+            printf(" msg_data: MULTIWII_IMU\n");
+            printf(" acc: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.accx, msg->msg_data.multiwii_raw_imu.accy, msg->msg_data.multiwii_raw_imu.accz);
+            printf(" gyro: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.gyrx, msg->msg_data.multiwii_raw_imu.gyry, msg->msg_data.multiwii_raw_imu.gyrz);
+            printf(" mag: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.magx, msg->msg_data.multiwii_raw_imu.magy, msg->msg_data.multiwii_raw_imu.magz);
+            break;
+        case MULTIWII_RC:
+            printf(" msg_data: MULTIWII_RC\n");
+            printf(" roll: %i\n", msg->msg_data.multiwii_rc.roll);
+            printf(" pitch: %i\n", msg->msg_data.multiwii_rc.pitch);
+            printf(" yaw: %i\n", msg->msg_data.multiwii_rc.yaw);
+            printf(" throttle: %i\n", msg->msg_data.multiwii_rc.throttle);
+            printf(" aux1: %i\n", msg->msg_data.multiwii_rc.aux1);
+            printf(" aux2: %i\n", msg->msg_data.multiwii_rc.aux2);
+            printf(" aux3: %i\n", msg->msg_data.multiwii_rc.aux3);
+            printf(" aux4: %i\n", msg->msg_data.multiwii_rc.aux4);
+            break;
+        case MULTIWII_GPS:
+            printf(" msg_data: MULTIWII_GPS\n");
+            printf(" roll: %i\n", msg->msg_data.multiwii_gps.fix);
+            printf(" numSat: %i\n", msg->msg_data.multiwii_gps.numSat);
+            printf(" coordLAT: %i\n", msg->msg_data.multiwii_gps.coordLAT);
+            printf(" coordLON: %i\n", msg->msg_data.multiwii_gps.coordLON);
+            printf(" altitude: %i\n", msg->msg_data.multiwii_gps.altitude);
+            printf(" speed: %i\n", msg->msg_data.multiwii_gps.speed);
+            break;
+        default:
+            break;
+    }
 }

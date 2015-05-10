@@ -6,6 +6,7 @@
 #include <poll.h>
 #include "multiwii_msg_protocol.h"
 
+void print_multiwii_message(Message*);
 
 class SerialCom {
 public:
