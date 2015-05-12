@@ -102,10 +102,10 @@ bool SerialCom::receive_to_buffer() {
             //char cc;
             for (uint8_t index = 0; index<result; index++) {
                 input_buffer[input_buffer_write_position] = msg_buffer[index];
-                
+
                 //cc = printf("%i ", input_buffer[input_buffer_write_position]);
                 //std::cout << cc;
-                
+
                 input_buffer_write_position++;
                 if (input_buffer_write_position == input_buffer_length) {
                     input_buffer_write_position = 0;
@@ -129,56 +129,6 @@ bool SerialCom::receive_to_buffer() {
         return false;
     }
 }
-
-/*
-bool SerialCom::receive_to_buffer() {
-    //std::cout << "SerialCom::read_to_buffer  starts reading on serial port " << serial_device_path << std::endl;
-    int result, loopCount = buffer_io_max;
-    struct pollfd fds[1];
-    fds[0].fd = serial_interface;
-    fds[0].events = POLLIN;
-    int timeout_msecs = 2;  // 2 is works fine without double checking mode!
-    int timeout_msecs_check = 1;
-    int poll_return = 1;
-
-    while (loopCount-- > 0) {
-        // polling in double checking mode! so if first poll is positive, a second poll is pervormed to verify the result!
-        poll_return = poll(fds, 1, timeout_msecs);
-//        if (poll_return > 0) {
-//            poll_return = poll(fds, 1, timeout_msecs_check);
-//        }
-        //std::cout << "SerialCom::read_to_buffer  " << loopCount << " poll returned " << poll_return << std::endl;
-        if (poll_return > 0) {
-            char buf = 'h';
-            result = read(serial_interface, &buf, 1);
-            //std::cout << "SerialCom::read_to_buffer  " << loopCount << " read " << buf << " with result " << result << std::endl;
-            if (result > 0) {
-                // if there was no error while reading then add reading to input buffer.
-                input_buffer[input_buffer_write_position] = buf;
-                input_buffer_write_position++;
-                if (input_buffer_write_position >= input_buffer_length) {
-                    //std::cout << "SerialCom::read_to_buffer  input_buffer is full! " << input_buffer_write_position << " wrapping!" << std::endl;
-                    //clear_input_buffer();
-                    input_buffer_write_position -= input_buffer_length;
-                }
-            } else if (result == 0) {
-                // no input available
-                //std::cout << "SerialCom::read_to_buffer  all serial data was read to the input_buffer" << std::endl;
-                return true;
-            } else {
-                // we will skip errors here
-                std::cout << "SerialCom::read_to_buffer  error" << std::endl;
-                return true;
-            }
-        } else {
-            //std::cout << "SerialCom::read_to_buffer  all serial data was read to the input_buffer" << std::endl;
-            return true;
-        }
-    }
-    std::cout << "SerialCom::read_to_buffer  reading repetition reached buffer_io_max " << buffer_io_max << std::endl;
-    return false;
-}
-*/
 
 
 bool SerialCom::send_from_buffer() {
@@ -252,6 +202,33 @@ bool SerialCom::send_request(MessageCode msg_code){
     
     write_msg_to_buffer(msg);
     return true;
+}
+
+bool SerialCom::send_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
+    std::cout << "SerialCom::send_msg_rc sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = 'M';
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MULTIWII_RC_LENGTH;
+    msg.msg_code = MULTIWII_RC;
+    msg.msg_data.multiwii_rc.roll = roll;
+    msg.msg_data.multiwii_rc.pitch = pitch;
+    msg.msg_data.multiwii_rc.yaw = yaw;
+    msg.msg_data.multiwii_rc.throttle = throttle;
+    msg.msg_data.multiwii_rc.aux1 = aux1;
+    msg.msg_data.multiwii_rc.aux2 = aux2;
+    msg.msg_data.multiwii_rc.aux3 = aux3;
+    msg.msg_data.multiwii_rc.aux4 = aux4;
+
+    char msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg_length ^ msg_code;
+    for (uint16_t index=0; index < msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+    write_msg_to_buffer(msg);
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){

@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
     multiwii_serial.set_max_io(200);                                        // set maximum bytes per reading
     multiwii_serial.init();                                                 // start serial connection
-    sleep(2);                                                               // wait for arduino bootloader
+    sleep(2);                                                               // wait for arduino boot loader
     multiwii_serial.clear_input_buffer();                                   // clear serial buffer
     Message input_msg;                                                      // the latest received message
     uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
@@ -66,12 +66,22 @@ int main(int argc, char **argv)
     uint32_t request_imu = 0;
     uint32_t request_motor = 0;
     uint32_t request_gps = 0;
+    uint32_t request_attitude = 0;
+    uint32_t request_altitude = 0;
+    uint32_t request_battery = 0;
+    uint32_t request_distance = 0;
+    uint32_t request_led = 0;
     uint32_t received_total = 0;
     uint32_t received_status = 0;
     uint32_t received_rc = 0;
     uint32_t received_imu = 0;
     uint32_t received_motor = 0;
     uint32_t received_gps = 0;
+    uint32_t received_attitude = 0;
+    uint32_t received_altitude = 0;
+    uint32_t received_battery = 0;
+    uint32_t received_distance = 0;
+    uint32_t received_led = 0;
     
     // set start timestamps in real and in cpu time
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
@@ -89,7 +99,7 @@ int main(int argc, char **argv)
         if (loop_counter % 1000 == 0) {
             system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
+            std::cout << "total  " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
             std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
             std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
             std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
@@ -116,6 +126,8 @@ int main(int argc, char **argv)
             multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+            multiwii_serial.send_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(10);
         }
@@ -168,7 +180,18 @@ int main(int argc, char **argv)
                 gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
                 gps_pub.publish(gpsMsg);
                 received_gps++;
+            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                received_attitude++;
+            } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                received_altitude++;
+            } else if (input_msg.msg_code == MARVIC_BATTERY) {
+                received_battery++;
+            } else if (input_msg.msg_code == MARVIC_LED) {
+                received_led++;
+            } else if (input_msg.msg_code == MARVIC_DISTANCE) {
+                received_distance++;
             }
+
             multiwii_serial.receive_to_buffer();
         }
         

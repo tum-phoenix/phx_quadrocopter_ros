@@ -4,6 +4,9 @@ enum MessageDirection : uint8_t {
 };
 
 enum MessageCode : uint8_t {
+    MARVIC_BATTERY = 60,
+    MARVIC_LED = 60,
+    MARVIC_DISTANCE = 60,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
