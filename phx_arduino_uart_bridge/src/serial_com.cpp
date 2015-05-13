@@ -223,8 +223,8 @@ bool SerialCom::send_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, ui
 
     char msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
-    uint8_t checksum = msg_length ^ msg_code;
-    for (uint16_t index=0; index < msg_length; index++) {
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
         checksum = checksum ^ msg_data_bytes[index];
     }
     msg.checksum = checksum;
