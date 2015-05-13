@@ -20,12 +20,16 @@ int main(int argc, char **argv)
     uint32_t request_status = 0;
     uint32_t request_rc = 0;
     uint32_t request_imu = 0;
+    uint32_t request_attitude = 0;
+    uint32_t request_altitude = 0;
     uint32_t request_motor = 0;
     uint32_t request_gps = 0;
     uint32_t received_total = 0;
     uint32_t received_status = 0;
     uint32_t received_rc = 0;
     uint32_t received_imu = 0;
+    uint32_t received_attitude = 0;
+    uint32_t received_altitude = 0;
     uint32_t received_motor = 0;
     uint32_t received_gps = 0;
     Message input_msg;
@@ -37,21 +41,23 @@ int main(int argc, char **argv)
         if (count % 1000 == 0) {
             double system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
-            std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
-            std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
-            std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
-            std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
-            std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
+            std::cout << "total:   " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
+            std::cout << "status   " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
+            std::cout << "rc       " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
+            std::cout << "imu      " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
+            std::cout << "attitude " << request_attitude<< "\t" <<received_attitude<< "\t" << request_attitude - received_attitude<< std::endl;
+            std::cout << "motor    " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
+            std::cout << "gps      " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
             
             std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
             auto real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
-            std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
-            std::cout << "freq rc     " << received_rc     / real_duration << " msg/s" << std::endl;
-            std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
-            std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq status  " << received_status   / real_duration << " msg/s" << std::endl;
+            std::cout << "freq rc      " << received_rc       / real_duration << " msg/s" << std::endl;
+            std::cout << "freq imu     " << received_imu      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq attitude" << received_attitude / real_duration << " msg/s" << std::endl;
+            std::cout << "freq motor   " << received_motor    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq gps     " << received_gps      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq total   " << received_total    / real_duration << " msg/s" << std::endl;
             
             std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
             std::cout << " communication took " << real_duration << " real seconds" << std::endl;
@@ -60,21 +66,10 @@ int main(int argc, char **argv)
         
         
         // send requests
-        //std::cout << "mainloop >> requesting" << std::endl;
-//        if (count % 3 == 0) {
-//            multiwii_serial.send_request(MULTIWII_STATUS);
-//            request_status++; request_total++;
-//        } else if (count % 3 == 1) {
-//            multiwii_serial.send_request(MULTIWII_IMU);
-//            request_imu++; request_total++;
-//        } else {
-//            multiwii_serial.send_request(MULTIWII_MOTOR);
-//            request_motor++; request_total++;
-//        }
-//        multiwii_serial.send_from_buffer();
         if (count % 3 == 0) {
             multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
             multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
+            multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(10);
@@ -85,15 +80,6 @@ int main(int argc, char **argv)
             multiwii_serial.send_from_buffer();
             usleep(10);
         }
-        
-//        if (count % 4 == 2) {
-//            multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
-//            multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
-//            multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
-//            multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
-//            multiwii_serial.send_from_buffer();
-//            usleep(100);
-//        }
         
         // receive serial stuff
         //std::cout << "mainloop >> receiving" << std::endl;
@@ -109,8 +95,10 @@ int main(int argc, char **argv)
             } else if (input_msg.msg_code == MULTIWII_RC) {
                 received_rc++;
             } else if (input_msg.msg_code == MULTIWII_IMU) {
-                std::cout << "input_msg.msg_data.multiwii_raw_imu.accx >> " << input_msg.msg_data.multiwii_raw_imu.accx << std::endl;
+//                std::cout << "input_msg.msg_data.multiwii_raw_imu.accx >> " << input_msg.msg_data.multiwii_raw_imu.accx << std::endl;
                 received_imu++;
+            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                received_attitude++;
             } else if (input_msg.msg_code == MULTIWII_MOTOR) {
                 received_motor++;
             } else if (input_msg.msg_code == MULTIWII_GPS) {
@@ -130,6 +118,7 @@ int main(int argc, char **argv)
     std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
     std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
     std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
+    std::cout << "attitude " << request_attitude<< "\t" <<received_attitude<< "\t" << request_attitude - received_attitude<< std::endl;
     std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
     std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
     
@@ -138,6 +127,7 @@ int main(int argc, char **argv)
     std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
     std::cout << "freq rc     " << received_rc     / real_duration << " msg/s" << std::endl;
     std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
+    std::cout << "freq attitude" << received_attitude / real_duration << " msg/s" << std::endl;
     std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
     std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
     std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
