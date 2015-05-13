@@ -2,6 +2,7 @@
 #include <ctime>
 #include <sstream>
 #include "ros/ros.h"
+#include "tf/tf.h"
 #include "std_msgs/Header.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
@@ -36,6 +37,8 @@ int main(int argc, char **argv)
     std_msgs::Header headerMsg;
     sensor_msgs::Imu imuMsg;
     sensor_msgs::Joy joyMsg;
+    joyMsg.axes = std::vector<float> (4, 0);
+    joyMsg.buttons = std::vector<int> (4, 0);
     phx_arduino_uart_bridge::Motor motorMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
@@ -64,12 +67,16 @@ int main(int argc, char **argv)
     uint32_t request_status = 0;
     uint32_t request_rc = 0;
     uint32_t request_imu = 0;
+    uint32_t request_attitude = 0;
+    uint32_t request_altitude = 0;
     uint32_t request_motor = 0;
     uint32_t request_gps = 0;
     uint32_t received_total = 0;
     uint32_t received_status = 0;
     uint32_t received_rc = 0;
     uint32_t received_imu = 0;
+    uint32_t received_attitude = 0;
+    uint32_t received_altitude = 0;
     uint32_t received_motor = 0;
     uint32_t received_gps = 0;
     
@@ -89,17 +96,19 @@ int main(int argc, char **argv)
         if (loop_counter % 1000 == 0) {
             system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
-            std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
-            std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
-            std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
-            std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
-            std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
+            std::cout << "total:   " << request_total       << "\t" << received_total    << "\t" << request_total - received_total         << std::endl;
+            std::cout << "status   " << request_status      << "\t" << received_status   << "\t" << request_status - received_status       << std::endl;
+            std::cout << "rc       " << request_rc          << "\t" << received_rc       << "\t" << request_rc - received_rc               << std::endl;
+            std::cout << "imu      " << request_imu         << "\t" << received_imu      << "\t" << request_imu - received_imu             << std::endl;
+            std::cout << "attitude " << request_attitude    << "\t" << received_attitude << "\t" << request_attitude - received_attitude   << std::endl;
+            std::cout << "motor    " << request_motor       << "\t" << received_motor    << "\t" << request_motor - received_motor         << std::endl;
+            std::cout << "gps      " << request_gps         << "\t" << received_gps      << "\t" << request_gps - received_gps             << std::endl;
             
             t1 = std::chrono::high_resolution_clock::now();
             real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
             std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
             std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq attitude" << received_attitude / real_duration << " msg/s" << std::endl;
             std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
             std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
             std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
@@ -115,6 +124,7 @@ int main(int argc, char **argv)
             multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
+            multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(10);
@@ -135,26 +145,34 @@ int main(int argc, char **argv)
                 headerMsg.seq = received_rc;
                 headerMsg.stamp = ros::Time::now();
                 headerMsg.frame_id = "multiwii";
-//                joyMsg.header = headerMsg;
-//                joyMsg.axes[0] = 0; //input_msg.msg_data.multiwii_rc.roll;
-//                joyMsg.axes[1] = input_msg.msg_data.multiwii_rc.pitch;
-//                joyMsg.axes[2] = input_msg.msg_data.multiwii_rc.yaw;
-//                joyMsg.axes[3] = input_msg.msg_data.multiwii_rc.throttle;
+                joyMsg.header = headerMsg;
+                joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
+                joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
+                joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
+                joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
+                joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
+                joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
+                joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
+                joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
                 joy_pub.publish(joyMsg);
                 received_rc++;
             } else if (input_msg.msg_code == MULTIWII_IMU) {
-                headerMsg.seq = received_imu;
-                headerMsg.stamp = ros::Time::now();
-                headerMsg.frame_id = "multiwii";
-                imuMsg.header = headerMsg;
                 imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
                 imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
                 imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
                 imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
                 imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
                 imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
-                imu_pub.publish(imuMsg);
                 received_imu++;
+            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                headerMsg.seq = received_imu;
+                headerMsg.stamp = ros::Time::now();
+                headerMsg.frame_id = "multiwii";
+                imuMsg.header = headerMsg;
+                geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
+                imuMsg.orientation = quaternion;
+                imu_pub.publish(imuMsg);
+                received_attitude++;
             } else if (input_msg.msg_code == MULTIWII_MOTOR) {
                 motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
                 motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
