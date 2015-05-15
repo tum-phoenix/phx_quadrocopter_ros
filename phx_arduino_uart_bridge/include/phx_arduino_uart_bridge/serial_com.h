@@ -33,6 +33,7 @@ public:
     bool write_msg_to_buffer(Message);
     bool write_to_output_buffer(uint8_t);
     uint8_t read_from_input_buffer();
+    uint16_t available();
     bool read_msg_from_buffer(Message*);
 
     bool deinitialize();

@@ -83,48 +83,94 @@ int main(int argc, char **argv)
         
         
         // send requests
+        /*
         if (count % 3 == 0) {
-            //multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
+            std::cout << "mainloop >> requesting 1" << std::endl;
+            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
             multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
             multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(10);
         }
+
         if (count % 5 == 0) {
             multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(10);
         }
+        */
+
+        if (count % 12 == 0) {
+            std::cout << "mainloop >> requesting 1" << std::endl;
+            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        } else if (count % 12 == 2) {
+            std::cout << "mainloop >> requesting 2" << std::endl;
+            multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        } else if (count % 12 == 4) {
+            std::cout << "mainloop >> requesting 3" << std::endl;
+            multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        } else if (count % 12 == 6) {
+            std::cout << "mainloop >> requesting 4" << std::endl;
+            multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        } else if (count % 12 == 8) {
+            std::cout << "mainloop >> requesting 5" << std::endl;
+            multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        } else if (count % 12 == 10) {
+            std::cout << "mainloop >> requesting 6" << std::endl;
+            multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
+            multiwii_serial.send_from_buffer();
+            usleep(100);
+        }
+
+
         
         // receive serial stuff
-        //std::cout << "mainloop >> receiving" << std::endl;
+        std::cout << "mainloop >> receiving" << std::endl;
         multiwii_serial.receive_to_buffer();
 
         // interprete stuff
-        //std::cout << "mainloop >> interpreting" << std::endl;
-        while (multiwii_serial.read_msg_from_buffer(&input_msg) == true) {
-            //std::cout << "interpreting_loop >> starts" << std::endl;
-            received_total++;
-            if (input_msg.msg_code == MULTIWII_STATUS) {
-                received_status++;
-            } else if (input_msg.msg_code == MULTIWII_RC) {
-                received_rc++;
-            } else if (input_msg.msg_code == MULTIWII_IMU) {
-//                std::cout << "input_msg.msg_data.multiwii_raw_imu.accx >> " << input_msg.msg_data.multiwii_raw_imu.accx << std::endl;
-                received_imu++;
-            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
-                received_attitude++;
-            } else if (input_msg.msg_code == MULTIWII_MOTOR) {
-                received_motor++;
-            } else if (input_msg.msg_code == MULTIWII_GPS) {
-                received_gps++;
+        std::cout << "mainloop >> interpreting" << std::endl;
+        bool new_msg_arrived = true;
+        while (new_msg_arrived == true) {
+            new_msg_arrived = multiwii_serial.read_msg_from_buffer(&input_msg);
+            std::cout << "interpreting_loop >> new_msg_arrived yes or no" << std::endl;
+            if (new_msg_arrived == true) {
+                std::cout << "interpreting_loop >> new_msg_arrived interpreting" << std::endl;
+                received_total++;
+                if (input_msg.msg_length == 0) {
+                    std::cout << "interpreting_loop >> received request" << std::endl;
+                } else {
+                    if (input_msg.msg_code == MULTIWII_STATUS) {
+                        received_status++;
+                    } else if (input_msg.msg_code == MULTIWII_RC) {
+                        received_rc++;
+                    } else if (input_msg.msg_code == MULTIWII_IMU) {
+                        received_imu++;
+                    } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                        received_attitude++;
+                    } else if (input_msg.msg_code == MULTIWII_MOTOR) {
+                        received_motor++;
+                    } else if (input_msg.msg_code == MULTIWII_GPS) {
+                        received_gps++;
+                    }
+                }
+                usleep(600);    // publishing stuff to ros here
             }
-            usleep(600);    // publishing stuff to ros here
-            //std::cout << "  interpreting_loop >> receiving" << std::endl;
+            std::cout << "  interpreting_loop >> receiving" << std::endl;
             multiwii_serial.receive_to_buffer();
-            //std::cout << "  interpreting_loop >> receiving done" << std::endl;
+            std::cout << "  interpreting_loop >> receiving done" << std::endl;
         }
     }
     multiwii_serial.deinitialize();
