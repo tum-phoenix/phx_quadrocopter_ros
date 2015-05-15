@@ -20,13 +20,13 @@ bool SerialCom::set_max_io(uint16_t max_io_bytes) {
 
 bool SerialCom::init() {
     std::cout << "SerialCom::init  initializing SerialCom on device " << serial_device_path << std::endl;
-    //serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_SYNC);
+    //serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_SYNC);    // original
     serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_NDELAY);
 
     std::cout << "SerialCom::init  configuring serial device " << serial_interface << std::endl;
     tcgetattr(serial_interface, &usb_tio);
     usb_tio.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
-    //usb_tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | INPCK | ISTRIP | IXON);
+    //usb_tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | INPCK | ISTRIP | IXON); // original
     usb_tio.c_oflag = 0;
     usb_tio.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
     usb_tio.c_cflag &= ~(CSIZE | PARENB | HUPCL);

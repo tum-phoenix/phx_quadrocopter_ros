@@ -1,5 +1,6 @@
 #include <chrono> 
-#include <iostream> 
+#include <iostream>
+#include <sstream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 int main(int argc, char **argv)
@@ -8,8 +9,23 @@ int main(int argc, char **argv)
     
     // establish connection:
     SerialCom multiwii_serial;                                              // create SerialCom instance
-    multiwii_serial.set_device("/dev/ttyUSB0");
-    multiwii_serial.set_baudrate(115200);
+    if (argc >= 2) {
+        multiwii_serial.set_device(argv[1]);
+    } else {
+        multiwii_serial.set_device("/dev/ttyUSB0");
+    }
+    if (argc >= 3) {
+        std::istringstream iss(argv[2]);
+        uint32_t x;
+        if (!(iss >> x)) {
+            multiwii_serial.set_baudrate(x);
+        } else {
+            multiwii_serial.set_baudrate(115200);
+        }
+    } else {
+        multiwii_serial.set_baudrate(115200);
+    }
+
     multiwii_serial.set_max_io(200);
     multiwii_serial.init();                                                 // initialize serial connection
     sleep(2);                                                               // wait for arduino bootloader
@@ -33,7 +49,8 @@ int main(int argc, char **argv)
     uint32_t received_motor = 0;
     uint32_t received_gps = 0;
     Message input_msg;
-    
+
+    std::cout << " start up done" << std::endl;
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
     double begin_communication = double(clock()) / CLOCKS_PER_SEC;
     
@@ -67,7 +84,7 @@ int main(int argc, char **argv)
         
         // send requests
         if (count % 3 == 0) {
-            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
+            //multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
             multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
             multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;

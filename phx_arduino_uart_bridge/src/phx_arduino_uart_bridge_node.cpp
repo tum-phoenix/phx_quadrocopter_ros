@@ -192,8 +192,6 @@ int main(int argc, char **argv)
                 gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
                 gps_pub.publish(gpsMsg);
                 received_gps++;
-            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
-                received_attitude++;
             } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
                 received_altitude++;
             } else if (input_msg.msg_code == MARVIC_BATTERY) {
