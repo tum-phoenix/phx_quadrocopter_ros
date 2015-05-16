@@ -58,6 +58,8 @@ private:
     static const uint16_t input_buffer_length = 256;
     static const uint16_t output_buffer_length = 256;
 
+    bool do_debug_printout = true;
+
     uint8_t input_buffer[input_buffer_length];
     uint16_t input_buffer_write_position;
     uint16_t input_buffer_read_position;

@@ -89,8 +89,9 @@ bool SerialCom::clear_output_buffer() {
 }
 
 bool SerialCom::receive_to_buffer() {
-    std::cout << "SerialCom::read_to_buffer  starts reading on serial port " << serial_device_path << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  starts receiving from serial port " << serial_device_path << std::endl;
     int result = 0;
+    uint16_t new_stuff = 0;
     int loopCount = buffer_io_max;
     
     struct pollfd fds[1];
@@ -99,47 +100,48 @@ bool SerialCom::receive_to_buffer() {
     int timeout_msecs = 2;  // 2 is works fine without double checking mode!
     
     while (poll(fds, 1, timeout_msecs) > 0) {
-        std::cout << "SerialCom::read_to_buffer  positive poll " << std::endl;
+        if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > positive poll " << std::endl;
         char msg_buffer[loopCount];
         result = read(serial_interface, &msg_buffer, loopCount);
-        std::cout << "SerialCom::read_to_buffer  result " << result << std::endl;
+        if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  did read " << result << " from the serial port"<< std::endl;
         if (result > 0) {
             // if there was no error while reading
-            //std::cout << "SerialCom::read_to_buffer  input ";
-            //char cc;
+            if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  >> adding to input_buffer: ";
+
             for (uint8_t index = 0; index<result; index++) {
                 input_buffer[input_buffer_write_position] = msg_buffer[index];
-
-                //cc = printf("%i ", input_buffer[input_buffer_write_position]);
-                //std::cout << cc;
-
+                new_stuff++;
+                if (do_debug_printout == true) {
+                    char cc;
+                    cc = printf("%i ", input_buffer[input_buffer_write_position]);
+                    std::cout << cc;
+                }
                 input_buffer_write_position++;
                 if (input_buffer_write_position == input_buffer_length) {
                     input_buffer_write_position = 0;
                 }
             }
-            //std::cout << std::endl;
-            //std::cout << "SerialCom::read_to_buffer  read " << result << std::endl;
+            if (do_debug_printout == true) std::cout << std::endl;
         } else if (result == 0) {
             // no input available
-            std::cout << "SerialCom::read_to_buffer  nothing available" << std::endl;
+            if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  >> nothing available" << std::endl;
         } else {
             // we will skip errors here
-            std::cout << "SerialCom::read_to_buffer  error" << std::endl;
+            if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  >> error" << std::endl;
         }
     }
     // nothing polled
-    std::cout << "SerialCom::read_to_buffer  negative poll" << std::endl;
-    if (result == 0) {
-        return true;    // no input waiting
+    if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > negative poll" << std::endl;
+    if (new_stuff == 0) {
+        return false;    // no input was waiting
     } else {
-        return false;
+        return true;     // new input was added to the input buffer
     }
 }
 
 
 bool SerialCom::send_from_buffer() {
-    //std::cout << "SerialCom::send_from_buffer  starts sending on serial port " << serial_device_path << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  starts sending on serial port " << serial_device_path << std::endl;
     int result, loopCount = buffer_io_max;
     char temp_buffer;
 
@@ -157,13 +159,13 @@ bool SerialCom::send_from_buffer() {
                 std::cout << "SerialCom::send_from_buffer  error" << std::endl;
             }
         } else {
-            //std::cout << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;
+            if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;
             output_buffer_read_position = 0;
             output_buffer_write_position = 0;
             return true;
         }
     }
-    //std::cout << "SerialCom::send_from_buffer  sending repetition reached buffer_io_max " << buffer_io_max << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  sending repetition reached buffer_io_max " << buffer_io_max << std::endl;
     return false;
 }
 
@@ -198,7 +200,7 @@ bool SerialCom::deinitialize() {
 }
 
 bool SerialCom::send_request(MessageCode msg_code){
-    std::cout << "SerialCom::send_request sending a request on msg_code " << msg_code  << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::send_request sending a request on msg_code " << msg_code  << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
@@ -239,9 +241,6 @@ bool SerialCom::send_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, ui
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){
-    //std::cout << "SerialCom::write_to_output_buffer byte" << byte << std::endl;
-    //std::cout << "SerialCom::write_to_output_buffer output_buffer_write_position" << output_buffer_write_position << std::endl;
-    //std::cout << "SerialCom::write_to_output_buffer output_buffer" << output_buffer[output_buffer_write_position] << std::endl;
     output_buffer[output_buffer_write_position] = byte;
     output_buffer_write_position++;
     if (output_buffer_write_position >= output_buffer_length) {
@@ -267,7 +266,6 @@ bool SerialCom::write_msg_to_buffer(Message msg){
 }
 
 uint8_t SerialCom::read_from_input_buffer() {
-    std::cout << "SerialCom::read_from_input_buffer at " << input_buffer_read_position << " with " << available() << std::endl;
     uint8_t byte = input_buffer[input_buffer_read_position];
     input_buffer_read_position++;
     if (input_buffer_read_position >= input_buffer_length) {
@@ -283,12 +281,29 @@ uint16_t SerialCom::available() {
     } else if (input_buffer_write_position < input_buffer_read_position) {
         available_bytes = input_buffer_length - input_buffer_read_position + input_buffer_write_position;
     }
-    //std::cout << "SerialCom::available   write " << input_buffer_write_position << "  read " << input_buffer_read_position << "  available " << available_bytes << std::endl;
     return available_bytes;
 }
 
 bool SerialCom::read_msg_from_buffer(Message* msg) {
-    std::cout << "SerialCom::read_msg_from_buffer  starts reading the input buffer " << sizeof(msg->msg_data) << std::endl;
+    if (do_debug_printout == true) {
+        std::cout << "SerialCom::read_msg_from_buffer  analyses the input buffer for incoming messages" << std::endl;
+        std::cout << "SerialCom::read_msg_from_buffer  the input buffer is: ";
+        char cc;
+        for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
+            if ((input_buffer[index] == '$') || (input_buffer[index] == 'M') || (input_buffer[index] == '<') || (input_buffer[index] == '>') || (input_buffer[index] == '!')) {
+                std::cout << "\033[34;1m";
+                cc = printf("%c ", input_buffer[index]);
+                std::cout << cc;
+                std::cout << "\033[0m";
+            } else {
+                std::cout << "\033[34;2m";
+                cc = printf("%i ", input_buffer[index]);
+                std::cout << cc;
+                std::cout << "\033[0m";
+            }
+        }
+        std::cout << "\033[0m" << std::endl;
+    }
     uint16_t analysis_start;
 
     uint8_t msg_preamble = 0;
@@ -304,43 +319,84 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
 
     while (available() >= 6) {
         analysis_start = input_buffer_read_position;
+        if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer  analyse starting from input_buffer_read_position " << input_buffer_read_position << " to " << input_buffer_write_position << std::endl;
 
         for (uint16_t index=0; index < sizeof(msg->msg_data); index++) {
             data = 0;
             msg_data_bytes[index] = data;
         }
-        std::cout << "SerialCom::read_msg_from_buffer  analyse starting from " << input_buffer_read_position << " " << input_buffer_write_position << std::endl;
+
         if (read_from_input_buffer() == '$') {
             // start byte found
+            if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found" << std::endl;
             msg_preamble = '$';
             if (read_from_input_buffer() == 'M') {
+                // MultiWii protocol byte found
+                if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> MultiWii protocol byte found" << std::endl;
                 msg_protocol = 'M';
                 msg_direction = read_from_input_buffer();
                 msg_length = read_from_input_buffer();
                 msg_code = read_from_input_buffer();
 
-                if (available() >= msg_length + 1) {
-                    // the full message was received and can now be read
-                    //printf("SerialCom::read_msg_from_buffer  receiving new msg on msg_code %i \n", msg_code);
+                if (do_debug_printout == true) printf("SerialCom::read_msg_from_buffer   >> msg_length byte: %i\n", msg_length);
+                if (do_debug_printout == true) printf("SerialCom::read_msg_from_buffer   >> msg_code byte:   %i\n", msg_code);
 
-                    checksum = msg_length ^ msg_code;
-                    for (uint16_t index=0; index < msg_length; index++) {
-                        std::cout << "SerialCom::read_msg_from_buffer  adding data" << std::endl;
-                        data = read_from_input_buffer();
-                        msg_data_bytes[index] = data;
-                        checksum = checksum ^ data;
-                    }
-                    msg_checksum = read_from_input_buffer();
-
-                    if (msg_length == 0) {
-                        std::cout << "SerialCom::read_msg_from_buffer  received request: " << msg_protocol << msg_direction << msg_length << msg_code << std::endl;
+                if (msg_length > sizeof(msg->msg_data)) {
+                    // this message is bigger that any possible message....so it is very likely it is bull shit
+                    if (do_debug_printout == true) std::cout << "\033[1;31mSerialCom::read_msg_from_buffer   >>> received message with payload_length " << msg_length << " > " << sizeof(msg->msg_data) << "\033[0m" << std::endl;
+                    if (do_debug_printout == true) {
+                        std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                         char cc;
                         for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
                             //cc = printf("%c ", input_buffer[index]);
                             cc = printf("%i ", input_buffer[index]);
                             std::cout << cc;
                         }
-                        std::cout << std::endl;
+                        std::cout << "\033[34;2m";
+                        for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
+                            //cc = printf("%c ", input_buffer[index]);
+                            cc = printf("%i ", input_buffer[index]);
+                            std::cout << cc;
+                        }
+                        std::cout << "\033[0m" << std::endl;
+                    }
+                    input_buffer_read_position = analysis_start + 1;
+                    if (input_buffer_read_position >= input_buffer_length) {
+                        input_buffer_read_position -= input_buffer_length;
+                    }
+                } else if (available() >= msg_length + 1) {
+                    // the full message was received and can now be read
+                    if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> available bytes: " << available() << std::endl;
+                    if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer      reading data" << std::endl;
+                    checksum = msg_length ^ msg_code;
+                    for (uint16_t index=0; index < msg_length; index++) {
+                        if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer      " << input_buffer_read_position;
+                        data = read_from_input_buffer();
+                        msg_data_bytes[index] = data;
+                        if (do_debug_printout == true) printf(":  %i  =  %i\n", data, msg_data_bytes[index]);
+                        checksum = checksum ^ data;
+                    }
+                    msg_checksum = read_from_input_buffer();
+
+                    if (msg_length == 0) {
+                        if (do_debug_printout == true) std::cout << "\033[1;31mSerialCom::read_msg_from_buffer   >>> this message was probably a request\033[0m" << std::endl;
+                        if (do_debug_printout == true) {
+                            std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
+                            char cc;
+                            for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
+                                //cc = printf("%c ", input_buffer[index]);
+                                cc = printf("%i ", input_buffer[index]);
+                                std::cout << cc;
+                            }
+                            std::cout << "\033[34;2m";
+                            for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
+                                //cc = printf("%c ", input_buffer[index]);
+                                cc = printf("%i ", input_buffer[index]);
+                                std::cout << cc;
+                            }
+                            std::cout << "\033[0m" << std::endl;
+                        }
+
                         //input_buffer_read_position = analysis_start + 1;
                         msg->msg_preamble = msg_preamble;
                         msg->msg_protocol = msg_protocol;
@@ -351,13 +407,33 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         memcpy(&tmp, msg_data_bytes, sizeof(tmp));
                         msg->msg_data = tmp;
                         msg->checksum = checksum;
-                        std::cout << "sleeping " << std::endl;
-                        sleep(1);
-                        std::cout << "returning " << std::endl;
-                        print_multiwii_message(msg);
+                        if (do_debug_printout == true) {
+                            std::cout << "sleeping " << std::endl;
+                            print_multiwii_message(msg);
+                            sleep(1);
+                            std::cout << "SerialCom::read_msg_from_buffer  returns true 1" << std::endl;
+                        }
                         return true;
                     } else if (msg_checksum == checksum) {
                         // the message is valid and can now be saved
+                        if (do_debug_printout == true) {
+                            std::cout << "SerialCom::read_msg_from_buffer   >>> this message was probably a valid message" << std::endl;
+                            std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
+                            char cc;
+                            for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
+                                //cc = printf("%c ", input_buffer[index]);
+                                cc = printf("%i ", input_buffer[index]);
+                                std::cout << cc;
+                            }
+                            std::cout << "\033[34;2m";
+                            for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
+                                //cc = printf("%c ", input_buffer[index]);
+                                cc = printf("%i ", input_buffer[index]);
+                                std::cout << cc;
+                            }
+                            std::cout << "\033[0m" << std::endl;
+                        }
+
                         msg->msg_preamble = msg_preamble;
                         msg->msg_protocol = msg_protocol;
                         msg->msg_direction = (MessageDirection) msg_direction;
@@ -367,11 +443,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         memcpy(&tmp, msg_data_bytes, sizeof(tmp));
                         msg->msg_data = tmp;
                         msg->checksum = checksum;
-                        printf("SerialCom::read_msg_from_buffer  received message! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
-                        std::cout << "SerialCom::read_msg_from_buffer  returns true" << std::endl;
-                        std::cout << "SerialCom::read_msg_from_buffer  " << msg_protocol << msg_direction << msg_length << msg_code << std::endl;
-                        print_multiwii_message(msg);
-                        std::cout << "SerialCom::read_msg_from_buffer  " << available() << std::endl;
+                        if (do_debug_printout == true) {
+                            printf("SerialCom::read_msg_from_buffer  received message! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
+                            print_multiwii_message(msg);
+                            std::cout << "SerialCom::read_msg_from_buffer  returns true 2" << std::endl;
+                        }
                         return true;
                     } else {
                         //printf("SerialCom::read_msg_from_buffer  broken message received! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
@@ -383,18 +459,32 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                 } else {
                     // the data of this msg was not received completely jet, wait a bit.
                     input_buffer_read_position = analysis_start;
-                    std::cout << "                         >> data not fully received! returning false" << std::endl;
+                    if (do_debug_printout == true) std::cout << "                         >> data not fully received! returning false" << std::endl;
                     return false;   // exiting because the available data is not entirely read into the input_buffer.
                 }
             } else {
-                std::cout << "                         >> no supported protocol byte" << std::endl;
+                std::cout << "SerialCom::read_msg_from_buffer    >> no supported protocol byte" << std::endl;
+                std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
+                char cc;
+                for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
+                    //cc = printf("%c ", input_buffer[index]);
+                    cc = printf("%i ", input_buffer[index]);
+                    std::cout << cc;
+                }
+                std::cout << "\033[34;2m";
+                for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
+                    //cc = printf("%c ", input_buffer[index]);
+                    cc = printf("%i ", input_buffer[index]);
+                    std::cout << cc;
+                }
+                std::cout << "\033[0m" << std::endl;
                 input_buffer_read_position = analysis_start + 1;
             }
         } else {
-            std::cout << "                         >> no start byte" << std::endl;
+            if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer    >> no start byte" << std::endl;
         }
     }
-    std::cout << "                         >> analysis reached real time" << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer    >> analysis reached real time" << std::endl;
     return false;   // exiting because there is now new data in the input_buffer
 }
 
