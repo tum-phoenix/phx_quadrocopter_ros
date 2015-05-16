@@ -100,14 +100,11 @@ bool SerialCom::receive_to_buffer() {
     int timeout_msecs = 2;  // 2 is works fine without double checking mode!
     
     while (poll(fds, 1, timeout_msecs) > 0) {
-        if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > positive poll " << std::endl;
         char msg_buffer[loopCount];
         result = read(serial_interface, &msg_buffer, loopCount);
-        if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  did read " << result << " from the serial port"<< std::endl;
+        if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > positive poll >> reading " << result << " bytes from the serial port: ";
         if (result > 0) {
             // if there was no error while reading
-            if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  >> adding to input_buffer: ";
-
             for (uint8_t index = 0; index<result; index++) {
                 input_buffer[input_buffer_write_position] = msg_buffer[index];
                 new_stuff++;
@@ -131,7 +128,7 @@ bool SerialCom::receive_to_buffer() {
         }
     }
     // nothing polled
-    if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > negative poll" << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  > negative poll -> exiting after having read " << new_stuff << " new bytes" << std::endl;
     if (new_stuff == 0) {
         return false;    // no input was waiting
     } else {
@@ -286,8 +283,7 @@ uint16_t SerialCom::available() {
 
 bool SerialCom::read_msg_from_buffer(Message* msg) {
     if (do_debug_printout == true) {
-        std::cout << "SerialCom::read_msg_from_buffer  analyses the input buffer for incoming messages" << std::endl;
-        std::cout << "SerialCom::read_msg_from_buffer  the input buffer is: ";
+        std::cout << "SerialCom::read_msg_from_buffer  analyses the input buffer for incoming messages: ";
         char cc;
         for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
             if ((input_buffer[index] == '$') || (input_buffer[index] == 'M') || (input_buffer[index] == '<') || (input_buffer[index] == '>') || (input_buffer[index] == '!')) {
@@ -304,7 +300,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
         }
         std::cout << "\033[0m" << std::endl;
     }
-    uint16_t analysis_start;
+    uint16_t analysis_start = input_buffer_read_position;
 
     uint8_t msg_preamble = 0;
     uint8_t msg_protocol = 0;
@@ -319,7 +315,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
 
     while (available() >= 6) {
         analysis_start = input_buffer_read_position;
-        if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer  analyse starting from input_buffer_read_position " << input_buffer_read_position << " to " << input_buffer_write_position << std::endl;
+        if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   > analyse starting from input_buffer_read_position " << input_buffer_read_position << " to " << input_buffer_write_position << std::endl;
 
         for (uint16_t index=0; index < sizeof(msg->msg_data); index++) {
             data = 0;
@@ -328,18 +324,19 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
 
         if (read_from_input_buffer() == '$') {
             // start byte found
-            if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found" << std::endl;
+            if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found";
             msg_preamble = '$';
             if (read_from_input_buffer() == 'M') {
                 // MultiWii protocol byte found
-                if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> MultiWii protocol byte found" << std::endl;
+                if (do_debug_printout == true) std::cout << "  >> MultiWii protocol byte found";
                 msg_protocol = 'M';
                 msg_direction = read_from_input_buffer();
                 msg_length = read_from_input_buffer();
                 msg_code = read_from_input_buffer();
 
-                if (do_debug_printout == true) printf("SerialCom::read_msg_from_buffer   >> msg_length byte: %i\n", msg_length);
-                if (do_debug_printout == true) printf("SerialCom::read_msg_from_buffer   >> msg_code byte:   %i\n", msg_code);
+                if (do_debug_printout == true) printf("  >> msg_length byte: %i", msg_length);
+                if (do_debug_printout == true) printf("  >> msg_code byte: %i", msg_code);
+                if (do_debug_printout == true) std::cout << std::endl;
 
                 if (msg_length > sizeof(msg->msg_data)) {
                     // this message is bigger that any possible message....so it is very likely it is bull shit
@@ -367,21 +364,21 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                 } else if (available() >= msg_length + 1) {
                     // the full message was received and can now be read
                     if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> available bytes: " << available() << std::endl;
-                    if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer      reading data" << std::endl;
+                    if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer      reading payload: ";
                     checksum = msg_length ^ msg_code;
                     for (uint16_t index=0; index < msg_length; index++) {
-                        if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer      " << input_buffer_read_position;
                         data = read_from_input_buffer();
                         msg_data_bytes[index] = data;
-                        if (do_debug_printout == true) printf(":  %i  =  %i\n", data, msg_data_bytes[index]);
+                        if (do_debug_printout == true) printf(" %i ", msg_data_bytes[index]);
                         checksum = checksum ^ data;
                     }
                     msg_checksum = read_from_input_buffer();
+                    if (do_debug_printout == true) std::cout << std::endl;
 
                     if (msg_length == 0) {
-                        if (do_debug_printout == true) std::cout << "\033[1;31mSerialCom::read_msg_from_buffer   >>> this message was probably a request\033[0m" << std::endl;
+                        if (do_debug_printout == true) std::cout << "\033[1;31m" << "SerialCom::read_msg_from_buffer   >>> this message was probably a request" << "\033[0m" << std::endl;
                         if (do_debug_printout == true) {
-                            std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
+                            std::cout << "SerialCom::read_msg_from_buffer   >>> message was: " << "\033[34;1m";
                             char cc;
                             for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
                                 //cc = printf("%c ", input_buffer[index]);
@@ -409,8 +406,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         msg->checksum = checksum;
                         if (do_debug_printout == true) {
                             std::cout << "sleeping " << std::endl;
-                            print_multiwii_message(msg);
-                            sleep(1);
+                            //print_multiwii_message(msg);
                             std::cout << "SerialCom::read_msg_from_buffer  returns true 1" << std::endl;
                         }
                         return true;
@@ -445,7 +441,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         msg->checksum = checksum;
                         if (do_debug_printout == true) {
                             printf("SerialCom::read_msg_from_buffer  received message! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
-                            print_multiwii_message(msg);
+                            //print_multiwii_message(msg);
                             std::cout << "SerialCom::read_msg_from_buffer  returns true 2" << std::endl;
                         }
                         return true;
@@ -463,7 +459,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                     return false;   // exiting because the available data is not entirely read into the input_buffer.
                 }
             } else {
-                std::cout << "SerialCom::read_msg_from_buffer    >> no supported protocol byte" << std::endl;
+                std::cout << "  >> no supported protocol byte" << std::endl;
                 std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                 char cc;
                 for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
@@ -491,58 +487,58 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
 
 void print_multiwii_message(Message* msg) {
     printf(" print_multiwii_message:\n");
-    printf(" msg_header: %c %c %c\n", msg->msg_preamble, msg->msg_protocol, msg->msg_direction);
-    printf(" msg_length: %i\n", msg->msg_length);
-    printf(" msg_code: %i\n", msg->msg_code);
+    printf("   msg_header: %c %c %c\n", msg->msg_preamble, msg->msg_protocol, msg->msg_direction);
+    printf("   msg_length: %i\n", msg->msg_length);
+    printf("   msg_code:   %i\n", msg->msg_code);
     switch (msg->msg_code){
         case MULTIWII_STATUS:
-            printf(" msg_data: MULTIWII_STATUS\n");
-            printf(" cycleTime: %i\n", msg->msg_data.multiwii_status.cycleTime);
-            printf(" i2c_errors_count: %i\n", msg->msg_data.multiwii_status.i2c_errors_count);
+            printf("   msg_data: MULTIWII_STATUS\n");
+            printf("     cycleTime:        %i\n", msg->msg_data.multiwii_status.cycleTime);
+            printf("     i2c_errors_count: %i\n", msg->msg_data.multiwii_status.i2c_errors_count);
             break;
         case MULTIWII_IMU:
-            printf(" msg_data: MULTIWII_IMU\n");
-            printf(" acc: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.accx, msg->msg_data.multiwii_raw_imu.accy, msg->msg_data.multiwii_raw_imu.accz);
-            printf(" gyro: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.gyrx, msg->msg_data.multiwii_raw_imu.gyry, msg->msg_data.multiwii_raw_imu.gyrz);
-            printf(" mag: %i, %i, %i\n", msg->msg_data.multiwii_raw_imu.magx, msg->msg_data.multiwii_raw_imu.magy, msg->msg_data.multiwii_raw_imu.magz);
+            printf("   msg_data: MULTIWII_IMU\n");
+            printf(" acc:  %i,\t %i,\t %i\n", msg->msg_data.multiwii_raw_imu.accx, msg->msg_data.multiwii_raw_imu.accy, msg->msg_data.multiwii_raw_imu.accz);
+            printf(" gyro: %i,\t %i,\t %i\n", msg->msg_data.multiwii_raw_imu.gyrx, msg->msg_data.multiwii_raw_imu.gyry, msg->msg_data.multiwii_raw_imu.gyrz);
+            printf(" mag:  %i,\t %i,\t %i\n", msg->msg_data.multiwii_raw_imu.magx, msg->msg_data.multiwii_raw_imu.magy, msg->msg_data.multiwii_raw_imu.magz);
             break;
         case MULTIWII_RC:
-            printf(" msg_data: MULTIWII_RC\n");
-            printf(" roll: %i\n", msg->msg_data.multiwii_rc.roll);
-            printf(" pitch: %i\n", msg->msg_data.multiwii_rc.pitch);
-            printf(" yaw: %i\n", msg->msg_data.multiwii_rc.yaw);
-            printf(" throttle: %i\n", msg->msg_data.multiwii_rc.throttle);
-            printf(" aux1: %i\n", msg->msg_data.multiwii_rc.aux1);
-            printf(" aux2: %i\n", msg->msg_data.multiwii_rc.aux2);
-            printf(" aux3: %i\n", msg->msg_data.multiwii_rc.aux3);
-            printf(" aux4: %i\n", msg->msg_data.multiwii_rc.aux4);
+            printf("   msg_data: MULTIWII_RC\n");
+            printf("     roll:     %i\n", msg->msg_data.multiwii_rc.roll);
+            printf("     pitch:    %i\n", msg->msg_data.multiwii_rc.pitch);
+            printf("     yaw:      %i\n", msg->msg_data.multiwii_rc.yaw);
+            printf("     throttle: %i\n", msg->msg_data.multiwii_rc.throttle);
+            printf("     aux1:     %i\n", msg->msg_data.multiwii_rc.aux1);
+            printf("     aux2:     %i\n", msg->msg_data.multiwii_rc.aux2);
+            printf("     aux3:     %i\n", msg->msg_data.multiwii_rc.aux3);
+            printf("     aux4:     %i\n", msg->msg_data.multiwii_rc.aux4);
             break;
         case MULTIWII_MOTOR:
-            printf(" msg_data: MULTIWII_MOTOR\n");
-            printf(" motor0: %i\n", msg->msg_data.multiwii_motor.motor0);
-            printf(" motor1: %i\n", msg->msg_data.multiwii_motor.motor1);
-            printf(" motor2: %i\n", msg->msg_data.multiwii_motor.motor2);
-            printf(" motor3: %i\n", msg->msg_data.multiwii_motor.motor3);
-            printf(" motor4: %i\n", msg->msg_data.multiwii_motor.motor4);
-            printf(" motor5: %i\n", msg->msg_data.multiwii_motor.motor5);
-            printf(" motor6: %i\n", msg->msg_data.multiwii_motor.motor6);
-            printf(" motor7: %i\n", msg->msg_data.multiwii_motor.motor7);
+            printf("   msg_data: MULTIWII_MOTOR\n");
+            printf("     motor0: %i\n", msg->msg_data.multiwii_motor.motor0);
+            printf("     motor1: %i\n", msg->msg_data.multiwii_motor.motor1);
+            printf("     motor2: %i\n", msg->msg_data.multiwii_motor.motor2);
+            printf("     motor3: %i\n", msg->msg_data.multiwii_motor.motor3);
+            printf("     motor4: %i\n", msg->msg_data.multiwii_motor.motor4);
+            printf("     motor5: %i\n", msg->msg_data.multiwii_motor.motor5);
+            printf("     motor6: %i\n", msg->msg_data.multiwii_motor.motor6);
+            printf("     motor7: %i\n", msg->msg_data.multiwii_motor.motor7);
             break;
 
         case MULTIWII_ATTITUDE:
-            printf(" msg_data: MULTIWII_ATTITUDE\n");
-            printf(" roll: %i\n", msg->msg_data.multiwii_attitude.roll);
-            printf(" pitch: %i\n", msg->msg_data.multiwii_attitude.pitch);
-            printf(" yaw: %i\n", msg->msg_data.multiwii_attitude.yaw);
+            printf("   msg_data: MULTIWII_ATTITUDE\n");
+            printf("     roll:  %i\n", msg->msg_data.multiwii_attitude.roll);
+            printf("     pitch: %i\n", msg->msg_data.multiwii_attitude.pitch);
+            printf("     yaw:   %i\n", msg->msg_data.multiwii_attitude.yaw);
             break;
         case MULTIWII_GPS:
-            printf(" msg_data: MULTIWII_GPS\n");
-            printf(" fix: %i\n", msg->msg_data.multiwii_gps.fix);
-            printf(" numSat: %i\n", msg->msg_data.multiwii_gps.numSat);
-            printf(" coordLAT: %i\n", msg->msg_data.multiwii_gps.coordLAT);
-            printf(" coordLON: %i\n", msg->msg_data.multiwii_gps.coordLON);
-            printf(" altitude: %i\n", msg->msg_data.multiwii_gps.altitude);
-            printf(" speed: %i\n", msg->msg_data.multiwii_gps.speed);
+            printf("   msg_data: MULTIWII_GPS\n");
+            printf("     fix:      %i\n", msg->msg_data.multiwii_gps.fix);
+            printf("     numSat:   %i\n", msg->msg_data.multiwii_gps.numSat);
+            printf("     coordLAT: %i\n", msg->msg_data.multiwii_gps.coordLAT);
+            printf("     coordLON: %i\n", msg->msg_data.multiwii_gps.coordLON);
+            printf("     altitude: %i\n", msg->msg_data.multiwii_gps.altitude);
+            printf("     speed:    %i\n", msg->msg_data.multiwii_gps.speed);
             break;
         default:
             break;

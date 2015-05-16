@@ -55,9 +55,9 @@ int main(int argc, char **argv)
     SerialCom multiwii_serial;                                              // create SerialCom instance
     multiwii_serial.set_device("/dev/ttyUSB0");                             // select the device
     multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
-    multiwii_serial.set_max_io(200);                                        // set maximum bytes per reading
+    multiwii_serial.set_max_io(250);                                        // set maximum bytes per reading
     multiwii_serial.init();                                                 // start serial connection
-    sleep(2);                                                               // wait for arduino bootloader
+    sleep(12);                                                              // wait for arduino boot loader
     multiwii_serial.clear_input_buffer();                                   // clear serial buffer
     Message input_msg;                                                      // the latest received message
     uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
         }
         
         // serialcom send requests
-        if (loop_counter % 3 == 0) {
+        if (loop_counter % 1 == 0) {
             multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
             multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
@@ -133,78 +133,79 @@ int main(int argc, char **argv)
             multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
-            usleep(10);
+            usleep(600);
         }
-        
-        
-        // serialcom receive serial stuff
-        multiwii_serial.receive_to_buffer();
-        
-        
-        // interprete stuff
-        while (multiwii_serial.read_msg_from_buffer(&input_msg) == true) {
-            received_total++;
-            if (input_msg.msg_code == MULTIWII_STATUS) {
-                // publish to ros here
-                received_status++;
-            } else if (input_msg.msg_code == MULTIWII_RC) {
-                headerMsg.seq = received_rc;
-                headerMsg.stamp = ros::Time::now();
-                headerMsg.frame_id = "multiwii";
-                joyMsg.header = headerMsg;
-                joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                joy_pub.publish(joyMsg);
-                received_rc++;
-            } else if (input_msg.msg_code == MULTIWII_IMU) {
-                imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
-                imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
-                imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
-                imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
-                imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
-                imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
-                received_imu++;
-            } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
-                headerMsg.seq = received_imu;
-                headerMsg.stamp = ros::Time::now();
-                headerMsg.frame_id = "multiwii";
-                imuMsg.header = headerMsg;
-                geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
-                imuMsg.orientation = quaternion;
-                imu_pub.publish(imuMsg);
-                received_attitude++;
-            } else if (input_msg.msg_code == MULTIWII_MOTOR) {
-                motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
-                motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
-                motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
-                motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
-                motor_pub.publish(motorMsg);
-                received_motor++;
-            } else if (input_msg.msg_code == MULTIWII_GPS) {
-                gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
-                gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
-                gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
-                gps_pub.publish(gpsMsg);
-                received_gps++;
-            } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
-                received_altitude++;
-            } else if (input_msg.msg_code == MARVIC_BATTERY) {
-                received_battery++;
-            } else if (input_msg.msg_code == MARVIC_LED) {
-                received_led++;
-            } else if (input_msg.msg_code == MARVIC_DISTANCE) {
-                received_distance++;
-            }
 
-            multiwii_serial.receive_to_buffer();
+        // receive serial stuff
+        while (multiwii_serial.receive_to_buffer() == true){
+            // interpret new input
+            while (multiwii_serial.read_msg_from_buffer(&input_msg) == true) {
+                received_total++;
+                if (input_msg.msg_length == 0) {
+                    //std::cout << "interpreting_loop >> received request" << std::endl;
+                } else {
+                    if (input_msg.msg_code == MULTIWII_STATUS) {
+                        // publish to ros here
+                        received_status++;
+                    } else if (input_msg.msg_code == MULTIWII_RC) {
+                        headerMsg.seq = received_rc;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "multiwii";
+                        joyMsg.header = headerMsg;
+                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
+                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
+                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
+                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
+                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
+                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
+                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
+                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
+                        joy_pub.publish(joyMsg);
+                        received_rc++;
+                    } else if (input_msg.msg_code == MULTIWII_IMU) {
+                        imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
+                        imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
+                        imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
+                        imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
+                        imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
+                        imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
+                        received_imu++;
+                    } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                        headerMsg.seq = received_imu;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "multiwii";
+                        imuMsg.header = headerMsg;
+                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
+                        imuMsg.orientation = quaternion;
+                        imu_pub.publish(imuMsg);
+                        received_attitude++;
+                    } else if (input_msg.msg_code == MULTIWII_MOTOR) {
+                        motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
+                        motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
+                        motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
+                        motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
+                        motor_pub.publish(motorMsg);
+                        received_motor++;
+                    } else if (input_msg.msg_code == MULTIWII_GPS) {
+                        gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
+                        gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
+                        gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
+                        gps_pub.publish(gpsMsg);
+                        received_gps++;
+                    } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                        received_altitude++;
+                    } else if (input_msg.msg_code == MARVIC_BATTERY) {
+                        received_battery++;
+                    } else if (input_msg.msg_code == MARVIC_LED) {
+                        received_led++;
+                    } else if (input_msg.msg_code == MARVIC_DISTANCE) {
+                        received_distance++;
+                    }
+                }
+                usleep(800);    // publishing stuff to ros here
+            }
         }
-        
+
         ros::spinOnce();
         loop_rate.sleep();
     }
