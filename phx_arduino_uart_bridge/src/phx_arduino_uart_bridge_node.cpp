@@ -136,6 +136,11 @@ int main(int argc, char **argv)
             usleep(600);
         }
 
+        if (loop_counter % 100 == 0) {
+            multiwii_serial.send_msg_rc(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800);
+            multiwii_serial.send_from_buffer();
+        }
+
         // receive serial stuff
         while (multiwii_serial.receive_to_buffer() == true){
             // interpret new input

@@ -74,7 +74,7 @@ bool SerialCom::init() {
 }
 
 bool SerialCom::clear_input_buffer() {
-    while (receive_to_buffer() != true){
+    while (receive_to_buffer() == true){
         std::cout << "SerialCom::clear_input_buffer  cleans up" << std::endl;
     }
     memset(input_buffer, '_', sizeof(input_buffer) - 1);
@@ -181,10 +181,11 @@ bool SerialCom::print_input_buffer() {
 bool SerialCom::print_output_buffer() {
     std::cout << "SerialCom::print_output_buffer  ";
     char cc;
-    for (uint16_t index=0; index < 30; index++) {
-        cc = printf("%c ", output_buffer[index]);
-        //cc = printf("%i ", output_buffer[index]);
+    for (uint16_t index=0; index < output_buffer_write_position; index++) {
+        std::cout << "\033[34;1m";
+        cc = printf("%i ", output_buffer[index]);
         std::cout << cc;
+        std::cout << "\033[0m";
     }
     std::cout << std::endl;
     return true;
@@ -235,6 +236,7 @@ bool SerialCom::send_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, ui
     }
     msg.checksum = checksum;
     write_msg_to_buffer(msg);
+    print_output_buffer();
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){
