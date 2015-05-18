@@ -212,11 +212,11 @@ bool SerialCom::prepare_request(MessageCode msg_code){
 }
 
 bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
-    std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_direction = MULTIWII_TO_COM;     // for multiwii: COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
     msg.msg_data.multiwii_rc_set.roll = roll;
@@ -228,23 +228,23 @@ bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll,
     msg.msg_data.multiwii_rc_set.aux3 = aux3;
     msg.msg_data.multiwii_rc_set.aux4 = aux4;
 
-    char msg_data_bytes[sizeof(msg.msg_data)];
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
     uint8_t checksum = msg.msg_length ^ msg.msg_code;
     for (uint16_t index=0; index < msg.msg_length; index++) {
         checksum = checksum ^ msg_data_bytes[index];
     }
     msg.checksum = checksum;
+
     write_msg_to_buffer(msg);
-    print_output_buffer();
 }
 
-bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t motor2, uint16_t moto3, uint16_t motor4, uint16_t motor5, uint16_t motor6, uint16_t motor7) {
-    std::cout << "SerialCom::prepare_msg_motor sending" << std::endl;
+bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t motor2, uint16_t motor3, uint16_t motor4, uint16_t motor5, uint16_t motor6, uint16_t motor7) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_motor sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_direction = MULTIWII_TO_COM;     // for multiwii: COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_MOTOR_SET_LENGTH;
     msg.msg_code = MULTIWII_MOTOR_SET;
     msg.msg_data.multiwii_motor_set.motor0 = motor0;
@@ -256,15 +256,15 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     msg.msg_data.multiwii_motor_set.motor6 = motor6;
     msg.msg_data.multiwii_motor_set.motor7 = motor7;
 
-    char msg_data_bytes[sizeof(msg.msg_data)];
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
     uint8_t checksum = msg.msg_length ^ msg.msg_code;
     for (uint16_t index=0; index < msg.msg_length; index++) {
         checksum = checksum ^ msg_data_bytes[index];
     }
     msg.checksum = checksum;
+
     write_msg_to_buffer(msg);
-    print_output_buffer();
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){
@@ -283,9 +283,10 @@ bool SerialCom::write_msg_to_buffer(Message msg){
     write_to_output_buffer(msg.msg_length);
     write_to_output_buffer(msg.msg_code);
     if (msg.msg_length != 0){
-        char* msg_bytes = reinterpret_cast<char*>(&msg.msg_data);
+        char msg_data_bytes[sizeof(msg.msg_data)];
+        memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
         for (uint8_t index=0; index < msg.msg_length; index++) {
-            write_to_output_buffer(msg_bytes[index]);
+            write_to_output_buffer(msg_data_bytes[index]);
         }
     }
     write_to_output_buffer(msg.checksum);
@@ -532,6 +533,7 @@ void print_multiwii_message(Message* msg) {
             printf(" gyro: %i,\t %i,\t %i\n", msg->msg_data.multiwii_raw_imu.gyrx, msg->msg_data.multiwii_raw_imu.gyry, msg->msg_data.multiwii_raw_imu.gyrz);
             printf(" mag:  %i,\t %i,\t %i\n", msg->msg_data.multiwii_raw_imu.magx, msg->msg_data.multiwii_raw_imu.magy, msg->msg_data.multiwii_raw_imu.magz);
             break;
+
         case MULTIWII_RC:
             printf("   msg_data: MULTIWII_RC\n");
             printf("     roll:     %i\n", msg->msg_data.multiwii_rc.roll);
@@ -543,6 +545,19 @@ void print_multiwii_message(Message* msg) {
             printf("     aux3:     %i\n", msg->msg_data.multiwii_rc.aux3);
             printf("     aux4:     %i\n", msg->msg_data.multiwii_rc.aux4);
             break;
+
+        case MULTIWII_RC_SET:
+            printf("   msg_data: MULTIWII_RC_SET\n");
+            printf("     roll:     %i\n", msg->msg_data.multiwii_rc_set.roll);
+            printf("     pitch:    %i\n", msg->msg_data.multiwii_rc_set.pitch);
+            printf("     yaw:      %i\n", msg->msg_data.multiwii_rc_set.yaw);
+            printf("     throttle: %i\n", msg->msg_data.multiwii_rc_set.throttle);
+            printf("     aux1:     %i\n", msg->msg_data.multiwii_rc_set.aux1);
+            printf("     aux2:     %i\n", msg->msg_data.multiwii_rc_set.aux2);
+            printf("     aux3:     %i\n", msg->msg_data.multiwii_rc_set.aux3);
+            printf("     aux4:     %i\n", msg->msg_data.multiwii_rc_set.aux4);
+            break;
+
         case MULTIWII_MOTOR:
             printf("   msg_data: MULTIWII_MOTOR\n");
             printf("     motor0: %i\n", msg->msg_data.multiwii_motor.motor0);
@@ -561,6 +576,7 @@ void print_multiwii_message(Message* msg) {
             printf("     pitch: %i\n", msg->msg_data.multiwii_attitude.pitch);
             printf("     yaw:   %i\n", msg->msg_data.multiwii_attitude.yaw);
             break;
+
         case MULTIWII_GPS:
             printf("   msg_data: MULTIWII_GPS\n");
             printf("     fix:      %i\n", msg->msg_data.multiwii_gps.fix);

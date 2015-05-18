@@ -125,21 +125,44 @@ int main(int argc, char **argv)
         }
         
         // serialcom send requests
-        if (loop_counter % 1 == 0) {
-            multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+
+        if (loop_counter % 5 == 0) {
+            //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+            //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+            //multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+            //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-            multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-            multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-            multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-            multiwii_serial.send_from_buffer();
-            usleep(600);
-        }
+            multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
+        } else {
+            if (loop_counter % 1 == 0) {
+                multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+                multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+            }
 
-        if (loop_counter % 100 == 0) {
-            multiwii_serial.prepare_msg_rc(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800);
-            multiwii_serial.send_from_buffer();
+            if (loop_counter % 2 == 0) {
+                //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+                multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+                //multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+            }
         }
+        multiwii_serial.send_from_buffer();
+        usleep(900);
+
+        //if (loop_counter % 100 == 0) {
+        //    multiwii_serial.prepare_msg_rc(1024, 1024, 1024, 1024, 1024, 1024, 1024, 1000);
+        //    multiwii_serial.send_from_buffer();
+        //}
 
         // receive serial stuff
         while (multiwii_serial.receive_to_buffer() == true){
@@ -166,6 +189,20 @@ int main(int argc, char **argv)
                         joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
                         joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
                         joy_pub.publish(joyMsg);
+                        ///*
+                        // this demonstrates that it is possible to fly the copter via the serial bridge by sending every second rc update back.
+                        if (received_rc % 2 == 0) {
+                            multiwii_serial.prepare_msg_rc((uint16_t) input_msg.msg_data.multiwii_rc.throttle,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.pitch,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.roll,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.yaw,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux1,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux2,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux3,
+                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux4);
+                            multiwii_serial.send_from_buffer();
+                        }
+                        //*/
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
@@ -203,13 +240,11 @@ int main(int argc, char **argv)
                         received_altitude++;
                     } else if (input_msg.msg_code == MARVIC_BATTERY) {
                         received_battery++;
-                    } else if (input_msg.msg_code == MARVIC_LED) {
-                        received_led++;
                     } else if (input_msg.msg_code == MARVIC_DISTANCE) {
                         received_distance++;
                     }
                 }
-                usleep(800);    // publishing stuff to ros here
+                usleep(600);    // publishing stuff to ros here
             }
         }
 
