@@ -197,8 +197,8 @@ bool SerialCom::deinitialize() {
     return true;
 }
 
-bool SerialCom::send_request(MessageCode msg_code){
-    if (do_debug_printout == true) std::cout << "SerialCom::send_request sending a request on msg_code " << msg_code  << std::endl;
+bool SerialCom::prepare_request(MessageCode msg_code){
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_request sending a request on msg_code " << msg_code  << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
@@ -211,22 +211,50 @@ bool SerialCom::send_request(MessageCode msg_code){
     return true;
 }
 
-bool SerialCom::send_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
-    std::cout << "SerialCom::send_msg_rc sending" << std::endl;
+bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
+    std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
-    msg.msg_code = MULTIWII_RC;
-    msg.msg_data.multiwii_rc.roll = roll;
-    msg.msg_data.multiwii_rc.pitch = pitch;
-    msg.msg_data.multiwii_rc.yaw = yaw;
-    msg.msg_data.multiwii_rc.throttle = throttle;
-    msg.msg_data.multiwii_rc.aux1 = aux1;
-    msg.msg_data.multiwii_rc.aux2 = aux2;
-    msg.msg_data.multiwii_rc.aux3 = aux3;
-    msg.msg_data.multiwii_rc.aux4 = aux4;
+    msg.msg_code = MULTIWII_RC_SET;
+    msg.msg_data.multiwii_rc_set.roll = roll;
+    msg.msg_data.multiwii_rc_set.pitch = pitch;
+    msg.msg_data.multiwii_rc_set.yaw = yaw;
+    msg.msg_data.multiwii_rc_set.throttle = throttle;
+    msg.msg_data.multiwii_rc_set.aux1 = aux1;
+    msg.msg_data.multiwii_rc_set.aux2 = aux2;
+    msg.msg_data.multiwii_rc_set.aux3 = aux3;
+    msg.msg_data.multiwii_rc_set.aux4 = aux4;
+
+    char msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+    write_msg_to_buffer(msg);
+    print_output_buffer();
+}
+
+bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t motor2, uint16_t moto3, uint16_t motor4, uint16_t motor5, uint16_t motor6, uint16_t motor7) {
+    std::cout << "SerialCom::prepare_msg_motor sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = 'M';
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MULTIWII_MOTOR_SET_LENGTH;
+    msg.msg_code = MULTIWII_MOTOR_SET;
+    msg.msg_data.multiwii_motor_set.motor0 = motor0;
+    msg.msg_data.multiwii_motor_set.motor1 = motor1;
+    msg.msg_data.multiwii_motor_set.motor2 = motor2;
+    msg.msg_data.multiwii_motor_set.motor3 = motor3;
+    msg.msg_data.multiwii_motor_set.motor4 = motor4;
+    msg.msg_data.multiwii_motor_set.motor5 = motor5;
+    msg.msg_data.multiwii_motor_set.motor6 = motor6;
+    msg.msg_data.multiwii_motor_set.motor7 = motor7;
 
     char msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));

@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_multiwii", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_multiwii", 1);
     
-    // ros loopspeed (this might interfere with the serial reading and the size of the serial buffer!)
+    // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
     
     // serialcom init
@@ -126,18 +126,18 @@ int main(int argc, char **argv)
         
         // serialcom send requests
         if (loop_counter % 1 == 0) {
-            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
-            multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
-            multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
-            multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
-            multiwii_serial.send_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-            multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(600);
         }
 
         if (loop_counter % 100 == 0) {
-            multiwii_serial.send_msg_rc(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800);
+            multiwii_serial.prepare_msg_rc(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800);
             multiwii_serial.send_from_buffer();
         }
 
@@ -168,6 +168,8 @@ int main(int argc, char **argv)
                         joy_pub.publish(joyMsg);
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
+                        // if raw_imu data is received this is updated in the imu ros message but not directly published.
+                        // the message is only published if fresh attitude data is present.
                         imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
                         imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
                         imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;

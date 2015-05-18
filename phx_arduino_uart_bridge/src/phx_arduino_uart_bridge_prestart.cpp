@@ -37,11 +37,11 @@ int main(int argc, char **argv)
     while (count-- > 0) {
         // request serial stuff
         if (count % 1 == 0) {
-            multiwii_serial.send_request(MULTIWII_RC); request_rc++; request_total++;
-            multiwii_serial.send_request(MULTIWII_GPS); request_gps++; request_total++;
-            multiwii_serial.send_request(MULTIWII_STATUS); request_status++; request_total++;
-            multiwii_serial.send_request(MULTIWII_IMU); request_imu++; request_total++;
-            //multiwii_serial.send_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+            //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.send_from_buffer();
             usleep(800);
         }

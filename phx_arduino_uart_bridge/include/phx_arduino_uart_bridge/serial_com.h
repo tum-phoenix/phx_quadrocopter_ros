@@ -28,10 +28,13 @@ public:
     bool print_input_buffer();
     bool print_output_buffer();
 
-    bool send_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
-    bool send_request(MessageCode);                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
+    bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+    bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+    bool prepare_request(MessageCode);                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
+
     bool write_msg_to_buffer(Message);
     bool write_to_output_buffer(uint8_t);
+
     uint8_t read_from_input_buffer();
     uint16_t available();
     bool read_msg_from_buffer(Message*);

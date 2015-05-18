@@ -1,12 +1,12 @@
 enum MessageDirection : uint8_t {
+    ERROR = '!',
     MULTIWII_TO_COM = '<',
     COM_TO_MULTIWII = '>'
 };
 
 enum MessageCode : uint8_t {
-    MARVIC_BATTERY = 60,
-    MARVIC_LED = 60,
-    MARVIC_DISTANCE = 60,
+    MARVIC_BATTERY = 66,
+    MARVIC_DISTANCE = 60,               // TODO: update this!
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
@@ -15,12 +15,14 @@ enum MessageCode : uint8_t {
     MULTIWII_GPS = 106,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
-    MULTIWII_MOTOR_SET = 214,
-    MULTIWII_RC_SET = 200
+    MULTIWII_MOTOR_SET = 214,           // setting motor
+    MULTIWII_RC_SET = 200               // setting rc
 };
 
 enum MessageLength : uint8_t {
     REQUEST = 0,
+    MARVIC_BATTERY_LENGTH = 24,
+    MARVIC_DISTANCE_LENGTH = 24,        // TODO: update this!
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
     MULTIWII_SERVO_LENGTH = 16,
@@ -35,6 +37,21 @@ enum MessageLength : uint8_t {
 
 struct Payload {
     union {
+        struct {                            // TODO: this message is overkill! min and max are not that interesting!
+            uint16_t cell1_mean;
+            uint16_t cell1_min;
+            uint16_t cell1_max;
+            uint16_t cell2_mean;
+            uint16_t cell2_min;
+            uint16_t cell2_max;
+            uint16_t cell3_mean;
+            uint16_t cell3_min;
+            uint16_t cell3_max;
+            uint16_t cell4_mean;
+            uint16_t cell4_min;
+            uint16_t cell4_max;
+        } marvic_battery;
+
         struct {
             uint16_t cycleTime;
             uint16_t i2c_errors_count;
