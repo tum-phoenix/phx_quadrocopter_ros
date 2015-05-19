@@ -202,7 +202,7 @@ bool SerialCom::prepare_request(MessageCode msg_code){
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = MULTIWII_TO_COM;
+    msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = REQUEST;
     msg.msg_code = msg_code;
     msg.checksum = msg_code;
@@ -216,7 +216,7 @@ bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll,
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = MULTIWII_TO_COM;     // for multiwii: COM_TO_MULTIWII;
+    msg.msg_direction = COM_TO_MULTIWII;     // for multiwii: COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
     msg.msg_data.multiwii_rc_set.roll = roll;
@@ -244,7 +244,7 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = MULTIWII_TO_COM;     // for multiwii: COM_TO_MULTIWII;
+    msg.msg_direction = COM_TO_MULTIWII;     // for multiwii: COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_MOTOR_SET_LENGTH;
     msg.msg_code = MULTIWII_MOTOR_SET;
     msg.msg_data.multiwii_motor_set.motor0 = motor0;

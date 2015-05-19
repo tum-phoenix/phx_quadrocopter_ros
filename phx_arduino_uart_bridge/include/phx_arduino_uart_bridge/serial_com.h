@@ -9,6 +9,31 @@
 void print_multiwii_message(Message*);
 
 class SerialCom {
+
+/*
+MoltiWii Protocol:
+
+$ M {<, >, !} {msg_length} {msg_code} [payload] {check byte}
+
+$ -> start byte marks the start of every valid message
+
+M -> protocol byte marks that in this case MultiWii protocol is used. This allows implementation of up to 255 different protocols at the same time!
+
+{<, >, !} -> direction byte: < means this message is meant for the micro controller,
+                             > means this message is meant for the computer,
+                             ! indicates an error message. no direction information is available.
+
+{msg_length} -> gives the length of the [payload] in number of bytes. For a request the payload is empty, therefore the msg_length = 0
+
+{msg_code} -> a byte which indicates which type of message is delivered.
+
+[payload] -> sequence of bytes containing the actual data of the message.
+             The number of bytes is given by the {msg_length}. It is possible that there is payload byte at all
+
+{check byte} -> this is a circomplex ^ of all bytes starting with the {msg_length} byte.
+*/
+
+
 public:
     // for configuration
     bool set_device(std::string);                   // for pre start configuration: define the serial device path here

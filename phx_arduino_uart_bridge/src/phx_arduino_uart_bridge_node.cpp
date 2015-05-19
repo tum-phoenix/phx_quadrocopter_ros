@@ -63,29 +63,18 @@ int main(int argc, char **argv)
     uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
     
     // init statistics
-    uint32_t request_total = 0;
-    uint32_t request_status = 0;
-    uint32_t request_rc = 0;
-    uint32_t request_imu = 0;
-    uint32_t request_motor = 0;
-    uint32_t request_gps = 0;
-    uint32_t request_attitude = 0;
-    uint32_t request_altitude = 0;
-    uint32_t request_battery = 0;
-    uint32_t request_distance = 0;
-    uint32_t request_led = 0;
-    uint32_t received_total = 0;
-    uint32_t received_status = 0;
-    uint32_t received_rc = 0;
-    uint32_t received_imu = 0;
-    uint32_t received_motor = 0;
-    uint32_t received_gps = 0;
-    uint32_t received_attitude = 0;
-    uint32_t received_altitude = 0;
-    uint32_t received_battery = 0;
-    uint32_t received_distance = 0;
-    uint32_t received_led = 0;
-    
+    uint32_t request_total = 0;         uint32_t received_total = 0;
+    uint32_t request_status = 0;        uint32_t received_status = 0;
+    uint32_t request_rc = 0;            uint32_t received_rc = 0;
+    uint32_t request_imu = 0;           uint32_t received_imu = 0;
+    uint32_t request_attitude = 0;      uint32_t received_attitude = 0;
+    uint32_t request_motor = 0;         uint32_t received_motor = 0;
+    uint32_t request_gps = 0;           uint32_t received_gps = 0;
+    uint32_t request_altitude = 0;      uint32_t received_altitude = 0;
+    uint32_t request_battery = 0;       uint32_t received_battery = 0;
+    uint32_t request_distance = 0;      uint32_t received_distance = 0;
+
+
     // set start timestamps in real and in cpu time
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
     double begin_communication = double(clock()) / CLOCKS_PER_SEC;
@@ -102,22 +91,29 @@ int main(int argc, char **argv)
         if (loop_counter % 1000 == 0) {
             system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "total:   " << request_total       << "\t" << received_total    << "\t" << request_total - received_total         << std::endl;
             std::cout << "status   " << request_status      << "\t" << received_status   << "\t" << request_status - received_status       << std::endl;
             std::cout << "rc       " << request_rc          << "\t" << received_rc       << "\t" << request_rc - received_rc               << std::endl;
             std::cout << "imu      " << request_imu         << "\t" << received_imu      << "\t" << request_imu - received_imu             << std::endl;
             std::cout << "attitude " << request_attitude    << "\t" << received_attitude << "\t" << request_attitude - received_attitude   << std::endl;
             std::cout << "motor    " << request_motor       << "\t" << received_motor    << "\t" << request_motor - received_motor         << std::endl;
             std::cout << "gps      " << request_gps         << "\t" << received_gps      << "\t" << request_gps - received_gps             << std::endl;
+            std::cout << "altitude " << request_altitude    << "\t" << received_altitude << "\t" << request_altitude - received_altitude   << std::endl;
+            std::cout << "battery  " << request_battery     << "\t" << received_battery  << "\t" << request_battery - received_battery     << std::endl;
+            std::cout << "distance " << request_distance    << "\t" << received_distance << "\t" << request_distance - received_distance   << std::endl;
+            std::cout << "total:   " << request_total       << "\t" << received_total    << "\t" << request_total - received_total         << std::endl;
             
             t1 = std::chrono::high_resolution_clock::now();
             real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
-            std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
-            std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq attitude" << received_attitude / real_duration << " msg/s" << std::endl;
-            std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
-            std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq status   " << received_status   / real_duration << " msg/s" << std::endl;
+            std::cout << "freq rc       " << received_rc       / real_duration << " msg/s" << std::endl;
+            std::cout << "freq imu      " << received_imu      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq attitude " << received_attitude / real_duration << " msg/s" << std::endl;
+            std::cout << "freq motor    " << received_motor    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq gps      " << received_gps      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq altitude " << received_altitude / real_duration << " msg/s" << std::endl;
+            std::cout << "freq battery  " << received_battery  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq distance " << received_distance / real_duration << " msg/s" << std::endl;
+            std::cout << "freq total    " << received_total    / real_duration << " msg/s" << std::endl;
             
             std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
             std::cout << " communication took " << real_duration << " real seconds" << std::endl;
@@ -125,7 +121,6 @@ int main(int argc, char **argv)
         }
         
         // serialcom send requests
-
         if (loop_counter % 5 == 0) {
             //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
             //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;

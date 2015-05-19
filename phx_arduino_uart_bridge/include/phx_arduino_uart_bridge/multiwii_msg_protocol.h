@@ -1,7 +1,7 @@
 enum MessageDirection : uint8_t {
     ERROR = '!',
-    MULTIWII_TO_COM = '<',
-    COM_TO_MULTIWII = '>'
+    MULTIWII_TO_COM = '>',
+    COM_TO_MULTIWII = '<'
 };
 
 enum MessageCode : uint8_t {
