@@ -16,6 +16,8 @@
 #include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
+void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
+
 /*
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import NavSatFix, NavSatStatus
@@ -29,7 +31,9 @@ from phx_arduino_uart_bridge.msg import Motor
 from phx_arduino_uart_bridge.msg import Battery
 from phx_arduino_uart_bridge.msg import Cycletime
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
- */
+*/
+
+SerialCom multiwii_serial;                                              // create SerialCom instance
 
 int main(int argc, char **argv)
 {
@@ -45,7 +49,7 @@ int main(int argc, char **argv)
     phx_arduino_uart_bridge::Motor motorMsg;
     phx_arduino_uart_bridge::Status statusMsg;
     phx_arduino_uart_bridge::Altitude altitudeMsg;
-    phx_arduino_uart_bridge::Altitude BatteryMsg;
+    phx_arduino_uart_bridge::Battery batteryMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
@@ -56,12 +60,14 @@ int main(int argc, char **argv)
     ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/altitude_marvic", 1);
     ros::Publisher battery_pub = n.advertise<phx_arduino_uart_bridge::Battery>("phx/battery_marvic", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_marvic", 1);
+
+    // ros init subscriber
+    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer", 1, rc_computer_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
     
     // serialcom init
-    SerialCom multiwii_serial;                                              // create SerialCom instance
     multiwii_serial.set_device("/dev/ttyUSB0");                             // select the device
     multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
     multiwii_serial.set_max_io(250);                                        // set maximum bytes per reading
@@ -298,4 +304,18 @@ int main(int argc, char **argv)
     std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
     
     return 0;
+}
+
+
+// callbacks
+void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
+    multiwii_serial.prepare_msg_rc((uint16_t) (*joyMsg).axes[0],
+                                   (uint16_t) joyMsg->axes[1],
+                                   (uint16_t) joyMsg->axes[2],
+                                   (uint16_t) joyMsg->axes[3],
+                                   (uint16_t) joyMsg->buttons[0],
+                                   (uint16_t) joyMsg->buttons[1],
+                                   (uint16_t) joyMsg->buttons[2],
+                                   (uint16_t) joyMsg->buttons[3]);
+    multiwii_serial.send_from_buffer();
 }
