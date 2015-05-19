@@ -1,0 +1,2 @@
+int16 cycleTime
+int16 i2c_errors_count

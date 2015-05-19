@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_msgs
   message_generation
   tf
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -55,6 +56,8 @@ find_package(catkin REQUIRED COMPONENTS
    Motor.msg
    Battery.msg
    Cycletime.msg
+   Status.msg
+   Altitude.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -111,17 +114,24 @@ include_directories(
  )
 
 ## Declare a cpp executable
-add_executable(phx_arduino_uart_bridge_node src/phx_arduino_uart_bridge_node.cpp)
+add_executable(phx_arduino_uart_bridge_node_multiwii src/phx_arduino_uart_bridge_node_multiwii.cpp)
+add_executable(phx_arduino_uart_bridge_node_marvic src/phx_arduino_uart_bridge_node_marvic.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(phx_arduino_uart_bridge_node phx_arduino_uart_bridge_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(phx_arduino_uart_bridge_node
+target_link_libraries(phx_arduino_uart_bridge_node_multiwii
    ${catkin_LIBRARIES}
    phx_serial_com
 )
+
+target_link_libraries(phx_arduino_uart_bridge_node_marvic
+   ${catkin_LIBRARIES}
+   phx_serial_com
+)
+
 
 #############
 ## Install ##
@@ -138,7 +148,7 @@ target_link_libraries(phx_arduino_uart_bridge_node
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS phx_arduino_uart_bridge phx_arduino_uart_bridge_node
+# install(TARGETS phx_arduino_uart_bridge phx_arduino_uart_bridge_node_multiwii
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

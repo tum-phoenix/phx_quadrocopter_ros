@@ -8,6 +8,9 @@
 #include "sensor_msgs/Joy.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "phx_arduino_uart_bridge/Motor.h"
+#include "phx_arduino_uart_bridge/Status.h"
+#include "phx_arduino_uart_bridge/Altitude.h"
+#include "phx_arduino_uart_bridge/Battery.h"
 
 #include <chrono>
 #include <iostream>
@@ -32,7 +35,7 @@ int main(int argc, char **argv)
 {
     // init ------------------------------------------------------------------------------------------------
     // ros init
-    ros::init(argc, argv, "UARTBridge");
+    ros::init(argc, argv, "UARTBridge_marvic");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
     sensor_msgs::Imu imuMsg;
@@ -40,13 +43,19 @@ int main(int argc, char **argv)
     joyMsg.axes = std::vector<float> (4, 0);
     joyMsg.buttons = std::vector<int> (4, 0);
     phx_arduino_uart_bridge::Motor motorMsg;
+    phx_arduino_uart_bridge::Status statusMsg;
+    phx_arduino_uart_bridge::Altitude altitudeMsg;
+    phx_arduino_uart_bridge::Altitude BatteryMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
-    ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu_multiwii", 1);
-    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/rc_multiwii", 1);
-    ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_multiwii", 1);
-    ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_multiwii", 1);
+    ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu_marvic", 1);
+    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/rc_marvic", 1);
+    ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_marvic", 1);
+    ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/status_marvic", 1);
+    ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/altitude_marvic", 1);
+    ros::Publisher battery_pub = n.advertise<phx_arduino_uart_bridge::Battery>("phx/battery_marvic", 1);
+    ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_marvic", 1);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -168,7 +177,9 @@ int main(int argc, char **argv)
                     //std::cout << "interpreting_loop >> received request" << std::endl;
                 } else {
                     if (input_msg.msg_code == MULTIWII_STATUS) {
-                        // publish to ros here
+                        statusMsg.cycleTime = input_msg.msg_data.multiwii_status.cycleTime;
+                        statusMsg.i2c_errors_count = input_msg.msg_data.multiwii_status.i2c_errors_count;
+                        status_pub.publish(statusMsg);
                         received_status++;
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
@@ -232,8 +243,16 @@ int main(int argc, char **argv)
                         gps_pub.publish(gpsMsg);
                         received_gps++;
                     } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
+                        altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
+                        altitude_pub.publish(altitudeMsg);
                         received_altitude++;
                     } else if (input_msg.msg_code == MARVIC_BATTERY) {
+                        batteryMsg.cell1 = input_msg.msg_data.marvic_battery.cell1_mean;
+                        batteryMsg.cell2 = input_msg.msg_data.marvic_battery.cell2_mean;
+                        batteryMsg.cell3 = input_msg.msg_data.marvic_battery.cell3_mean;
+                        batteryMsg.cell4 = input_msg.msg_data.marvic_battery.cell4_mean;
+                        battery_pub.publish(batteryMsg);
                         received_battery++;
                     } else if (input_msg.msg_code == MARVIC_DISTANCE) {
                         received_distance++;
