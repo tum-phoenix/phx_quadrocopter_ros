@@ -201,7 +201,7 @@ int main(int argc, char **argv)
                         joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
                         joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
                         joy_pub.publish(joyMsg);
-                        ///*
+                        /*
                         // this demonstrates that it is possible to fly the copter via the serial bridge by sending every second rc update back.
                         if (received_rc % 2 == 0) {
                             multiwii_serial.prepare_msg_rc((uint16_t) input_msg.msg_data.multiwii_rc.throttle,
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
                                                            (uint16_t) input_msg.msg_data.multiwii_rc.aux4);
                             multiwii_serial.send_from_buffer();
                         }
-                        //*/
+                        */
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
@@ -309,10 +309,11 @@ int main(int argc, char **argv)
 
 // callbacks
 void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
-    multiwii_serial.prepare_msg_rc((uint16_t) (*joyMsg).axes[0],
+    std::cout << "\033[1;31m>>> rc_computer_callback\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_rc((uint16_t) (*joyMsg).axes[3],
                                    (uint16_t) joyMsg->axes[1],
+                                   (uint16_t) joyMsg->axes[0],
                                    (uint16_t) joyMsg->axes[2],
-                                   (uint16_t) joyMsg->axes[3],
                                    (uint16_t) joyMsg->buttons[0],
                                    (uint16_t) joyMsg->buttons[1],
                                    (uint16_t) joyMsg->buttons[2],
