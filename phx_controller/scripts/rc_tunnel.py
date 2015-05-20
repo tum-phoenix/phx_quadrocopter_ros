@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import time
 import rospy
 from sensor_msgs.msg import Joy
 
@@ -9,17 +10,20 @@ class ControllerNode():
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.pub = rospy.Publisher('/phx/rc_computer', Joy)
 
-        self.freq = 100     #Hz
+        self.freq = 100                 # Hz
         r = rospy.Rate(self.freq)
-        self.counter = 0
+        self.counter_input = 0
+        self.counter_output = 0
+        self.start_time = time.time()
         
         while not rospy.is_shutdown():
             r.sleep()
 
     def rcCallback(self, joy_msg):
-        self.counter += 1
+        self.counter_input += 1
 
-        if self.counter % 2 == 0:
+        if self.counter_input % 2 == 0:
+            self.counter_output += 1
             joy_msg = Joy()
 
             # Replay and override current rc
@@ -33,6 +37,10 @@ class ControllerNode():
             self.input_rc[5] = joy_msg.buttons[1]
             self.input_rc[6] = joy_msg.buttons[2]
             self.input_rc[7] = joy_msg.buttons[3]
+            self.pub.publish(joy_msg)
+
+        if self.counter_input % 100 == 0:
+            print 'rc_tunnel_node.py >>', self.counter_input/(time.time()-self.start_time), 'rc inputs/sec  ', self.counter_output/(time.time()-self.start_time), 'rc outputs/sec'
 
 
 if __name__ == '__main__':
