@@ -11,27 +11,13 @@
 #include "phx_arduino_uart_bridge/Status.h"
 #include "phx_arduino_uart_bridge/Altitude.h"
 #include "phx_arduino_uart_bridge/Battery.h"
+#include "phx_arduino_uart_bridge/Autonomous.h"
 
 #include <chrono>
 #include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
-
-/*
-from sensor_msgs.msg import Imu
-from sensor_msgs.msg import NavSatFix, NavSatStatus
-from sensor_msgs.msg import Joy
-from std_msgs.msg import Int16
-from sensor_msgs.msg import FluidPressure #Barometer
-from sensor_msgs.msg import Temperature #For compensation gyrodrift
-from sensor_msgs.msg import Range #Distance to ground
-from geometry_msgs.msg import Twist, Quaternion
-from phx_arduino_uart_bridge.msg import Motor
-from phx_arduino_uart_bridge.msg import Battery
-from phx_arduino_uart_bridge.msg import Cycletime
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
-*/
 
 SerialCom multiwii_serial;                                              // create SerialCom instance
 
@@ -50,6 +36,7 @@ int main(int argc, char **argv)
     phx_arduino_uart_bridge::Status statusMsg;
     phx_arduino_uart_bridge::Altitude altitudeMsg;
     phx_arduino_uart_bridge::Battery batteryMsg;
+    phx_arduino_uart_bridge::Autonomous autonomousMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
@@ -58,7 +45,9 @@ int main(int argc, char **argv)
     ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/motor_marvic", 1);
     ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/status_marvic", 1);
     ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/altitude_marvic", 1);
+    ros::Publisher sonar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/sonar_marvic", 1);
     ros::Publisher battery_pub = n.advertise<phx_arduino_uart_bridge::Battery>("phx/battery_marvic", 1);
+    ros::Publisher autonomous_pub = n.advertise<phx_arduino_uart_bridge::Autonomous>("phx/autonomous_marvic", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_marvic", 1);
 
     // ros init subscriber
@@ -87,7 +76,9 @@ int main(int argc, char **argv)
     uint32_t request_gps = 0;           uint32_t received_gps = 0;
     uint32_t request_altitude = 0;      uint32_t received_altitude = 0;
     uint32_t request_battery = 0;       uint32_t received_battery = 0;
-    uint32_t request_distance = 0;      uint32_t received_distance = 0;
+    uint32_t request_sonar = 0;         uint32_t received_sonar = 0;
+    uint32_t request_autonomous = 0;    uint32_t received_autonomous = 0;
+
 
 
     // set start timestamps in real and in cpu time
@@ -106,29 +97,31 @@ int main(int argc, char **argv)
         if (loop_counter % 1000 == 0) {
             system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "status   " << request_status      << "\t" << received_status   << "\t" << request_status - received_status       << std::endl;
-            std::cout << "rc       " << request_rc          << "\t" << received_rc       << "\t" << request_rc - received_rc               << std::endl;
-            std::cout << "imu      " << request_imu         << "\t" << received_imu      << "\t" << request_imu - received_imu             << std::endl;
-            std::cout << "attitude " << request_attitude    << "\t" << received_attitude << "\t" << request_attitude - received_attitude   << std::endl;
-            std::cout << "motor    " << request_motor       << "\t" << received_motor    << "\t" << request_motor - received_motor         << std::endl;
-            std::cout << "gps      " << request_gps         << "\t" << received_gps      << "\t" << request_gps - received_gps             << std::endl;
-            std::cout << "altitude " << request_altitude    << "\t" << received_altitude << "\t" << request_altitude - received_altitude   << std::endl;
-            std::cout << "battery  " << request_battery     << "\t" << received_battery  << "\t" << request_battery - received_battery     << std::endl;
-            std::cout << "distance " << request_distance    << "\t" << received_distance << "\t" << request_distance - received_distance   << std::endl;
-            std::cout << "total:   " << request_total       << "\t" << received_total    << "\t" << request_total - received_total         << std::endl;
+            std::cout << "status   " << request_status      << "\t" << received_status     << "\t" << request_status - received_status         << std::endl;
+            std::cout << "rc       " << request_rc          << "\t" << received_rc         << "\t" << request_rc - received_rc                 << std::endl;
+            std::cout << "imu      " << request_imu         << "\t" << received_imu        << "\t" << request_imu - received_imu               << std::endl;
+            std::cout << "attitude " << request_attitude    << "\t" << received_attitude   << "\t" << request_attitude - received_attitude     << std::endl;
+            std::cout << "motor    " << request_motor       << "\t" << received_motor      << "\t" << request_motor - received_motor           << std::endl;
+            std::cout << "gps      " << request_gps         << "\t" << received_gps        << "\t" << request_gps - received_gps               << std::endl;
+            std::cout << "altitude " << request_altitude    << "\t" << received_altitude   << "\t" << request_altitude - received_altitude     << std::endl;
+            std::cout << "battery  " << request_battery     << "\t" << received_battery    << "\t" << request_battery - received_battery       << std::endl;
+            std::cout << "sonar    " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
+            std::cout << "autonom  " << request_autonomous  << "\t" << received_autonomous << "\t" << request_autonomous - received_autonomous << std::endl;
+            std::cout << "total:   " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
             
             t1 = std::chrono::high_resolution_clock::now();
             real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
-            std::cout << "freq status   " << received_status   / real_duration << " msg/s" << std::endl;
-            std::cout << "freq rc       " << received_rc       / real_duration << " msg/s" << std::endl;
-            std::cout << "freq imu      " << received_imu      / real_duration << " msg/s" << std::endl;
-            std::cout << "freq attitude " << received_attitude / real_duration << " msg/s" << std::endl;
-            std::cout << "freq motor    " << received_motor    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq gps      " << received_gps      / real_duration << " msg/s" << std::endl;
-            std::cout << "freq altitude " << received_altitude / real_duration << " msg/s" << std::endl;
-            std::cout << "freq battery  " << received_battery  / real_duration << " msg/s" << std::endl;
-            std::cout << "freq distance " << received_distance / real_duration << " msg/s" << std::endl;
-            std::cout << "freq total    " << received_total    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq status   " << received_status     / real_duration << " msg/s" << std::endl;
+            std::cout << "freq rc       " << received_rc         / real_duration << " msg/s" << std::endl;
+            std::cout << "freq imu      " << received_imu        / real_duration << " msg/s" << std::endl;
+            std::cout << "freq attitude " << received_attitude   / real_duration << " msg/s" << std::endl;
+            std::cout << "freq motor    " << received_motor      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq gps      " << received_gps        / real_duration << " msg/s" << std::endl;
+            std::cout << "freq altitude " << received_altitude   / real_duration << " msg/s" << std::endl;
+            std::cout << "freq battery  " << received_battery    / real_duration << " msg/s" << std::endl;
+            std::cout << "freq sonar    " << received_sonar      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq autonom  " << received_autonomous / real_duration << " msg/s" << std::endl;
+            std::cout << "freq total    " << received_total      / real_duration << " msg/s" << std::endl;
             
             std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
             std::cout << " communication took " << real_duration << " real seconds" << std::endl;
@@ -145,6 +138,9 @@ int main(int argc, char **argv)
             multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             multiwii_serial.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_SONAR); request_sonar++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_AUTONOMOUS_FLIGHT); request_autonomous++; request_total++;
+
         } else {
             if (loop_counter % 1 == 0) {
                 multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
@@ -167,12 +163,6 @@ int main(int argc, char **argv)
             }
         }
         multiwii_serial.send_from_buffer();
-        usleep(900);
-
-        //if (loop_counter % 100 == 0) {
-        //    multiwii_serial.prepare_msg_rc(1024, 1024, 1024, 1024, 1024, 1024, 1024, 1000);
-        //    multiwii_serial.send_from_buffer();
-        //}
 
         // receive serial stuff
         while (multiwii_serial.receive_to_buffer() == true){
@@ -260,11 +250,17 @@ int main(int argc, char **argv)
                         batteryMsg.cell4 = input_msg.msg_data.marvic_battery.cell4_mean;
                         battery_pub.publish(batteryMsg);
                         received_battery++;
-                    } else if (input_msg.msg_code == MARVIC_DISTANCE) {
-                        received_distance++;
+                    } else if (input_msg.msg_code == MARVIC_SONAR) {
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance;
+                        altitudeMsg.variation = 0;
+                        sonar_pub.publish(altitudeMsg);
+                        received_sonar++;
+                    } else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
+                        autonomousMsg.is_autonomous = input_msg.msg_data.marvic_autonomous.is_active;
+                        autonomous_pub.publish(autonomousMsg);
+                        received_autonomous++;
                     }
                 }
-                usleep(600);    // publishing stuff to ros here
             }
         }
 

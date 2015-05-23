@@ -211,12 +211,34 @@ bool SerialCom::prepare_request(MessageCode msg_code){
     return true;
 }
 
+
+bool SerialCom::prepare_msg_continuous_sending(uint8_t status) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_continuous_sending sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = 'M';
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MARVIC_CONTINUOUS_SENDING_LENGTH;
+    msg.msg_code = MARVIC_CONTINUOUS_SENDING;
+    msg.msg_data.marvic_continuous_sending.on_off = status;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
 bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = COM_TO_MULTIWII;     // for multiwii: COM_TO_MULTIWII;
+    msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
     msg.msg_data.multiwii_rc_set.roll = roll;
@@ -244,7 +266,7 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = 'M';
-    msg.msg_direction = COM_TO_MULTIWII;     // for multiwii: COM_TO_MULTIWII;
+    msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_MOTOR_SET_LENGTH;
     msg.msg_code = MULTIWII_MOTOR_SET;
     msg.msg_data.multiwii_motor_set.motor0 = motor0;

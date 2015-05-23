@@ -67,6 +67,7 @@ public:
     bool print_output_buffer();
 
     // preparing different messages -> they all call write_msg_to_buffer() in the end
+    bool prepare_msg_continuous_sending(uint8_t);
     bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_request(MessageCode);                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
