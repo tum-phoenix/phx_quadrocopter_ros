@@ -18,6 +18,7 @@
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
+void motor_computer_callback(const phx_arduino_uart_bridge::Motor::ConstPtr&);
 
 SerialCom multiwii_serial;                                              // create SerialCom instance
 
@@ -52,6 +53,7 @@ int main(int argc, char **argv)
 
     // ros init subscriber
     ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer", 1, rc_computer_callback);
+    ros::Subscriber motor_sub = n.subscribe<phx_arduino_uart_bridge::Motor>("phx/motor_computer", 1, motor_computer_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -314,5 +316,18 @@ void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
                                    (uint16_t) joyMsg->buttons[1],
                                    (uint16_t) joyMsg->buttons[2],
                                    (uint16_t) joyMsg->buttons[3]);
+    multiwii_serial.send_from_buffer();
+}
+
+void motor_computer_callback(const phx_arduino_uart_bridge::Motor::ConstPtr& motorMsg) {
+    std::cout << "\033[1;31m>>> motor_computer_callback" << (*motorMsg).motor0 << " " << (*motorMsg).motor1 << " "  << (*motorMsg).motor2 << " " << (*motorMsg).motor3 << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_motor((uint16_t) (*motorMsg).motor0,
+                                      (uint16_t) (*motorMsg).motor1,
+                                      (uint16_t) (*motorMsg).motor2,
+                                      (uint16_t) (*motorMsg).motor3,
+                                      (uint16_t) 1000,
+                                      (uint16_t) 1000,
+                                      (uint16_t) 1000,
+                                      (uint16_t) 1000);
     multiwii_serial.send_from_buffer();
 }
