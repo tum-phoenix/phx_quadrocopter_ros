@@ -10,8 +10,8 @@ class ControllerNode():
     def __init__(self):
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
-        self.sub = rospy.Subscriber('/phx/altitude_multiwii', Altitude, self.altitudeCallback)
-        self.pub = rospy.Publisher('/phx/rc_computer', Joy)
+        self.sub = rospy.Subscriber('/phx/altitude_marvic', Altitude, self.altitudeCallback)
+        self.pub = rospy.Publisher('/phx/rc_computer', Joy, queue_size=1)
 
         self.setPoint = 150
 
@@ -23,11 +23,12 @@ class ControllerNode():
         self.i_stop = 100
         self.controlCommand = 1000
 
-        self.freq = 100     #Hz
-        r = rospy.Rate(self.freq)
-        
+        self.freq = 100     # Hz
+        self.r = rospy.Rate(self.freq)
+
+    def run(self):
         while not rospy.is_shutdown():
-            r.sleep()
+            self.r.sleep()
 
     def altitudeCallback(self, altitude_msg):
         if self.input_rc[4] > 1500:
@@ -68,4 +69,5 @@ if __name__ == '__main__':
     rospy.init_node('controller')
     try:
         controller_node = ControllerNode()
+        controller_node.run()
     except rospy.ROSInterruptException: pass
