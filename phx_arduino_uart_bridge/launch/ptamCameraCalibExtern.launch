@@ -1,0 +1,14 @@
+<launch>
+	<node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/camera/image raw out:=/camera/image" />	
+
+	<node name="image_proc" pkg="image_proc" type="image_proc">
+            <remap from="image_raw" to="camera/image" />
+            <remap from="camera_info" to="camera/camera_info" />
+        </node>
+
+        <node name="cameracalibrator" pkg="ptam" type="cameracalibrator" clear_params="true" output="screen">
+            <remap from="image" to="image_mono" />
+            <remap from="pose" to="pose"/>
+            <rosparam file="$(find ptam)/PtamFixParams.yaml"/>
+        </node>
+</launch>
