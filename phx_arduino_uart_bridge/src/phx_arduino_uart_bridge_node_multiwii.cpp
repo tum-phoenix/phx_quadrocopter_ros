@@ -172,6 +172,10 @@ int main(int argc, char **argv)
                     //std::cout << "interpreting_loop >> received request" << std::endl;
                 } else {
                     if (input_msg.msg_code == MULTIWII_STATUS) {
+                        headerMsg.seq = received_status;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "multiwii";
+                        statusMsg.header = headerMsg;
                         statusMsg.cycleTime = input_msg.msg_data.multiwii_status.cycleTime;
                         statusMsg.i2c_errors_count = input_msg.msg_data.multiwii_status.i2c_errors_count;
                         status_pub.publish(statusMsg);
@@ -211,6 +215,10 @@ int main(int argc, char **argv)
                         imu_pub.publish(imuMsg);
                         received_attitude++;
                     } else if (input_msg.msg_code == MULTIWII_MOTOR) {
+                        headerMsg.seq = received_motor;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "multiwii";
+                        motorMsg.header = headerMsg;
                         motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
                         motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
                         motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
@@ -218,6 +226,10 @@ int main(int argc, char **argv)
                         motor_pub.publish(motorMsg);
                         received_motor++;
                     } else if (input_msg.msg_code == MULTIWII_GPS) {
+                        headerMsg.seq = received_gps;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "multiwii";
+                        gpsMsg.header = headerMsg;
                         gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
                         gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
                         gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
