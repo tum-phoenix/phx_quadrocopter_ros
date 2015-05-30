@@ -79,6 +79,7 @@ find_package(catkin REQUIRED COMPONENTS
 generate_messages(
    DEPENDENCIES
    sensor_msgs
+   std_msgs
  )
 
 ###################################
