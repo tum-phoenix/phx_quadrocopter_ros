@@ -9,6 +9,7 @@ from phx_arduino_uart_bridge.msg import Status
 from phx_arduino_uart_bridge.msg import Motor
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import Joy
+from sensor_msgs.msg import NavSatFix
 from phx_gui.msg import GUI_cmd
 
 
@@ -37,6 +38,35 @@ def default_ros_subscribe_callback(message, ros_topic):
     elif type(message) == Status:
         msg_payload.append(message.cycleTime)
         msg_payload.append(message.i2c_errors_count)
+    elif type(message) == Joy:
+        msg_payload.append(message.axes[0])
+        msg_payload.append(message.axes[1])
+        msg_payload.append(message.axes[2])
+        msg_payload.append(message.axes[3])
+        msg_payload.append(message.buttons[0])
+        msg_payload.append(message.buttons[1])
+        msg_payload.append(message.buttons[2])
+        msg_payload.append(message.buttons[3])
+    elif type(message) == Motor:
+        msg_payload.append(message.motor0)
+        msg_payload.append(message.motor1)
+        msg_payload.append(message.motor2)
+        msg_payload.append(message.motor3)
+    elif type(message) == Imu:
+        msg_payload.append(message.linear_acceleration.x)
+        msg_payload.append(message.linear_acceleration.y)
+        msg_payload.append(message.linear_acceleration.z)
+        msg_payload.append(message.angular_velocity.x)
+        msg_payload.append(message.angular_velocity.y)
+        msg_payload.append(message.angular_velocity.z)
+        msg_payload.append(message.orientation.w)
+        msg_payload.append(message.orientation.x)
+        msg_payload.append(message.orientation.y)
+        msg_payload.append(message.orientation.z)
+    elif type(message) == NavSatFix:
+        msg_payload.append(message.latitude)
+        msg_payload.append(message.longitude)
+        msg_payload.append(message.altitude)
     else:
         print '>>> default_ros_callback: not implemented topic:', ros_topic
     if len(msg_payload) > 0:
@@ -87,7 +117,16 @@ r = rospy.Rate(freq)
 # subscribe >> send >> receive
 subscribers = {'/phx/altitude_marvic': rospy.Subscriber('/phx/altitude_marvic', Altitude, lambda msg: default_ros_subscribe_callback(msg, '/phx/altitude_marvic')),
                '/phx/status_marvic': rospy.Subscriber('/phx/status_marvic', Status, lambda msg: default_ros_subscribe_callback(msg, '/phx/status_marvic')),
-               '/phx/battery_marvic': rospy.Subscriber('/phx/battery_marvic', Battery, lambda msg: default_ros_subscribe_callback(msg, '/phx/battery_marvic'))
+               '/phx/battery_marvic': rospy.Subscriber('/phx/battery_marvic', Battery, lambda msg: default_ros_subscribe_callback(msg, '/phx/battery_marvic')),
+               '/phx/rc_marvic': rospy.Subscriber('/phx/rc_marvic', Joy, lambda msg: default_ros_subscribe_callback(msg, '/phx/rc_marvic')),
+               '/phx/motor_marvic': rospy.Subscriber('/phx/motor_marvic', Motor, lambda msg: default_ros_subscribe_callback(msg, '/phx/motor_marvic')),
+               '/phx/imu_marvic': rospy.Subscriber('/phx/imu_marvic', Imu, lambda msg: default_ros_subscribe_callback(msg, '/phx/imu_marvic')),
+               '/phx/altitude_multiwii': rospy.Subscriber('/phx/altitude_multiwii', Altitude, lambda msg: default_ros_subscribe_callback(msg, '/phx/altitude_multiwii')),
+               '/phx/status_multiwii': rospy.Subscriber('/phx/status_multiwii', Status, lambda msg: default_ros_subscribe_callback(msg, '/phx/status_multiwii')),
+               '/phx/rc_multiwii': rospy.Subscriber('/phx/rc_multiwii', Joy, lambda msg: default_ros_subscribe_callback(msg, '/phx/rc_multiwii')),
+               '/phx/motor_multiwii': rospy.Subscriber('/phx/motor_multiwii', Motor, lambda msg: default_ros_subscribe_callback(msg, '/phx/motor_multiwii')),
+               '/phx/imu_multiwii': rospy.Subscriber('/phx/imu_multiwii', Imu, lambda msg: default_ros_subscribe_callback(msg, '/phx/imu_multiwii')),
+               '/phx/gps_multiwii': rospy.Subscriber('/phx/gps_multiwii', NavSatFix, lambda msg: default_ros_subscribe_callback(msg, '/phx/gps_multiwii'))
                }
 
 # ros     << osc     << gui
