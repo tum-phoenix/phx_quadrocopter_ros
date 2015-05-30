@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v0.ui'
 #
-# Created: Sun May 24 17:29:15 2015
+# Created: Fri May 29 20:51:03 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,23 +43,32 @@ class Ui_MainWindow(object):
         self.gui_output.addLayout(self.verticalLayout_plots)
         self.gridLayout_sliders = QtGui.QGridLayout()
         self.gridLayout_sliders.setObjectName(_fromUtf8("gridLayout_sliders"))
-        self.label_18 = QtGui.QLabel(self.horizontalLayoutWidget)
-        self.label_18.setObjectName(_fromUtf8("label_18"))
-        self.gridLayout_sliders.addWidget(self.label_18, 2, 1, 1, 1)
-        self.horizontalSlider_delta_time = QtGui.QSlider(self.horizontalLayoutWidget)
-        self.horizontalSlider_delta_time.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider_delta_time.setObjectName(_fromUtf8("horizontalSlider_delta_time"))
-        self.gridLayout_sliders.addWidget(self.horizontalSlider_delta_time, 1, 0, 1, 1)
+        self.label_17 = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.label_17.setObjectName(_fromUtf8("label_17"))
+        self.gridLayout_sliders.addWidget(self.label_17, 2, 1, 1, 1)
         self.horizontalSlider_time_point = QtGui.QSlider(self.horizontalLayoutWidget)
         self.horizontalSlider_time_point.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalSlider_time_point.setObjectName(_fromUtf8("horizontalSlider_time_point"))
-        self.gridLayout_sliders.addWidget(self.horizontalSlider_time_point, 2, 0, 1, 1)
+        self.gridLayout_sliders.addWidget(self.horizontalSlider_time_point, 3, 0, 1, 1)
+        self.horizontalSlider_delta_time = QtGui.QSlider(self.horizontalLayoutWidget)
+        self.horizontalSlider_delta_time.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider_delta_time.setObjectName(_fromUtf8("horizontalSlider_delta_time"))
+        self.gridLayout_sliders.addWidget(self.horizontalSlider_delta_time, 2, 0, 1, 1)
+        self.label_18 = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.label_18.setObjectName(_fromUtf8("label_18"))
+        self.gridLayout_sliders.addWidget(self.label_18, 3, 1, 1, 1)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.comboBox_topic_selection = QtGui.QComboBox(self.horizontalLayoutWidget)
         self.comboBox_topic_selection.setObjectName(_fromUtf8("comboBox_topic_selection"))
-        self.gridLayout_sliders.addWidget(self.comboBox_topic_selection, 0, 0, 1, 1)
-        self.label_17 = QtGui.QLabel(self.horizontalLayoutWidget)
-        self.label_17.setObjectName(_fromUtf8("label_17"))
-        self.gridLayout_sliders.addWidget(self.label_17, 1, 1, 1, 1)
+        self.horizontalLayout_2.addWidget(self.comboBox_topic_selection)
+        self.comboBox_sub_topic_selection = QtGui.QComboBox(self.horizontalLayoutWidget)
+        self.comboBox_sub_topic_selection.setObjectName(_fromUtf8("comboBox_sub_topic_selection"))
+        self.horizontalLayout_2.addWidget(self.comboBox_sub_topic_selection)
+        self.button_add_remove_plot = QtGui.QPushButton(self.horizontalLayoutWidget)
+        self.button_add_remove_plot.setObjectName(_fromUtf8("button_add_remove_plot"))
+        self.horizontalLayout_2.addWidget(self.button_add_remove_plot)
+        self.gridLayout_sliders.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
         self.gui_output.addLayout(self.gridLayout_sliders)
         self.horizontalLayout.addLayout(self.gui_output)
         self.gui_input = QtGui.QVBoxLayout()
@@ -309,8 +318,9 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "phoenixGUI", None))
-        self.label_18.setText(_translate("MainWindow", "time", None))
         self.label_17.setText(_translate("MainWindow", "dt", None))
+        self.label_18.setText(_translate("MainWindow", "time", None))
+        self.button_add_remove_plot.setText(_translate("MainWindow", "add/remove", None))
         self.label_3.setText(_translate("MainWindow", "axis2", None))
         self.label_7.setText(_translate("MainWindow", "button2", None))
         self.label_6.setText(_translate("MainWindow", "button1", None))

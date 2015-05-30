@@ -135,8 +135,11 @@ class OSCt:
         self.destination_address = self.destination_ip, self.destination_port
         print 'OSC-transmitter to', self.destination_ip, ':', self.destination_port
 
-        self.osc_transmitter = OSC.OSCClient()
-        self.osc_transmitter.connect(self.destination_address)
+        try:
+            self.osc_transmitter = OSC.OSCClient()
+            self.osc_transmitter.connect(self.destination_address)
+        except:
+            pass
         self.time_of_last_connect = 0
         self.connection_status = 'disconnected'
 
@@ -159,9 +162,12 @@ class OSCt:
             ip = self.destination_ip
         if debug:
             print ' >>> OSCt sends connect package to', self.destination_ip, ':', self.destination_port
-        if time.time() > self.time_of_last_connect + 5:
+        if time.time() > self.time_of_last_connect + 2:
             self.time_of_last_connect = time.time()
-            self.send_topic(topic='/osc_gui/connect', payload=ip, debug=debug)
+            try:
+                self.send_topic(topic='/osc_gui/connect', payload=ip, debug=debug)
+            except:
+                pass
             print 'sent connect'
 
     def send_keep_alive(self, debug=False):
