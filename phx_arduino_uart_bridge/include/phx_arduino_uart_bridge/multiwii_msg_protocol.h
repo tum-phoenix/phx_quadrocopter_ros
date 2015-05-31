@@ -122,6 +122,10 @@ struct Payload {
             uint16_t aux2;
             uint16_t aux3;
             uint16_t aux4;
+            uint16_t aux5;
+            uint16_t aux6;
+            uint16_t aux7;
+            uint16_t aux8;
         } multiwii_rc;
 
         struct {
