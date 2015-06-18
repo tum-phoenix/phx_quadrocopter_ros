@@ -1,4 +1,5 @@
-__author__ = 'manuelviermetz'
+#!/usr/bin/env python
+# __author__ = 'manuelviermetz'
 
 import rospy
 import numpy as np
@@ -126,11 +127,13 @@ subscribers = {'/phx/altitude_marvic': rospy.Subscriber('/phx/altitude_marvic', 
                '/phx/rc_multiwii': rospy.Subscriber('/phx/rc_multiwii', Joy, lambda msg: default_ros_subscribe_callback(msg, '/phx/rc_multiwii')),
                '/phx/motor_multiwii': rospy.Subscriber('/phx/motor_multiwii', Motor, lambda msg: default_ros_subscribe_callback(msg, '/phx/motor_multiwii')),
                '/phx/imu_multiwii': rospy.Subscriber('/phx/imu_multiwii', Imu, lambda msg: default_ros_subscribe_callback(msg, '/phx/imu_multiwii')),
-               '/phx/gps_multiwii': rospy.Subscriber('/phx/gps_multiwii', NavSatFix, lambda msg: default_ros_subscribe_callback(msg, '/phx/gps_multiwii'))
+               '/phx/gps_multiwii': rospy.Subscriber('/phx/gps_multiwii', NavSatFix, lambda msg: default_ros_subscribe_callback(msg, '/phx/gps_multiwii')),
+               '/phx/rc_computer_direct': rospy.Subscriber('/phx/rc_computer_direct', Joy, lambda msg: default_ros_subscribe_callback(msg, '/phx/rc_computer_direct'))
                }
 
 # ros     << osc     << gui
 # publish << receive << send
+#publishers = {'/phx/rc_computer_direct': [rospy.Publisher('/phx/rc_computer_direct', Joy, queue_size=1), 'Joy'],
 publishers = {'/phx/gui_rc': [rospy.Publisher('/phx/gui_rc', Joy, queue_size=1), 'Joy'],
               '/phx/gui_parameters': [rospy.Publisher('/phx/gui_parameters', GUI_cmd, queue_size=1), 'GUI_cmd']
               }
@@ -142,10 +145,10 @@ counter = 0
 try:
     while not rospy.is_shutdown():
 
-        print 'osc connection status: OSCr', osc_receiver.connection_status, 'OSCt', osc_transmitter.connection_status, osc_transmitter.sending_failed_counter, time.time() - osc_receiver.time_of_last_keep_alive_receiving
+        #print 'osc connection status: OSCr', osc_receiver.connection_status, 'OSCt', osc_transmitter.connection_status, osc_transmitter.sending_failed_counter, time.time() - osc_receiver.time_of_last_keep_alive_receiving
         osc_receiver.keep_alive()
         counter += 1
-        print 'sent... ', counter
+        #print 'sent... ', counter
 
         r.sleep()
     osc_receiver.stop()
