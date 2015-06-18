@@ -16,6 +16,10 @@
 #include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
+void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
+
+SerialCom multiwii_serial;                                              // create SerialCom instance
+
 /*
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import NavSatFix, NavSatStatus
@@ -54,13 +58,17 @@ int main(int argc, char **argv)
     ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/status_multiwii", 1);
     ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/altitude_multiwii", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps_multiwii", 1);
+
+    // ros init subscribers
+    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer_direct", 1, rc_direct_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
     
     // serialcom init
     SerialCom multiwii_serial;                                              // create SerialCom instance
-    multiwii_serial.set_device("/dev/ttyUSB1");                             // select the device
+    //multiwii_serial.set_device("/dev/ttyUSB1");                             // select the device
+    multiwii_serial.set_device("/dev/ttyAMA0");                             // select the device
     multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
     multiwii_serial.set_max_io(250);                                        // set maximum bytes per reading
     multiwii_serial.init();                                                 // start serial connection
@@ -287,4 +295,18 @@ int main(int argc, char **argv)
     std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
     
     return 0;
+}
+
+// callbacks
+void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
+    std::cout << "\033[1;31m>>> rc_direct_callback\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_rc((uint16_t) (*joyMsg).axes[3],
+                                   (uint16_t) joyMsg->axes[1],
+                                   (uint16_t) joyMsg->axes[0],
+                                   (uint16_t) joyMsg->axes[2],
+                                   (uint16_t) joyMsg->buttons[0],
+                                   (uint16_t) joyMsg->buttons[1],
+                                   (uint16_t) joyMsg->buttons[2],
+                                   (uint16_t) joyMsg->buttons[3]);
+    multiwii_serial.send_from_buffer();
 }
