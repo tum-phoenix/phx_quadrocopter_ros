@@ -117,6 +117,7 @@ r = rospy.Rate(freq)
 # ros       >> osc  >> gui
 # subscribe >> send >> receive
 subscribers = {'/phx/altitude_marvic': rospy.Subscriber('/phx/altitude_marvic', Altitude, lambda msg: default_ros_subscribe_callback(msg, '/phx/altitude_marvic')),
+               '/phx/sonar_marvic': rospy.Subscriber('/phx/sonar_marvic', Altitude, lambda msg: default_ros_subscribe_callback(msg, '/phx/sonar_marvic')),
                '/phx/status_marvic': rospy.Subscriber('/phx/status_marvic', Status, lambda msg: default_ros_subscribe_callback(msg, '/phx/status_marvic')),
                '/phx/battery_marvic': rospy.Subscriber('/phx/battery_marvic', Battery, lambda msg: default_ros_subscribe_callback(msg, '/phx/battery_marvic')),
                '/phx/rc_marvic': rospy.Subscriber('/phx/rc_marvic', Joy, lambda msg: default_ros_subscribe_callback(msg, '/phx/rc_marvic')),

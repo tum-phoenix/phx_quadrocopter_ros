@@ -2,10 +2,11 @@
 	<machine name="phoenix" address="localhost" />
 	<node name="FlightLogger" pkg="rosbag" type="record" args="-a -o /home/phoenix/flightlogs/flightlog" machine="phoenix" />
 	<node name="UARTBridge_multiwii" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_multiwii" output="screen" machine="phoenix" />
-	<!-- <node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" /> -->
+	<node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" />
+    <!--  -->
+    <node name="Camera" pkg="raspicam" type="raspicam_node" output="screen" machine="phoenix" />
 	<node name="LEDControl_Node" pkg="phx_controller" type="led_node.py" output="screen" machine="phoenix" />
 	<node name="OSC_gui_Node" pkg="phx_gui" type="osc_copter.py" output="screen" machine="phoenix" />
-	<node name="Camera" pkg="raspicam" type="raspicam_node" output="screen" machine="phoenix" />
 	<node name="CaptureStarter" pkg="rosservice" type="rosservice"  args="call --wait /camera/start_capture" machine="phoenix" />
 	<node name="ImageRectifier" pkg="image_proc" type="image_proc" output="screen" machine="phoenix" args="image_raw:=camera/image/compressed" />
 </launch>

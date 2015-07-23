@@ -38,12 +38,12 @@ class LEDNode:
         self.update_event.clear()
 
     def callback_altitude_update(self, stuff):
-        self.animation_f = 1 / (stuff.estimated_altitude + 1e-7)
+        self.animation_f = abs(1 / ((stuff.estimated_altitude - 10) + 1e-7))
         if self.animation_f > 1:
             self.animation_f = 1
 
         # self.animation_update_event.set()
-        print (stuff.estimated_altitude)
+        # print (stuff.estimated_altitude)
 
     def set_led_status(self, status):
         led = np.zeros((4, 3))

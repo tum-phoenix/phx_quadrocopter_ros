@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     if (argc >= 2) {
         multiwii_serial.set_device(argv[1]);
     } else {
-        multiwii_serial.set_device("/dev/ttyAMA0");  //ttyUSB0");
+        multiwii_serial.set_device("/dev/ttyACM0");  //ttyUSB0");
     }
     if (argc >= 3) {
         std::istringstream iss(argv[2]);

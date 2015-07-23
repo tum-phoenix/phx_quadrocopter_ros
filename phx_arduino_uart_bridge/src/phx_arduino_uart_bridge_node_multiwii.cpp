@@ -68,7 +68,8 @@ int main(int argc, char **argv)
     // serialcom init
     SerialCom multiwii_serial;                                              // create SerialCom instance
     //multiwii_serial.set_device("/dev/ttyUSB1");                             // select the device
-    multiwii_serial.set_device("/dev/ttyAMA0");                             // select the device
+    //multiwii_serial.set_device("/dev/ttyAMA0");                             // select the device
+    multiwii_serial.set_device("/dev/ttyACM0");                             // select the device
     multiwii_serial.set_baudrate(115200);                                   // set the communication baudrate
     multiwii_serial.set_max_io(250);                                        // set maximum bytes per reading
     multiwii_serial.init();                                                 // start serial connection

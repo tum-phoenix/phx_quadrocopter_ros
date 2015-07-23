@@ -57,7 +57,8 @@ struct Payload {
         } marvic_autonomous;
 
         struct {
-            uint16_t distance;
+            uint16_t distance_0;
+            uint16_t distance_1;
         } marvic_sonar;
 
         struct {

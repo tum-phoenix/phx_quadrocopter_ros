@@ -253,8 +253,8 @@ int main(int argc, char **argv)
                         battery_pub.publish(batteryMsg);
                         received_battery++;
                     } else if (input_msg.msg_code == MARVIC_SONAR) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance;
-                        altitudeMsg.variation = 0;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance_0;
+                        altitudeMsg.variation = input_msg.msg_data.marvic_sonar.distance_1;
                         sonar_pub.publish(altitudeMsg);
                         received_sonar++;
                     } else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
