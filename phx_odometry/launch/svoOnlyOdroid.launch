@@ -8,6 +8,7 @@
         
         <!-- Camera calibration file -->
         <rosparam file="$(find phx_odometry)/param/camera_atan.yaml" />
+	<!-- <rosparam file="$(find phx_odometry)/param/vo_low.yaml" /> -->
         
         <!-- Default parameter settings: choose between vo_fast and vo_accurate -->
         <rosparam file="$(find svo_ros)/param/vo_fast.yaml" />
