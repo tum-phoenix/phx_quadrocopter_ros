@@ -1,0 +1,20 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	<node name="image_proc" pkg="image_proc" type="image_proc">
+            <remap from="image_raw" to="/image_raw" />
+            <remap from="camera_info" to="/camera_info" />
+        </node>
+	<node pkg="svo_ros" type="vo" name="svo" clear_params="true" output="screen">
+    
+        <!-- Camera topic to subscribe to -->
+        <param name="cam_topic" value="/image_mono" type="str" />
+        
+        <!-- Camera calibration file -->
+        <rosparam file="$(find phx_odometry)/param/camera_atan_ps3eye.yaml" />
+	<!-- <rosparam file="$(find phx_odometry)/param/vo_low.yaml" /> -->
+        
+        <!-- Default parameter settings: choose between vo_fast and vo_accurate -->
+        <rosparam file="$(find svo_ros)/param/vo_fast.yaml" />
+
+    </node>
+</launch>
