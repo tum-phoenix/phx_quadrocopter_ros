@@ -9,16 +9,20 @@ enum MessageCode : uint8_t {
     MARVIC_BATTERY = 66,
     MARVIC_AUTONOMOUS_FLIGHT = 67,
     MARVIC_SONAR = 68,
+    MARVIC_LIDAR = 69,
+    MARVIC_INFRA_RED = 70,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
     MULTIWII_MOTOR = 104,
     MULTIWII_RC = 105,
     MULTIWII_GPS = 106,
+    MULTIWII_GPS_WP = 118,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
     MULTIWII_MOTOR_SET = 214,           // setting motor
-    MULTIWII_RC_SET = 200               // setting rc
+    MULTIWII_RC_SET = 200,              // setting rc
+    MULTIWII_GPS_WP_SET = 209           // setting gps way point
 };
 
 enum MessageLength : uint8_t {
@@ -33,10 +37,13 @@ enum MessageLength : uint8_t {
     MULTIWII_MOTOR_LENGTH = 16,
     MULTIWII_RC_LENGTH = 16,
     MULTIWII_GPS_LENGTH = 16,
+    REQUEST_GPS_WP = 1,
+    MULTIWII_GPS_WP_LENGTH = 18,
     MULTIWII_ATTITUDE_LENGTH = 6,
     MULTIWII_ALTITUDE_LENGTH = 6,
     MULTIWII_MOTOR_SET_LENGTH = 16,
-    MULTIWII_RC_SET_LENGTH = 16
+    MULTIWII_RC_SET_LENGTH = 16,
+    MULTIWII_GPS_WP_SET_LENGTH = 18
 };
 
 struct Payload {
@@ -151,6 +158,16 @@ struct Payload {
         } multiwii_gps;
 
         struct {
+            uint8_t wp_number;
+            uint32_t coordLAT;
+            uint32_t coordLON;
+            uint32_t altitude;
+            uint16_t heading;
+            uint16_t stay_time;
+            uint8_t nav_flag;
+        } multiwii_gps_way_point;
+
+        struct {
             uint16_t roll;
             uint16_t pitch;
             uint16_t yaw;
@@ -160,6 +177,16 @@ struct Payload {
             uint32_t estAlt;
             uint16_t variation;
         } multiwii_altitude;
+
+        struct {
+            uint8_t wp_number;
+            uint32_t coordLAT;
+            uint32_t coordLON;
+            uint32_t altitude;
+            uint16_t heading;
+            uint16_t stay_time;
+            uint8_t nav_flag;
+        } multiwii_gps_set_way_point;
     };
 };
 
