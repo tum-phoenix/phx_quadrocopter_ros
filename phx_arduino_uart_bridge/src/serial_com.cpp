@@ -265,6 +265,53 @@ bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll,
     write_msg_to_buffer(msg);
 }
 
+bool SerialCom::prepare_msg_gps_get_way_point(uint8_t wp_no) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_gps_get_way_point sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = 'M';
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = REQUEST_GPS_WP;
+    msg.msg_code = MULTIWII_GPS_WP;
+    msg.msg_data.multiwii_gps_way_point.wp_number = wp_no;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+    write_msg_to_buffer(msg);
+    return true;
+}
+
+bool SerialCom::prepare_msg_gps_set_way_point(uint8_t wp_no, uint32_t lat, uint32_t lon, uint32_t alt, uint16_t heading, uint16_t stay_time, uint8_t nav_flag) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_gps_set_way_point sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = 'M';
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MULTIWII_GPS_WP_SET_LENGTH;
+    msg.msg_code = MULTIWII_GPS_WP_SET;
+    msg.msg_data.multiwii_gps_set_way_point.wp_number = wp_no;
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT = lat;
+    msg.msg_data.multiwii_gps_set_way_point.coordLON = lon;
+    msg.msg_data.multiwii_gps_set_way_point.altitude = alt;
+    msg.msg_data.multiwii_gps_set_way_point.heading = heading;
+    msg.msg_data.multiwii_gps_set_way_point.stay_time = stay_time;
+    msg.msg_data.multiwii_gps_set_way_point.nav_flag = nav_flag;
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
 bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t motor2, uint16_t motor3, uint16_t motor4, uint16_t motor5, uint16_t motor6, uint16_t motor7) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_motor sending" << std::endl;
     Message msg;
