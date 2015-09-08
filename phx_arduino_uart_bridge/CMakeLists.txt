@@ -119,6 +119,9 @@ include_directories(
 ## Declare a cpp executable
 add_executable(phx_arduino_uart_bridge_node_multiwii src/phx_arduino_uart_bridge_node_multiwii.cpp)
 add_executable(phx_arduino_uart_bridge_node_marvic src/phx_arduino_uart_bridge_node_marvic.cpp)
+add_executable(phx_arduino_uart_bridge_node_marvic src/phx_uart_bridge_node_naze.cpp)
+add_executable(phx_arduino_uart_bridge_node_marvic src/phx_uart_bridge_node_marvicRC.cpp)
+add_executable(phx_arduino_uart_bridge_node_marvic src/phx_uart_bridge_node_marvicAltitude.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -131,6 +134,21 @@ target_link_libraries(phx_arduino_uart_bridge_node_multiwii
 )
 
 target_link_libraries(phx_arduino_uart_bridge_node_marvic
+   ${catkin_LIBRARIES}
+   phx_serial_com
+)
+
+target_link_libraries(phx_uart_bridge_node_naze
+   ${catkin_LIBRARIES}
+   phx_serial_com
+)
+
+target_link_libraries(phx_uart_bridge_node_marvicRC
+   ${catkin_LIBRARIES}
+   phx_serial_com
+)
+
+target_link_libraries(phx_uart_bridge_node_marvicAltitude
    ${catkin_LIBRARIES}
    phx_serial_com
 )
