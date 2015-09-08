@@ -1,0 +1,11 @@
+<launch>
+        <node name="image_proc" pkg="image_proc" type="image_proc">
+            <remap from="image_raw" to="/image_raw" />
+            <remap from="camera_info" to="/camera_info" />
+        </node>
+        <node name="cameracalibrator" pkg="ptam" type="cameracalibrator" clear_params="true" output="screen">
+            <remap from="image" to="/image_mono" />
+            <remap from="pose" to="pose"/>
+            <rosparam file="$(find ptam)/PtamFixParams.yaml"/>
+        </node>
+</launch>
