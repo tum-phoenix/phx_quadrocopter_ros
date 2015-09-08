@@ -1,0 +1,23 @@
+<launch>
+    <!--  -->
+	<machine name="phoenix" address="localhost" />
+	<node name="FlightLogger" pkg="rosbag" type="record" args="-a -o /home/phoenix/flightlogs/flightlog" machine="phoenix" />
+	<node name="UARTBridge_multiwii" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_multiwii" output="screen" machine="phoenix" />
+	<node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" />
+	
+	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
+      		<param name="device" value="/dev/video0" />
+      		<param name="width" value="640" />
+      		<param name="height" value="480" />
+      		<param name="format" value="YUYV" />
+      		<param name="fps" value="60" />
+		<param name="gain" value="0" />
+		<param name="Auto Exposure" value="0" />
+    </node>
+
+	<node name="ImageProc" pkg="image_proc" type="image_proc">
+            <remap from="image_raw" to="/image_raw" />
+            <remap from="camera_info" to="/camera_info" />
+    </node>
+    
+</launch>
