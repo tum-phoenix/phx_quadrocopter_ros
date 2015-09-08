@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="Gui" type="phx_gui.gui.Gui" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      GUI plugin for the TUM Phoenix Quadrocopter
+    </description>
+    <qtgui>
+      <!-- optional grouping...
+      <group>
+        <label>Controller</label>
+      </group>
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>Quadrocopter</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Great user interface to provide real value.</statustip>
+    </qtgui>
+  </class>
+</library>
