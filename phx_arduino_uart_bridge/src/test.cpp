@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 //            multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-            multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+            multiwii_serial.prepare_request(MULTIWII_ALTITUDE, 'P'); request_altitude++; request_total++;
             multiwii_serial.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
             multiwii_serial.send_from_buffer();
         } else {
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         received_imu++;
-                    } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                    } else if ((input_msg.msg_protocol == 'M') && (input_msg.msg_code == MULTIWII_ATTITUDE)) {
                         received_attitude++;
                     } else if (input_msg.msg_code == MULTIWII_MOTOR) {
                         received_motor++;

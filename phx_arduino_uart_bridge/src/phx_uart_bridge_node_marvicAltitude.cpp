@@ -209,7 +209,7 @@ int main(int argc, char **argv)
                             multiwii_serial.send_from_buffer();
                         }
                         received_rc++;
-                    } */ else if (input_msg.msg_code == MULTIWII_IMU) {
+                    } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
                         // the message is only published if fresh attitude data is present.
                         imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
@@ -241,12 +241,12 @@ int main(int argc, char **argv)
                         gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
                         gps_pub.publish(gpsMsg);
                         received_gps++;
-                    } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                    } */ else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
                         altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
                         altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
                         altitude_pub.publish(altitudeMsg);
                         received_altitude++;
-                    } else if (input_msg.msg_code == MARVIC_BATTERY) {
+                    } /* else if (input_msg.msg_code == MARVIC_BATTERY) {
                         batteryMsg.cell1 = input_msg.msg_data.marvic_battery.cell1_mean;
                         batteryMsg.cell2 = input_msg.msg_data.marvic_battery.cell2_mean;
                         batteryMsg.cell3 = input_msg.msg_data.marvic_battery.cell3_mean;
@@ -258,21 +258,21 @@ int main(int argc, char **argv)
                         altitudeMsg.variation = input_msg.msg_data.marvic_sonar.distance_1;
                         sonar_pub.publish(altitudeMsg);
                         received_sonar++;
-                    } else if ((input_msg.protocol == 'P') && (input_msg.msg_code == MARVIC_LIDAR)) {
+                    } */ else if ((input_msg.msg_protocol == 'P') && (input_msg.msg_code == MARVIC_LIDAR)) {
                         altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         lidar_pub.publish(altitudeMsg);
                         received_lidar++;
-                    } else if ((input_msg.protocol == 'P') && (input_msg.msg_code == MARVIC_INFRA_RED)) {
+                    } else if ((input_msg.msg_protocol == 'P') && (input_msg.msg_code == MARVIC_INFRA_RED)) {
                         altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance_0;
                         altitudeMsg.variation = 0;
                         infra_red_pub.publish(altitudeMsg);
                         received_infra_red++;
-                    } else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
+                    } /* else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
                         autonomousMsg.is_autonomous = input_msg.msg_data.marvic_autonomous.is_active;
                         autonomous_pub.publish(autonomousMsg);
                         received_autonomous++;
-                    }
+                    } */
                 }
             }
         }
