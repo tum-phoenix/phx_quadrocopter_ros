@@ -201,11 +201,11 @@ bool SerialCom::deinitialize() {
     return true;
 }
 
-bool SerialCom::prepare_request(MessageCode msg_code){
+bool SerialCom::prepare_request(MessageCode msg_code, uint8_t protocol){
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_request sending a request on msg_code " << msg_code  << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = protocol;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = REQUEST;
     msg.msg_code = msg_code;
@@ -430,10 +430,12 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
             // start byte found
             if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found";
             msg_preamble = '$';
-            if (read_from_input_buffer() == 'M') {
+            uint8_t temp_protocol_type = read_from_input_buffer();
+            if (temp_protocol_type == 'M' || temp_protocol_type == 'P') {
                 // MultiWii protocol byte found
-                if (do_debug_printout == true) std::cout << "  >> MultiWii protocol byte found";
-                msg_protocol = 'M';
+                if ((do_debug_printout == true) && (temp_protocol_type == 'M')) std::cout << "  >> MultiWii protocol byte found";
+                if ((do_debug_printout == true) && (temp_protocol_type == 'P')) std::cout << "  >> PHOENIX protocol byte found";
+                msg_protocol = temp_protocol_type;
                 msg_direction = read_from_input_buffer();
                 msg_length = read_from_input_buffer();
                 msg_code = read_from_input_buffer();

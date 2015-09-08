@@ -9,19 +9,21 @@ enum MessageCode : uint8_t {
     MARVIC_BATTERY = 66,
     MARVIC_AUTONOMOUS_FLIGHT = 67,
     MARVIC_SONAR = 68,
-    MARVIC_LIDAR = 69,
-    MARVIC_INFRA_RED = 70,
+    MARVIC_LIDAR = 70,
+    MARVIC_INFRA_RED = 69,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
     MULTIWII_MOTOR = 104,
     MULTIWII_RC = 105,
     MULTIWII_GPS = 106,
+//    MULTIWII_PID = 112,
     MULTIWII_GPS_WP = 118,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
+//    MULTIWII_PID_SET = 202,
     MULTIWII_GPS_WP_SET = 209           // setting gps way point
 };
 
@@ -31,6 +33,8 @@ enum MessageLength : uint8_t {
     MARVIC_BATTERY_LENGTH = 8,
     MARVIC_AUTONOMOUS_FLIGHT_LENGTH = 1,
     MARVIC_SONAR_LENGTH = 1,
+    MARVIC_LIDAR_LENGTH = 2,
+    MARVIC_INFRA_RED_LENGTH = 2,
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
     MULTIWII_SERVO_LENGTH = 16,
@@ -177,6 +181,10 @@ struct Payload {
             uint32_t estAlt;
             uint16_t variation;
         } multiwii_altitude;
+
+        struct {
+            uint16_t distance;
+        } marvic_altitude;              // valid for LIDAR and INFRA_RED
 
         struct {
             uint8_t wp_number;
