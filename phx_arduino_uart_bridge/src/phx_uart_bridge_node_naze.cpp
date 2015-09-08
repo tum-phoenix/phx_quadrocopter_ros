@@ -17,6 +17,7 @@
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
+void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
