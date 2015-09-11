@@ -21,6 +21,7 @@ enum MessageCode : uint8_t {
     MULTIWII_GPS_WP = 118,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
+    MULTIWII_SERVO_SET = 213,           // setting servos
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
 //    MULTIWII_PID_SET = 202,
@@ -45,6 +46,7 @@ enum MessageLength : uint8_t {
     MULTIWII_GPS_WP_LENGTH = 18,
     MULTIWII_ATTITUDE_LENGTH = 6,
     MULTIWII_ALTITUDE_LENGTH = 6,
+    MULTIWII_SERVO_SET_LENGTH = 36,
     MULTIWII_MOTOR_SET_LENGTH = 16,
     MULTIWII_RC_SET_LENGTH = 16,
     MULTIWII_GPS_WP_SET_LENGTH = 18
@@ -101,6 +103,16 @@ struct Payload {
             uint16_t servo5;
             uint16_t servo6;
             uint16_t servo7;
+            uint16_t servo8;
+            uint16_t servo9;
+            uint16_t servo10;
+            uint16_t servo11;
+            uint16_t servo12;
+            uint16_t servo13;
+            uint16_t servo14;
+            uint16_t servo15;
+            uint16_t servo16;
+            uint16_t servo17;
         } multiwii_servo;
 
         struct {
