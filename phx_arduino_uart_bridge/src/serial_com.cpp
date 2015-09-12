@@ -1,7 +1,7 @@
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 bool SerialCom::set_device(std::string device_path) {
-    serial_device_path = device_path.c_str();
+    serial_device_path = device_path;
     std::cout << "SerialCom::set_device  serial_device_path was set to " << serial_device_path << std::endl;
     return true;
 }
@@ -20,7 +20,7 @@ bool SerialCom::set_max_io(uint16_t max_io_bytes) {
 
 bool SerialCom::init() {
     std::cout << "SerialCom::init  initializing SerialCom on device " << serial_device_path << std::endl;
-    serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_SYNC);    // original
+    serial_interface = open(serial_device_path.c_str(), O_RDWR | O_NOCTTY | O_SYNC);    // original
     //serial_interface = open(serial_device_path, O_RDWR | O_NOCTTY | O_NDELAY);
 
     std::cout << "SerialCom::init  configuring serial device " << serial_interface << std::endl;

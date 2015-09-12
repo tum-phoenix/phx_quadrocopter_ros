@@ -85,12 +85,12 @@ public:
     uint8_t read_from_input_buffer();               // reads the next byte from the input_buffer
     bool read_msg_from_buffer(Message*);            // this reads the next full message from the buffer and writes it into the given Message*
 
-    uint16_t error_count;
+    uint16_t error_count = 10;
     bool deinitialize();                            // closes the serial port properly
 private:
     bool do_debug_printout = false;
 
-    const char* serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
+    std::string serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
     uint32_t serial_device_baud_rate;               // the used baudrate like 9600, 57600 or 115200
     uint16_t buffer_io_max;                         // maximum numbers of bytes which are read or written during one cycle
     int serial_interface;                           // the handle for the serial device and its config after it is opened
