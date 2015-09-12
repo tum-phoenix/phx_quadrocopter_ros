@@ -118,8 +118,8 @@ include_directories(
  )
 
 ## Declare a cpp executable
-add_executable(phx_arduino_uart_bridge_node_multiwii src/phx_arduino_uart_bridge_node_multiwii.cpp)
-add_executable(phx_arduino_uart_bridge_node_marvic src/phx_arduino_uart_bridge_node_marvic.cpp)
+#add_executable(phx_arduino_uart_bridge_node_multiwii src/phx_arduino_uart_bridge_node_multiwii.cpp)
+#add_executable(phx_arduino_uart_bridge_node_marvic src/phx_arduino_uart_bridge_node_marvic.cpp)
 add_executable(phx_uart_bridge_node_naze src/phx_uart_bridge_node_naze.cpp)
 add_executable(phx_uart_bridge_node_marvicRC src/phx_uart_bridge_node_marvicRC.cpp)
 add_executable(phx_uart_bridge_node_marvicAltitude src/phx_uart_bridge_node_marvicAltitude.cpp)
@@ -129,15 +129,15 @@ add_executable(phx_uart_bridge_node_marvicAltitude src/phx_uart_bridge_node_marv
 # add_dependencies(phx_arduino_uart_bridge_node phx_arduino_uart_bridge_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(phx_arduino_uart_bridge_node_multiwii
-   ${catkin_LIBRARIES}
-   phx_serial_com
-)
+#target_link_libraries(phx_arduino_uart_bridge_node_multiwii
+#   ${catkin_LIBRARIES}
+#   phx_serial_com
+#)
 
-target_link_libraries(phx_arduino_uart_bridge_node_marvic
-   ${catkin_LIBRARIES}
-   phx_serial_com
-)
+#target_link_libraries(phx_arduino_uart_bridge_node_marvic
+#   ${catkin_LIBRARIES}
+#   phx_serial_com
+#)
 
 target_link_libraries(phx_uart_bridge_node_naze
    ${catkin_LIBRARIES}
