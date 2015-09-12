@@ -84,6 +84,7 @@ public:
     uint8_t read_from_input_buffer();               // reads the next byte from the input_buffer
     bool read_msg_from_buffer(Message*);            // this reads the next full message from the buffer and writes it into the given Message*
 
+    uint16_t error_count;
     bool deinitialize();                            // closes the serial port properly
 private:
     bool do_debug_printout = false;

@@ -71,6 +71,8 @@ bool SerialCom::init() {
     output_buffer_write_position = 0;
     output_buffer_read_position = 0;
     std::cout << "SerialCom::init  done" << std::endl;
+
+    error_count = 0;
     sleep(2);
     tcflush(serial_interface, TCOFLUSH);
     tcflush(serial_interface, TCIFLUSH);
@@ -129,6 +131,7 @@ bool SerialCom::receive_to_buffer() {
         } else {
             // we will skip errors here
             if (do_debug_printout == true) std::cout << "SerialCom::read_to_buffer  >> error" << std::endl;
+            error_count++;
         }
     }
     // nothing polled
@@ -158,6 +161,7 @@ bool SerialCom::send_from_buffer() {
             } else {
                 // we will skip errors here
                 std::cout << "SerialCom::send_from_buffer  error" << std::endl;
+                error_count++;
             }
         } else {
             if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;
