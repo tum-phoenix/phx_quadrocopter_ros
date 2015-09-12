@@ -344,7 +344,7 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     write_msg_to_buffer(msg);
 }
 
-bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t servo2, uint16_t servo3, uint16_t servo4, uint16_t servo5, uint16_t servo6, uint16_t servo7, uint16_t servo8, uint16_t servo9, uint16_t servo10, uint16_t servo11, uint16_t servo12, uint16_t servo13, uint16_t servo14, uint16_t servo14, uint16_t servo15, uint16_t servo16, uint16_t servo17) {
+bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t servo2, uint16_t servo3, uint16_t servo4, uint16_t servo5, uint16_t servo6, uint16_t servo7, uint16_t servo8, uint16_t servo9, uint16_t servo10, uint16_t servo11, uint16_t servo12, uint16_t servo13, uint16_t servo14, uint16_t servo15, uint16_t servo16, uint16_t servo17) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_servo sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';

@@ -70,7 +70,8 @@ public:
     bool prepare_msg_continuous_sending(uint8_t);
     bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
-    bool prepare_msg_servo(uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0);
+    bool prepare_msg_servo(uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0,
+                           uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0);
     bool prepare_msg_gps_get_way_point(uint8_t);
     bool prepare_msg_gps_set_way_point(uint8_t, uint32_t, uint32_t, uint32_t, uint16_t, uint16_t, uint8_t);
     bool prepare_request(MessageCode, uint8_t='M');                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
