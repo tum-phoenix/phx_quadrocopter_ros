@@ -1,30 +1,21 @@
-Die Serielle Kommunikation mit den beiden MicroControllern läuft derzeit in einem Python-Skript ab welches die Objekte der pyCopter Klasse nutzt.
+Um mit MicroControllern über eine serielle UART Verbindung zu kommunizieren wird das dem Mavlink Protokoll angelehnte Protokoll Multiwii Serial Protocoll (msp) verwendet.
 
-pyCopter
-	.serial_com
-		.multiwii_portocoll
-			Baut eine serielle Verbindung zu Multiwii oder onboard Arduino auf
-			und kümmert sich um die Serielle Kommunikation und den Austausch von Daten
-		.serial_rc
-			gegenwärtig nicht in Verwendung und wird wohl rausfliegen da die betreffenden
-			methoden schon in multiwii_protocoll eingebaut sind.
-	.network_com
-		.osc_receiver
-			Horcht nach an die eigene IP gerichtete Nachrichten und leitet sie an
-			das richtige Modul weiter, zum Beispiel eine OSC RC.
-		.osc_transmitter
-			Sendet die Flugdaten ins Netzwerk und hofft darauf dass sie vom
-			MonitoringPC empfangen werden.
-		.osc_rc
-			Geht mit eingehenden OSC RC Daten um und wandelt sie in ein für die 
-			Serielle Kommunikation brauchbares Format um.
-	.copter_status
-		Dies ist das Objekt welches serielle und Netzwerkverbindungen sowie sämtliche 
-		Flugdaten zusammenfasst. Die Methoden der copter_status Klasse sollten im Normalfall
-		ausreichen die Gewünschten Befehle aus dem Netzwerk zu erhalten bzw. an das MultiWii
-		zu senden.
-	.virtual_remote_control
-		Dieses Objekt ist noch in der Entwicklung und soll helfen die Steuerung per PC zu
-		erleichtern indem verschiedenste Kommandos interpretiert und richtig fusioniert
-		werden. Außerdem finden hier die Rechnungen statt die die Steuerungsdaten für den
-		seriellen Ausgang brauchbar macht.
+Nachrichten werden hier durch einen Request des Hosts (Computer) an den Client (micro controller) angefragt und eine Antwort wird vom Client geantwortet. Die Nachrichten bauen sich wie folgt auf:
+
+```
+> START_BYTE  PROTOCOL_BYTE  DIRECTION_BYTE  MSG_TYPE  MSG_LENGTH  Payload  CHECK_BYTE <
+
+START_BYTE = '$'
+PROTOCOL_BYTE = 'M' for msp or 'P' for phoenix
+DIRECTION_BYTE = '>' or '<' or in case of an error '!'
+MSG_TYPE = (uint8_t) well defined message code which is globaly fixed
+MSG_LENGTH = (uint8_t) length of the payload in number of bytes
+Payload = row of MSG_LENGTH bytes
+CHECK_BYTE = (uint8_t) MSG_TYPE ^ MSG_LENGTH ^ Payload[i in range 0 to MSG_LENGTH]
+```
+
+Ein request einer Nachricht mit einem speziellen MSG_TYPE ist eine Nachricht dieses MSG_TYPE jedoch mit MSG_LENGTH = 0 und ohne jegliche Payload.
+
+Die Serielle Kommunikation kann via Python-Skript mit der pyCopter Klasse genutzt werden. Dies ist jedoch nicht sonderlich effizient.
+
+Daher wurde eine cpp Version zur Seriellen Kommunikation entwickelt um effizient und beliebig skalierbar Daten über die Serielle Schnittstelle auszutauschen. Das cpp Skript published die Daten dabei direkt in ROS, bzw. kann Nachrichten auch direkt an den MicroController weiterleiten.
