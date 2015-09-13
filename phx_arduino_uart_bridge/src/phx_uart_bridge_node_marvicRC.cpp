@@ -93,6 +93,15 @@ int main(int argc, char **argv)
     // main loop -------------------------------------------------------------------------------------------
     while (ros::ok())
     {
+        if (serial_interface.error_count > 10) {
+            ROS_INFO("uart bridge marvicRC is shutting down due to serial port problem, restarting in 5sec");
+            serial_interface.deinitialize();
+            sleep(5);
+            serial_interface.init();                                                 // start serial connection
+            sleep(1);                                                                // wait for boot loader and calibration
+            serial_interface.clear_input_buffer();                                   // clear serial buffer
+            ROS_INFO("uart bridge marvicRC goes back to main loop");
+        }
         loop_counter++;
         // print statistics from while to while
         if (loop_counter % 1000 == 0) {
