@@ -205,7 +205,7 @@ bool SerialCom::deinitialize() {
     return true;
 }
 
-bool SerialCom::prepare_request(MessageCode msg_code, uint8_t protocol){
+bool SerialCom::prepare_request(MessageCode msg_code, MessageProtocol protocol){
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_request sending a request on msg_code " << msg_code  << std::endl;
     Message msg;
     msg.msg_preamble = '$';
@@ -219,33 +219,11 @@ bool SerialCom::prepare_request(MessageCode msg_code, uint8_t protocol){
     return true;
 }
 
-
-bool SerialCom::prepare_msg_continuous_sending(uint8_t status) {
-    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_continuous_sending sending" << std::endl;
-    Message msg;
-    msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
-    msg.msg_direction = COM_TO_MULTIWII;
-    msg.msg_length = MARVIC_CONTINUOUS_SENDING_LENGTH;
-    msg.msg_code = MARVIC_CONTINUOUS_SENDING;
-    msg.msg_data.marvic_continuous_sending.on_off = status;
-
-    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
-    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
-    uint8_t checksum = msg.msg_length ^ msg.msg_code;
-    for (uint16_t index=0; index < msg.msg_length; index++) {
-        checksum = checksum ^ msg_data_bytes[index];
-    }
-    msg.checksum = checksum;
-
-    write_msg_to_buffer(msg);
-}
-
 bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
@@ -273,7 +251,7 @@ bool SerialCom::prepare_msg_gps_get_way_point(uint8_t wp_no) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_gps_get_way_point sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = REQUEST_GPS_WP;
     msg.msg_code = MULTIWII_GPS_WP;
@@ -294,7 +272,7 @@ bool SerialCom::prepare_msg_gps_set_way_point(uint8_t wp_no, uint32_t lat, uint3
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_gps_set_way_point sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_GPS_WP_SET_LENGTH;
     msg.msg_code = MULTIWII_GPS_WP_SET;
@@ -320,7 +298,7 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_motor sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_MOTOR_SET_LENGTH;
     msg.msg_code = MULTIWII_MOTOR_SET;
@@ -348,7 +326,7 @@ bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t ser
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_servo sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = 'M';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_SERVO_SET_LENGTH;
     msg.msg_code = MULTIWII_SERVO_SET;
@@ -370,6 +348,95 @@ bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t ser
     msg.msg_data.multiwii_servo.servo15 = servo15;
     msg.msg_data.multiwii_servo.servo16 = servo16;
     msg.msg_data.multiwii_servo.servo17 = servo17;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
+bool prepare_msg_led_strip(uint8_t led_0_r, uint8_t led_0_g, uint8_t led_0_b, uint8_t led_1_r, uint8_t led_1_g, uint8_t led_1_b,
+                           uint8_t led_2_r, uint8_t led_2_g, uint8_t led_2_b, uint8_t led_3_r, uint8_t led_3_g, uint8_t led_3_b,
+                           uint8_t led_4_r, uint8_t led_4_g, uint8_t led_4_b, uint8_t led_5_r, uint8_t led_5_g, uint8_t led_5_b,
+                           uint8_t led_6_r, uint8_t led_6_g, uint8_t led_6_b, uint8_t led_7_r, uint8_t led_7_g, uint8_t led_7_b,
+                           uint8_t led_8_r, uint8_t led_8_g, uint8_t led_8_b, uint8_t led_9_r, uint8_t led_9_g, uint8_t led_9_b, uint8_t strip_index){
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_led sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = PHOENIX_PROTOCOL;
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MARVIC_STRIP_LED_LENGTH;
+    if (strip_index  == 0) {
+        msg.msg_code = MARVIC_LED_0;
+    } else if (strip_index  == 1) {
+        msg.msg_code = MARVIC_LED_1;
+    } else if (strip_index  == 2) {
+        msg.msg_code = MARVIC_LED_2;
+    } else if (strip_index  == 3) {
+        msg.msg_code = MARVIC_LED_3;
+    } else {
+        msg.msg_code = MARVIC_LED_0;
+    }
+    msg.msg_data.marvic_led_strip.led_0_r = led_0_r;
+    msg.msg_data.marvic_led_strip.led_0_g = led_0_g;
+    msg.msg_data.marvic_led_strip.led_0_b = led_0_b;
+    msg.msg_data.marvic_led_strip.led_1_r = led_1_r;
+    msg.msg_data.marvic_led_strip.led_1_g = led_1_g;
+    msg.msg_data.marvic_led_strip.led_1_b = led_1_b;
+    msg.msg_data.marvic_led_strip.led_2_r = led_2_r;
+    msg.msg_data.marvic_led_strip.led_2_g = led_2_g;
+    msg.msg_data.marvic_led_strip.led_2_b = led_2_b;
+    msg.msg_data.marvic_led_strip.led_3_r = led_3_r;
+    msg.msg_data.marvic_led_strip.led_3_g = led_3_g;
+    msg.msg_data.marvic_led_strip.led_3_b = led_3_b;
+    msg.msg_data.marvic_led_strip.led_4_r = led_4_r;
+    msg.msg_data.marvic_led_strip.led_4_g = led_4_g;
+    msg.msg_data.marvic_led_strip.led_4_b = led_4_b;
+    msg.msg_data.marvic_led_strip.led_5_r = led_5_r;
+    msg.msg_data.marvic_led_strip.led_5_g = led_5_g;
+    msg.msg_data.marvic_led_strip.led_5_b = led_5_b;
+    msg.msg_data.marvic_led_strip.led_6_r = led_6_r;
+    msg.msg_data.marvic_led_strip.led_6_g = led_6_g;
+    msg.msg_data.marvic_led_strip.led_6_b = led_6_b;
+    msg.msg_data.marvic_led_strip.led_7_r = led_7_r;
+    msg.msg_data.marvic_led_strip.led_7_g = led_7_g;
+    msg.msg_data.marvic_led_strip.led_7_b = led_7_b;
+    msg.msg_data.marvic_led_strip.led_8_r = led_8_r;
+    msg.msg_data.marvic_led_strip.led_8_g = led_8_g;
+    msg.msg_data.marvic_led_strip.led_8_b = led_8_b;
+    msg.msg_data.marvic_led_strip.led_9_r = led_9_r;
+    msg.msg_data.marvic_led_strip.led_9_g = led_9_g;
+    msg.msg_data.marvic_led_strip.led_9_b = led_9_b;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
+bool prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint8_t led_r, uint8_t led_g, uint8_t led_b){
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_single_led sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = PHOENIX_PROTOCOL;
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MARVIC_SINGLE_LED_LENGTH;
+    msg.msg_code = MARVIC_SINGLE_LED;
+    msg.msg_data.marvic_led_single.led_id = led_id;
+    msg.msg_data.marvic_led_single.strip_index = strip_index;
+    msg.msg_data.marvic_led_single.led_r = led_r;
+    msg.msg_data.marvic_led_single.led_g = led_g;
+    msg.msg_data.marvic_led_single.led_b = led_b;
 
     uint8_t msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));

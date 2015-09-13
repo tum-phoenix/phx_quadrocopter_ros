@@ -10,14 +10,19 @@
 #include "phx_arduino_uart_bridge/Motor.h"
 #include "phx_arduino_uart_bridge/Status.h"
 #include "phx_arduino_uart_bridge/Altitude.h"
-#include "phx_arduino_uart_bridge/Battery.h"
-#include "phx_arduino_uart_bridge/Autonomous.h"
+#include "phx_arduino_uart_bridge/LEDstrip.h"
+#include "phx_arduino_uart_bridge/LED.h"
 
 #include <chrono>
 #include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
 void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
+void led_strip_0_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
+void led_strip_1_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
+void led_strip_2_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
+void led_strip_3_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
+void led_single_callback(const phx_arduino_uart_bridge::LED::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
@@ -35,17 +40,19 @@ int main(int argc, char **argv)
     phx_arduino_uart_bridge::Motor motorMsg;
     phx_arduino_uart_bridge::Status statusMsg;
     phx_arduino_uart_bridge::Altitude altitudeMsg;
-    phx_arduino_uart_bridge::Battery batteryMsg;
-    phx_arduino_uart_bridge::Autonomous autonomousMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/marvicRC/rc_input", 1);
     ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/marvicRC/status", 1);
-    ros::Publisher autonomous_pub = n.advertise<phx_arduino_uart_bridge::Autonomous>("phx/autonomous_flight", 1);
 
     // ros init subscriber
     ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer", 1, rc_computer_callback);
+    ros::Subscriber led_strip_0_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_0", 1, led_strip_0_callback);
+    ros::Subscriber led_strip_1_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_1", 1, led_strip_1_callback);
+    ros::Subscriber led_strip_2_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_2", 1, led_strip_2_callback);
+    ros::Subscriber led_strip_3_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_3", 1, led_strip_3_callback);
+    ros::Subscriber led_single_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_single", 1, led_single_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -124,36 +131,15 @@ int main(int argc, char **argv)
         
         // serialcom send requests
         if (loop_counter % 5 == 0) {
-            //serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-            //serial_interface.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
-            //serial_interface.prepare_request(MARVIC_SONAR); request_sonar++; request_total++;
             serial_interface.prepare_request(MARVIC_AUTONOMOUS_FLIGHT); request_autonomous++; request_total++;
 
         } else {
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
 
             if (loop_counter % 2 == 0) {
-                //serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
@@ -174,7 +160,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "marvicRC";
                         joyMsg.header = headerMsg;
                         joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
                         joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
@@ -200,59 +186,6 @@ int main(int argc, char **argv)
                         }
                         */
                         received_rc++;
-                    } /* else if (input_msg.msg_code == MULTIWII_IMU) {
-                        // if raw_imu data is received this is updated in the imu ros message but not directly published.
-                        // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
-                        imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
-                        imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
-                        imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
-                        imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
-                        imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
-                        received_imu++;
-                    } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
-                        headerMsg.seq = received_imu;
-                        headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
-                        imuMsg.header = headerMsg;
-                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
-                        imuMsg.orientation = quaternion;
-                        imu_pub.publish(imuMsg);
-                        received_attitude++;
-                    } else if (input_msg.msg_code == MULTIWII_MOTOR) {
-                        motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
-                        motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
-                        motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
-                        motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
-                        motor_pub.publish(motorMsg);
-                        received_motor++;
-                    } else if (input_msg.msg_code == MULTIWII_GPS) {
-                        gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
-                        gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
-                        gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
-                        gps_pub.publish(gpsMsg);
-                        received_gps++;
-                    } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
-                        altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
-                        altitude_pub.publish(altitudeMsg);
-                        received_altitude++;
-                    } else if (input_msg.msg_code == MARVIC_BATTERY) {
-                        batteryMsg.cell1 = input_msg.msg_data.marvic_battery.cell1_mean;
-                        batteryMsg.cell2 = input_msg.msg_data.marvic_battery.cell2_mean;
-                        batteryMsg.cell3 = input_msg.msg_data.marvic_battery.cell3_mean;
-                        batteryMsg.cell4 = input_msg.msg_data.marvic_battery.cell4_mean;
-                        battery_pub.publish(batteryMsg);
-                        received_battery++;
-                    } else if (input_msg.msg_code == MARVIC_SONAR) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance_0;
-                        altitudeMsg.variation = input_msg.msg_data.marvic_sonar.distance_1;
-                        sonar_pub.publish(altitudeMsg);
-                        received_sonar++;
-                    } */ else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
-                        autonomousMsg.is_autonomous = input_msg.msg_data.marvic_autonomous.is_active;
-                        autonomous_pub.publish(autonomousMsg);
-                        received_autonomous++;
                     }
                 }
             }
@@ -301,25 +234,166 @@ int main(int argc, char **argv)
 void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
     std::cout << "\033[1;31m>>> rc_computer_callback\033[0m"<< std::endl;
     serial_interface.prepare_msg_rc((uint16_t) (*joyMsg).axes[3],
-                                   (uint16_t) joyMsg->axes[1],
-                                   (uint16_t) joyMsg->axes[0],
-                                   (uint16_t) joyMsg->axes[2],
-                                   (uint16_t) joyMsg->buttons[0],
-                                   (uint16_t) joyMsg->buttons[1],
-                                   (uint16_t) joyMsg->buttons[2],
-                                   (uint16_t) joyMsg->buttons[3]);
+                                    (uint16_t) joyMsg->axes[1],
+                                    (uint16_t) joyMsg->axes[0],
+                                    (uint16_t) joyMsg->axes[2],
+                                    (uint16_t) joyMsg->buttons[0],
+                                    (uint16_t) joyMsg->buttons[1],
+                                    (uint16_t) joyMsg->buttons[2],
+                                    (uint16_t) joyMsg->buttons[3]);
     serial_interface.send_from_buffer();
 }
 
-void motor_computer_callback(const phx_arduino_uart_bridge::Motor::ConstPtr& motorMsg) {
-    std::cout << "\033[1;31m>>> motor_computer_callback" << (*motorMsg).motor0 << " " << (*motorMsg).motor1 << " "  << (*motorMsg).motor2 << " " << (*motorMsg).motor3 << "\033[0m"<< std::endl;
-    serial_interface.prepare_msg_motor((uint16_t) (*motorMsg).motor0,
-                                      (uint16_t) (*motorMsg).motor1,
-                                      (uint16_t) (*motorMsg).motor2,
-                                      (uint16_t) (*motorMsg).motor3,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000);
-    serial_interface.send_from_buffer();
+void led_strip_0_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_command) {
+    std::cout << "\033[1;31m>>> led_arm_0_callback" << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_led_strip((uint8_t) led_command->led_0_r,
+                                          (uint8_t) led_command->led_0_g,
+                                          (uint8_t) led_command->led_0_b,
+                                          (uint8_t) led_command->led_1_r,
+                                          (uint8_t) led_command->led_1_g,
+                                          (uint8_t) led_command->led_1_b,
+                                          (uint8_t) led_command->led_2_r,
+                                          (uint8_t) led_command->led_2_g,
+                                          (uint8_t) led_command->led_2_b,
+                                          (uint8_t) led_command->led_3_r,
+                                          (uint8_t) led_command->led_3_g,
+                                          (uint8_t) led_command->led_3_b,
+                                          (uint8_t) led_command->led_4_r,
+                                          (uint8_t) led_command->led_4_g,
+                                          (uint8_t) led_command->led_4_b,
+                                          (uint8_t) led_command->led_5_r,
+                                          (uint8_t) led_command->led_5_g,
+                                          (uint8_t) led_command->led_5_b,
+                                          (uint8_t) led_command->led_6_r,
+                                          (uint8_t) led_command->led_6_g,
+                                          (uint8_t) led_command->led_6_b,
+                                          (uint8_t) led_command->led_7_r,
+                                          (uint8_t) led_command->led_7_g,
+                                          (uint8_t) led_command->led_7_b,
+                                          (uint8_t) led_command->led_8_r,
+                                          (uint8_t) led_command->led_8_g,
+                                          (uint8_t) led_command->led_8_b,
+                                          (uint8_t) led_command->led_9_r,
+                                          (uint8_t) led_command->led_9_g,
+                                          (uint8_t) led_command->led_9_b,
+                                          0);
+    multiwii_serial.send_from_buffer();
+}
+
+void led_strip_1_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_command) {
+    std::cout << "\033[1;31m>>> led_arm_1_callback" << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_led_strip((uint8_t) led_command->led_0_r,
+                                          (uint8_t) led_command->led_0_g,
+                                          (uint8_t) led_command->led_0_b,
+                                          (uint8_t) led_command->led_1_r,
+                                          (uint8_t) led_command->led_1_g,
+                                          (uint8_t) led_command->led_1_b,
+                                          (uint8_t) led_command->led_2_r,
+                                          (uint8_t) led_command->led_2_g,
+                                          (uint8_t) led_command->led_2_b,
+                                          (uint8_t) led_command->led_3_r,
+                                          (uint8_t) led_command->led_3_g,
+                                          (uint8_t) led_command->led_3_b,
+                                          (uint8_t) led_command->led_4_r,
+                                          (uint8_t) led_command->led_4_g,
+                                          (uint8_t) led_command->led_4_b,
+                                          (uint8_t) led_command->led_5_r,
+                                          (uint8_t) led_command->led_5_g,
+                                          (uint8_t) led_command->led_5_b,
+                                          (uint8_t) led_command->led_6_r,
+                                          (uint8_t) led_command->led_6_g,
+                                          (uint8_t) led_command->led_6_b,
+                                          (uint8_t) led_command->led_7_r,
+                                          (uint8_t) led_command->led_7_g,
+                                          (uint8_t) led_command->led_7_b,
+                                          (uint8_t) led_command->led_8_r,
+                                          (uint8_t) led_command->led_8_g,
+                                          (uint8_t) led_command->led_8_b,
+                                          (uint8_t) led_command->led_9_r,
+                                          (uint8_t) led_command->led_9_g,
+                                          (uint8_t) led_command->led_9_b,
+                                          1);
+    multiwii_serial.send_from_buffer();
+}
+
+void led_strip_2_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_command) {
+    std::cout << "\033[1;31m>>> led_arm_2_callback" << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_led_strip((uint8_t) led_command->led_0_r,
+                                          (uint8_t) led_command->led_0_g,
+                                          (uint8_t) led_command->led_0_b,
+                                          (uint8_t) led_command->led_1_r,
+                                          (uint8_t) led_command->led_1_g,
+                                          (uint8_t) led_command->led_1_b,
+                                          (uint8_t) led_command->led_2_r,
+                                          (uint8_t) led_command->led_2_g,
+                                          (uint8_t) led_command->led_2_b,
+                                          (uint8_t) led_command->led_3_r,
+                                          (uint8_t) led_command->led_3_g,
+                                          (uint8_t) led_command->led_3_b,
+                                          (uint8_t) led_command->led_4_r,
+                                          (uint8_t) led_command->led_4_g,
+                                          (uint8_t) led_command->led_4_b,
+                                          (uint8_t) led_command->led_5_r,
+                                          (uint8_t) led_command->led_5_g,
+                                          (uint8_t) led_command->led_5_b,
+                                          (uint8_t) led_command->led_6_r,
+                                          (uint8_t) led_command->led_6_g,
+                                          (uint8_t) led_command->led_6_b,
+                                          (uint8_t) led_command->led_7_r,
+                                          (uint8_t) led_command->led_7_g,
+                                          uint8_t) led_command->led_7_b,
+                                          (uint8_t) led_command->led_8_r,
+                                          (uint8_t) led_command->led_8_g,
+                                          (uint8_t) led_command->led_8_b,
+                                          (uint8_t) led_command->led_9_r,
+                                          (uint8_t) led_command->led_9_g,
+                                          (uint8_t) led_command->led_9_b,
+                                          2);
+    multiwii_serial.send_from_buffer();
+}
+
+void led_strip_3_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_command) {
+    std::cout << "\033[1;31m>>> led_arm_3_callback" << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_led_strip((uint8_t) led_command->led_0_r,
+                                          (uint8_t) led_command->led_0_g,
+                                          (uint8_t) led_command->led_0_b,
+                                          (uint8_t) led_command->led_1_r,
+                                          (uint8_t) led_command->led_1_g,
+                                          (uint8_t) led_command->led_1_b,
+                                          (uint8_t) led_command->led_2_r,
+                                          (uint8_t) led_command->led_2_g,
+                                          (uint8_t) led_command->led_2_b,
+                                          (uint8_t) led_command->led_3_r,
+                                          (uint8_t) led_command->led_3_g,
+                                          (uint8_t) led_command->led_3_b,
+                                          (uint8_t) led_command->led_4_r,
+                                          (uint8_t) led_command->led_4_g,
+                                          (uint8_t) led_command->led_4_b,
+                                          (uint8_t) led_command->led_5_r,
+                                          (uint8_t) led_command->led_5_g,
+                                          (uint8_t) led_command->led_5_b,
+                                          (uint8_t) led_command->led_6_r,
+                                          (uint8_t) led_command->led_6_g,
+                                          (uint8_t) led_command->led_6_b,
+                                          (uint8_t) led_command->led_7_r,
+                                          (uint8_t) led_command->led_7_g,
+                                          (uint8_t) led_command->led_7_b,
+                                          (uint8_t) led_command->led_8_r,
+                                          (uint8_t) led_command->led_8_g,
+                                          (uint8_t) led_command->led_8_b,
+                                          (uint8_t) led_command->led_9_r,
+                                          (uint8_t) led_command->led_9_g,
+                                          (uint8_t) led_command->led_9_b,
+                                          3);
+    multiwii_serial.send_from_buffer();
+}
+
+void led_single_callback(const phx_arduino_uart_bridge::LED::ConstPtr&) {
+    std::cout << "\033[1;31m>>> led_single_callback sending" << "\033[0m"<< std::endl;
+    multiwii_serial.prepare_msg_single_led((uint8_t) led_command->led_index,
+                                           (uint8_t) led_command->strip_id,
+                                           (uint8_t) led_command->led_r,
+                                           (uint8_t) led_command->led_g,
+                                           (uint8_t) led_command->led_b);
+    multiwii_serial.send_from_buffer();
 }

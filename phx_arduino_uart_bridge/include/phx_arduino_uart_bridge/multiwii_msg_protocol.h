@@ -4,10 +4,18 @@ enum MessageDirection : uint8_t {
     COM_TO_MULTIWII = '<'
 };
 
+enum MessageProtocol : uint8_t {
+    MULTIWII_PROTOCOL = 'M',
+    PHOENIX_PROTOCOL = 'P'
+};
+
 enum MessageCode : uint8_t {
-    MARVIC_CONTINUOUS_SENDING = 69,
+    MARVIC_LED_0 = 50,
+    MARVIC_LED_1 = 51,
+    MARVIC_LED_2 = 52,
+    MARVIC_LED_3 = 53,
+    MARVIC_SINGLE_LED = 54,
     MARVIC_BATTERY = 66,
-    MARVIC_AUTONOMOUS_FLIGHT = 67,
     MARVIC_SONAR = 68,
     MARVIC_LIDAR = 70,
     MARVIC_INFRA_RED = 69,
@@ -30,12 +38,12 @@ enum MessageCode : uint8_t {
 
 enum MessageLength : uint8_t {
     REQUEST = 0,
-    MARVIC_CONTINUOUS_SENDING_LENGTH = 1,
     MARVIC_BATTERY_LENGTH = 8,
-    MARVIC_AUTONOMOUS_FLIGHT_LENGTH = 1,
-    MARVIC_SONAR_LENGTH = 1,
-    MARVIC_LIDAR_LENGTH = 2,
-    MARVIC_INFRA_RED_LENGTH = 2,
+    MARVIC_SONAR_LENGTH = 6,
+    MARVIC_LIDAR_LENGTH = 6,
+    MARVIC_INFRA_RED_LENGTH = 6,
+    MARVIC_STRIP_LED_LENGTH = 30,
+    MARVIC_SINGLE_LED_LENGTH = 5,
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
     MULTIWII_SERVO_LENGTH = 16,
@@ -55,8 +63,50 @@ enum MessageLength : uint8_t {
 struct Payload {
     union {
         struct {
-            uint8_t on_off;
-        } marvic_continuous_sending;
+            uint8_t led_0_r;
+            uint8_t led_0_g;
+            uint8_t led_0_b;
+            uint8_t led_1_r;
+            uint8_t led_1_g;
+            uint8_t led_1_b;
+            uint8_t led_2_r;
+            uint8_t led_2_g;
+            uint8_t led_2_b;
+            uint8_t led_3_r;
+            uint8_t led_3_g;
+            uint8_t led_3_b;
+            uint8_t led_4_r;
+            uint8_t led_4_g;
+            uint8_t led_4_b;
+            uint8_t led_5_r;
+            uint8_t led_5_g;
+            uint8_t led_5_b;
+            uint8_t led_6_r;
+            uint8_t led_6_g;
+            uint8_t led_6_b;
+            uint8_t led_7_r;
+            uint8_t led_7_g;
+            uint8_t led_7_b;
+            uint8_t led_8_r;
+            uint8_t led_8_g;
+            uint8_t led_8_b;
+            uint8_t led_9_r;
+            uint8_t led_9_g;
+            uint8_t led_9_b;
+        } marvic_led_strip;                       // MARVIC_LED_0 = 50, MARVIC_LED_1 = 51, MARVIC_LED_2 = 52, MARVIC_LED_3 = 53
+
+        struct {
+            uint8_t led_id;
+            uint8_t strip_index;
+            uint8_t led_r;
+            uint8_t led_g;
+            uint8_t led_b;
+        } marvic_led_single;                // MARVIC_SINGLE_LED = 54
+
+        struct {
+            uint32_t millisecond_time_stamp;
+            uint16_t distance;
+        } marvic_altitude;                  // MARVIC_SONAR = 68, MARVIC_INFRA_RED = 69, MARVIC_LIDAR = 70
 
         struct {
             uint16_t cell1_mean;
@@ -64,15 +114,6 @@ struct Payload {
             uint16_t cell3_mean;
             uint16_t cell4_mean;
         } marvic_battery;
-
-        struct {
-            uint8_t is_active;
-        } marvic_autonomous;
-
-        struct {
-            uint16_t distance_0;
-            uint16_t distance_1;
-        } marvic_sonar;
 
         struct {
             uint16_t cycleTime;
@@ -195,10 +236,6 @@ struct Payload {
         } multiwii_altitude;
 
         struct {
-            uint16_t distance;
-        } marvic_altitude;              // valid for LIDAR and INFRA_RED
-
-        struct {
             uint8_t wp_number;
             uint32_t coordLAT;
             uint32_t coordLON;
@@ -212,7 +249,7 @@ struct Payload {
 
 struct Message {
     uint8_t msg_preamble;
-    uint8_t msg_protocol;
+    MessageProtocol msg_protocol;
     MessageDirection msg_direction;
     MessageLength msg_length;
     MessageCode msg_code;
