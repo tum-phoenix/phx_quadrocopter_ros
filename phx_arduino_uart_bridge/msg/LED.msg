@@ -1,6 +1,6 @@
 Header header
-uint8_t led_index
-uint8_t strip_id
-uint8_t led_r
-uint8_t led_g
-uint8_t led_b
+uint8 led_index
+uint8 strip_id
+uint8 led_r
+uint8 led_g
+uint8 led_b
