@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     ros::Publisher sonar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/sonar", 1);
     ros::Publisher lidar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/lidar", 1);
     ros::Publisher infra_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/infra_red", 1);
-    ros::Publisher barometer_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
+    ros::Publisher barometer_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
 
     // ros init subscriber
     
@@ -66,6 +66,7 @@ int main(int argc, char **argv)
     uint32_t request_sonar = 0;         uint32_t received_sonar = 0;
     uint32_t request_lidar = 0;     uint32_t received_lidar = 0;
     uint32_t request_infra_red = 0;     uint32_t received_infra_red = 0;
+    uint32_t request_barometer = 0;     uint32_t received_barometer = 0;
     uint32_t request_autonomous = 0;    uint32_t received_autonomous = 0;
 
 
@@ -125,8 +126,8 @@ int main(int argc, char **argv)
         if (loop_counter % 5 == 0) {
             multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-            multiwii_serial.prepare_request(MARVIC_LIDAR, 'P'); request_lidar++; request_total++;
-            multiwii_serial.prepare_request(MARVIC_INFRA_RED, 'P'); request_infra_red++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_LIDAR, PHOENIX_PROTOCOL); request_lidar++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_INFRA_RED, PHOENIX_PROTOCOL); request_infra_red++; request_total++;
 
         } else {
             if (loop_counter % 1 == 0) {
@@ -169,7 +170,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         infra_red_pub.publish(altitudeMsg);
                         received_infra_red++;
@@ -178,7 +179,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         sonar_pub.publish(altitudeMsg);
                         received_sonar++;
@@ -187,7 +188,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         barometer_pub.publish(altitudeMsg);
                         received_barometer++;

@@ -360,11 +360,11 @@ bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t ser
     write_msg_to_buffer(msg);
 }
 
-bool prepare_msg_led_strip(uint8_t led_0_r, uint8_t led_0_g, uint8_t led_0_b, uint8_t led_1_r, uint8_t led_1_g, uint8_t led_1_b,
-                           uint8_t led_2_r, uint8_t led_2_g, uint8_t led_2_b, uint8_t led_3_r, uint8_t led_3_g, uint8_t led_3_b,
-                           uint8_t led_4_r, uint8_t led_4_g, uint8_t led_4_b, uint8_t led_5_r, uint8_t led_5_g, uint8_t led_5_b,
-                           uint8_t led_6_r, uint8_t led_6_g, uint8_t led_6_b, uint8_t led_7_r, uint8_t led_7_g, uint8_t led_7_b,
-                           uint8_t led_8_r, uint8_t led_8_g, uint8_t led_8_b, uint8_t led_9_r, uint8_t led_9_g, uint8_t led_9_b, uint8_t strip_index){
+bool SerialCom::prepare_msg_led_strip(uint8_t led_0_r, uint8_t led_0_g, uint8_t led_0_b, uint8_t led_1_r, uint8_t led_1_g, uint8_t led_1_b,
+                                      uint8_t led_2_r, uint8_t led_2_g, uint8_t led_2_b, uint8_t led_3_r, uint8_t led_3_g, uint8_t led_3_b,
+                                      uint8_t led_4_r, uint8_t led_4_g, uint8_t led_4_b, uint8_t led_5_r, uint8_t led_5_g, uint8_t led_5_b,
+                                      uint8_t led_6_r, uint8_t led_6_g, uint8_t led_6_b, uint8_t led_7_r, uint8_t led_7_g, uint8_t led_7_b,
+                                      uint8_t led_8_r, uint8_t led_8_g, uint8_t led_8_b, uint8_t led_9_r, uint8_t led_9_g, uint8_t led_9_b, uint8_t strip_index){
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_led sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
@@ -424,7 +424,7 @@ bool prepare_msg_led_strip(uint8_t led_0_r, uint8_t led_0_g, uint8_t led_0_b, ui
     write_msg_to_buffer(msg);
 }
 
-bool prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint8_t led_r, uint8_t led_g, uint8_t led_b){
+bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint8_t led_r, uint8_t led_g, uint8_t led_b){
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_single_led sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
@@ -611,7 +611,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
 
                         //input_buffer_read_position = analysis_start + 1;
                         msg->msg_preamble = msg_preamble;
-                        msg->msg_protocol = msg_protocol;
+                        msg->msg_protocol = (MessageProtocol) msg_protocol;
                         msg->msg_direction = (MessageDirection) msg_direction;
                         msg->msg_length = (MessageLength) msg_length;
                         msg->msg_code = (MessageCode) msg_code;
@@ -646,7 +646,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         }
 
                         msg->msg_preamble = msg_preamble;
-                        msg->msg_protocol = msg_protocol;
+                        msg->msg_protocol = (MessageProtocol) msg_protocol;
                         msg->msg_direction = (MessageDirection) msg_direction;
                         msg->msg_length = (MessageLength) msg_length;
                         msg->msg_code = (MessageCode) msg_code;

@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
     // init ------------------------------------------------------------------------------------------------
     // ros init
-    ros::init(argc, argv, "UART_bridge_marvicRC");
+    ros::init(argc, argv, "UART_bridge_marvicRCaltitude");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
     sensor_msgs::Imu imuMsg;
@@ -45,6 +45,13 @@ int main(int argc, char **argv)
     // ros init publishers
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/marvicRC/rc_input", 1);
     ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/marvicRC/status", 1);
+
+    ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/altitude", 1);
+    ros::Publisher sonar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/sonar", 1);
+    ros::Publisher lidar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/lidar", 1);
+    ros::Publisher infra_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/infra_red", 1);
+    ros::Publisher barometer_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
+
 
     // ros init subscriber
     ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer", 1, rc_computer_callback);
@@ -71,16 +78,11 @@ int main(int argc, char **argv)
     uint32_t request_total = 0;         uint32_t received_total = 0;
     uint32_t request_status = 0;        uint32_t received_status = 0;
     uint32_t request_rc = 0;            uint32_t received_rc = 0;
-    uint32_t request_imu = 0;           uint32_t received_imu = 0;
-    uint32_t request_attitude = 0;      uint32_t received_attitude = 0;
-    uint32_t request_motor = 0;         uint32_t received_motor = 0;
-    uint32_t request_gps = 0;           uint32_t received_gps = 0;
     uint32_t request_altitude = 0;      uint32_t received_altitude = 0;
-    uint32_t request_battery = 0;       uint32_t received_battery = 0;
     uint32_t request_sonar = 0;         uint32_t received_sonar = 0;
-    uint32_t request_autonomous = 0;    uint32_t received_autonomous = 0;
-
-
+    uint32_t request_lidar = 0;         uint32_t received_lidar = 0;
+    uint32_t request_infra_red = 0;     uint32_t received_infra_red = 0;
+    uint32_t request_barometer = 0;     uint32_t received_barometer = 0;
 
     // set start timestamps in real and in cpu time
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
@@ -94,44 +96,38 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         if (serial_interface.error_count > 10) {
-            ROS_INFO("uart bridge marvicRC is shutting down due to serial port problem, restarting in 5sec");
+            ROS_INFO("uart bridge marvicRCaltitude is shutting down due to serial port problem, restarting in 5sec");
             serial_interface.deinitialize();
             sleep(5);
             serial_interface.init();                                                 // start serial connection
             sleep(1);                                                                // wait for boot loader and calibration
             serial_interface.clear_input_buffer();                                   // clear serial buffer
-            ROS_INFO("uart bridge marvicRC goes back to main loop");
+            ROS_INFO("uart bridge marvicRCaltitude goes back to main loop");
         }
         loop_counter++;
         // print statistics from while to while
         if (loop_counter % 1000 == 0) {
             system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
             std::cout << "       request\tin\tloss" << std::endl;
-            std::cout << "status   " << request_status      << "\t" << received_status     << "\t" << request_status - received_status         << std::endl;
-            std::cout << "rc       " << request_rc          << "\t" << received_rc         << "\t" << request_rc - received_rc                 << std::endl;
-            std::cout << "imu      " << request_imu         << "\t" << received_imu        << "\t" << request_imu - received_imu               << std::endl;
-            std::cout << "attitude " << request_attitude    << "\t" << received_attitude   << "\t" << request_attitude - received_attitude     << std::endl;
-            std::cout << "motor    " << request_motor       << "\t" << received_motor      << "\t" << request_motor - received_motor           << std::endl;
-            std::cout << "gps      " << request_gps         << "\t" << received_gps        << "\t" << request_gps - received_gps               << std::endl;
-            std::cout << "altitude " << request_altitude    << "\t" << received_altitude   << "\t" << request_altitude - received_altitude     << std::endl;
-            std::cout << "battery  " << request_battery     << "\t" << received_battery    << "\t" << request_battery - received_battery       << std::endl;
-            std::cout << "sonar    " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
-            std::cout << "autonom  " << request_autonomous  << "\t" << received_autonomous << "\t" << request_autonomous - received_autonomous << std::endl;
-            std::cout << "total:   " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
+            std::cout << "status    " << request_status      << "\t" << received_status     << "\t" << request_status - received_status         << std::endl;
+            std::cout << "rc        " << request_rc          << "\t" << received_rc         << "\t" << request_rc - received_rc                 << std::endl;
+            std::cout << "altitude  " << request_altitude    << "\t" << received_altitude   << "\t" << request_altitude - received_altitude     << std::endl;
+            std::cout << "sonar     " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
+            std::cout << "barometer " << request_barometer   << "\t" << received_barometer  << "\t" << request_barometer - received_barometer   << std::endl;
+            std::cout << "LIDAR     " << request_lidar       << "\t" << received_lidar      << "\t" << request_lidar - received_lidar           << std::endl;
+            std::cout << "ifra red  " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
+            std::cout << "total:    " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
             
             t1 = std::chrono::high_resolution_clock::now();
             real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
-            std::cout << "freq status   " << received_status     / real_duration << " msg/s" << std::endl;
-            std::cout << "freq rc       " << received_rc         / real_duration << " msg/s" << std::endl;
-            std::cout << "freq imu      " << received_imu        / real_duration << " msg/s" << std::endl;
-            std::cout << "freq attitude " << received_attitude   / real_duration << " msg/s" << std::endl;
-            std::cout << "freq motor    " << received_motor      / real_duration << " msg/s" << std::endl;
-            std::cout << "freq gps      " << received_gps        / real_duration << " msg/s" << std::endl;
-            std::cout << "freq altitude " << received_altitude   / real_duration << " msg/s" << std::endl;
-            std::cout << "freq battery  " << received_battery    / real_duration << " msg/s" << std::endl;
-            std::cout << "freq sonar    " << received_sonar      / real_duration << " msg/s" << std::endl;
-            std::cout << "freq autonom  " << received_autonomous / real_duration << " msg/s" << std::endl;
-            std::cout << "freq total    " << received_total      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq status    " << received_status     / real_duration << " msg/s" << std::endl;
+            std::cout << "freq rc        " << received_rc         / real_duration << " msg/s" << std::endl;
+            std::cout << "freq altitude  " << received_altitude   / real_duration << " msg/s" << std::endl;
+            std::cout << "freq sonar     " << received_sonar      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq barometer " << received_barometer  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq LIDAR     " << received_lidar      / real_duration << " msg/s" << std::endl;
+            std::cout << "freq infra red " << received_infra_red  / real_duration << " msg/s" << std::endl;
+            std::cout << "freq total     " << received_total      / real_duration << " msg/s" << std::endl;
             
             std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
             std::cout << " communication took " << real_duration << " real seconds" << std::endl;
@@ -144,6 +140,12 @@ int main(int argc, char **argv)
         } else {
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+
+                serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+                serial_interface.prepare_request(MARVIC_LIDAR, PHOENIX_PROTOCOL); request_lidar++; request_total++;
+                serial_interface.prepare_request(MARVIC_INFRA_RED, PHOENIX_PROTOCOL); request_infra_red++; request_total++;
+                serial_interface.prepare_request(MARVIC_SONAR, PHOENIX_PROTOCOL); request_sonar++; request_total++;
+                serial_interface.prepare_request(MARVIC_BAROMETER, PHOENIX_PROTOCOL); request_barometer++; request_total++;
             }
 
             if (loop_counter % 2 == 0) {
@@ -193,6 +195,47 @@ int main(int argc, char **argv)
                         }
                         */
                         received_rc++;
+                    } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
+                        altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
+                        altitude_pub.publish(altitudeMsg);
+                        received_altitude++;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_LIDAR)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        lidar_pub.publish(altitudeMsg);
+                        received_lidar++;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_INFRA_RED)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        infra_red_pub.publish(altitudeMsg);
+                        received_infra_red++;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_SONAR)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        sonar_pub.publish(altitudeMsg);
+                        received_sonar++;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_BAROMETER)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        barometer_pub.publish(altitudeMsg);
+                        received_barometer++;
                     }
                 }
             }
@@ -204,29 +247,33 @@ int main(int argc, char **argv)
     
     
     // shutdown -------------------------------------------------------------------------------------------
-    ROS_INFO("uart bridge is shutting down");
+    ROS_INFO("uart bridge marvicRCaltitude is shutting down");
     
     
     serial_interface.deinitialize();
     
     
     system_duration = (double(clock()) / CLOCKS_PER_SEC) - begin_communication;
-    std::cout << "       request\tin\tloss" << std::endl;
-    std::cout << "total: " << request_total   << "\t" << received_total  << "\t" << request_total - received_total   << std::endl;
-    std::cout << "status " << request_status  << "\t" << received_status << "\t" << request_status - received_status << std::endl;
-    std::cout << "rc     " << request_rc      << "\t" << received_rc     << "\t" << request_rc - received_rc         << std::endl;
-    std::cout << "imu    " << request_imu     << "\t" << received_imu    << "\t" << request_imu - received_imu       << std::endl;
-    std::cout << "motor  " << request_motor   << "\t" << received_motor  << "\t" << request_motor - received_motor   << std::endl;
-    std::cout << "gps    " << request_gps     << "\t" << received_gps    << "\t" << request_gps - received_gps       << std::endl;
-    
+    std::cout << "   request\tin\tloss" << std::endl;
+    std::cout << "status    " << request_status      << "\t" << received_status     << "\t" << request_status - received_status         << std::endl;
+    std::cout << "rc        " << request_rc          << "\t" << received_rc         << "\t" << request_rc - received_rc                 << std::endl;
+    std::cout << "altitude  " << request_altitude    << "\t" << received_altitude   << "\t" << request_altitude - received_altitude     << std::endl;
+    std::cout << "sonar     " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
+    std::cout << "barometer " << request_barometer   << "\t" << received_barometer  << "\t" << request_barometer - received_barometer   << std::endl;
+    std::cout << "LIDAR     " << request_lidar       << "\t" << received_lidar      << "\t" << request_lidar - received_lidar           << std::endl;
+    std::cout << "ifra red  " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
+    std::cout << "total:    " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
+
     t1 = std::chrono::high_resolution_clock::now();
     real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
-    std::cout << "freq status " << received_status / real_duration << " msg/s" << std::endl;
-    std::cout << "freq rc     " << received_rc     / real_duration << " msg/s" << std::endl;
-    std::cout << "freq imu    " << received_imu    / real_duration << " msg/s" << std::endl;
-    std::cout << "freq motor  " << received_motor  / real_duration << " msg/s" << std::endl;
-    std::cout << "freq gps    " << received_gps    / real_duration << " msg/s" << std::endl;
-    std::cout << "freq total  " << received_total  / real_duration << " msg/s" << std::endl;
+    std::cout << "freq status    " << received_status     / real_duration << " msg/s" << std::endl;
+    std::cout << "freq rc        " << received_rc         / real_duration << " msg/s" << std::endl;
+    std::cout << "freq altitude  " << received_altitude   / real_duration << " msg/s" << std::endl;
+    std::cout << "freq sonar     " << received_sonar      / real_duration << " msg/s" << std::endl;
+    std::cout << "freq barometer " << received_barometer  / real_duration << " msg/s" << std::endl;
+    std::cout << "freq LIDAR     " << received_lidar      / real_duration << " msg/s" << std::endl;
+    std::cout << "freq infra red " << received_infra_red  / real_duration << " msg/s" << std::endl;
+    std::cout << "freq total     " << received_total      / real_duration << " msg/s" << std::endl;
     std::cout << "End " << std::endl;
     
     std::cout << " communication took " << system_duration << " cpu seconds" << std::endl;
