@@ -17,8 +17,9 @@ enum MessageCode : uint8_t {
     MARVIC_SINGLE_LED = 54,
     MARVIC_BATTERY = 66,
     MARVIC_SONAR = 68,
-    MARVIC_LIDAR = 70,
     MARVIC_INFRA_RED = 69,
+    MARVIC_LIDAR = 70,
+    MARVIC_BAROMETER = 71,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
@@ -42,6 +43,7 @@ enum MessageLength : uint8_t {
     MARVIC_SONAR_LENGTH = 6,
     MARVIC_LIDAR_LENGTH = 6,
     MARVIC_INFRA_RED_LENGTH = 6,
+    MARVIC_BAROMETER_LENGTH = 6,
     MARVIC_STRIP_LED_LENGTH = 30,
     MARVIC_SINGLE_LED_LENGTH = 5,
     MULTIWII_STATUS_LENGTH = 11,
@@ -93,7 +95,7 @@ struct Payload {
             uint8_t led_9_r;
             uint8_t led_9_g;
             uint8_t led_9_b;
-        } marvic_led_strip;                       // MARVIC_LED_0 = 50, MARVIC_LED_1 = 51, MARVIC_LED_2 = 52, MARVIC_LED_3 = 53
+        } marvic_led_strip;                 // MARVIC_LED_0 = 50, MARVIC_LED_1 = 51, MARVIC_LED_2 = 52, MARVIC_LED_3 = 53
 
         struct {
             uint8_t led_id;
@@ -106,7 +108,7 @@ struct Payload {
         struct {
             uint32_t millisecond_time_stamp;
             uint16_t distance;
-        } marvic_altitude;                  // MARVIC_SONAR = 68, MARVIC_INFRA_RED = 69, MARVIC_LIDAR = 70
+        } marvic_altitude;                  // MARVIC_SONAR = 68, MARVIC_INFRA_RED = 69, MARVIC_LIDAR = 70, MARVIC_BAROMETER = 71
 
         struct {
             uint16_t cell1_mean;
