@@ -60,6 +60,7 @@ find_package(catkin REQUIRED COMPONENTS
    Status.msg
    Altitude.msg
    Autonomous.msg
+   LEDstrip.msg
    LED.msg
  )
 
