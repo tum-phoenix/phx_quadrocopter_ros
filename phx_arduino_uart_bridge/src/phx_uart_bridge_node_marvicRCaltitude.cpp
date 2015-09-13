@@ -69,10 +69,10 @@ int main(int argc, char **argv)
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
-    sleep(12);                                                              // wait for arduino boot loader
+    sleep(1);                                                                // wait for arduino boot loader
     serial_interface.clear_input_buffer();                                   // clear serial buffer
-    Message input_msg;                                                      // the latest received message
-    uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
+    Message input_msg;                                                       // the latest received message
+    uint32_t loop_counter = 0;                                               // a counter which is used for sending requests
     
     // init statistics
     uint32_t request_total = 0;         uint32_t received_total = 0;
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
             std::cout << "sonar     " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
             std::cout << "barometer " << request_barometer   << "\t" << received_barometer  << "\t" << request_barometer - received_barometer   << std::endl;
             std::cout << "LIDAR     " << request_lidar       << "\t" << received_lidar      << "\t" << request_lidar - received_lidar           << std::endl;
-            std::cout << "ifra red  " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
+            std::cout << "infra red " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
             std::cout << "total:    " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
             
             t1 = std::chrono::high_resolution_clock::now();
@@ -248,8 +248,6 @@ int main(int argc, char **argv)
     
     // shutdown -------------------------------------------------------------------------------------------
     ROS_INFO("uart bridge marvicRCaltitude is shutting down");
-    
-    
     serial_interface.deinitialize();
     
     
@@ -261,7 +259,7 @@ int main(int argc, char **argv)
     std::cout << "sonar     " << request_sonar       << "\t" << received_sonar      << "\t" << request_sonar - received_sonar           << std::endl;
     std::cout << "barometer " << request_barometer   << "\t" << received_barometer  << "\t" << request_barometer - received_barometer   << std::endl;
     std::cout << "LIDAR     " << request_lidar       << "\t" << received_lidar      << "\t" << request_lidar - received_lidar           << std::endl;
-    std::cout << "ifra red  " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
+    std::cout << "infra red " << request_infra_red   << "\t" << received_infra_red  << "\t" << request_infra_red - received_infra_red   << std::endl;
     std::cout << "total:    " << request_total       << "\t" << received_total      << "\t" << request_total - received_total           << std::endl;
 
     t1 = std::chrono::high_resolution_clock::now();
