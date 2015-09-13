@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     ros::Subscriber led_strip_1_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_1", 1, led_strip_1_callback);
     ros::Subscriber led_strip_2_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_2", 1, led_strip_2_callback);
     ros::Subscriber led_strip_3_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_3", 1, led_strip_3_callback);
-    ros::Subscriber led_single_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_single", 1, led_single_callback);
+    ros::Subscriber led_single_sub = n.subscribe<phx_arduino_uart_bridge::LED>("phx/led/led_single", 1, led_single_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
