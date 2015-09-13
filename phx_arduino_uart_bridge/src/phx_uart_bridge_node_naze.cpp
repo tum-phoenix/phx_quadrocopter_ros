@@ -10,7 +10,8 @@
 #include "phx_arduino_uart_bridge/Motor.h"
 #include "phx_arduino_uart_bridge/Status.h"
 #include "phx_arduino_uart_bridge/Altitude.h"
-//#include "phx_arduino_uart_bridge/Battery.h"
+#include "phx_arduino_uart_bridge/LEDstrip.h"
+#include "phx_arduino_uart_bridge/LED.h"
 
 #include <chrono>
 #include <iostream>
@@ -21,21 +22,6 @@ void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
-/*
-from sensor_msgs.msg import Imu
-from sensor_msgs.msg import NavSatFix, NavSatStatus
-from sensor_msgs.msg import Joy
-from std_msgs.msg import Int16
-from sensor_msgs.msg import FluidPressure #Barometer
-from sensor_msgs.msg import Temperature #For compensation gyrodrift
-from sensor_msgs.msg import Range #Distance to ground
-from geometry_msgs.msg import Twist, Quaternion
-from phx_arduino_uart_bridge.msg import Motor
-from phx_arduino_uart_bridge.msg import Battery
-from phx_arduino_uart_bridge.msg import Cycletime
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue #For Battery status
- */
-
 int main(int argc, char **argv)
 {
     // init ------------------------------------------------------------------------------------------------
@@ -43,14 +29,16 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "UART_bridge_naze");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
+
     sensor_msgs::Imu imuMsg;
-    sensor_msgs::Joy joyMsg;
-    joyMsg.axes = std::vector<float> (4, 0);
-    joyMsg.buttons = std::vector<int> (4, 0);
     phx_arduino_uart_bridge::Motor motorMsg;
     phx_arduino_uart_bridge::Status statusMsg;
     phx_arduino_uart_bridge::Altitude altitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
+
+    sensor_msgs::Joy joyMsg;
+    joyMsg.axes = std::vector<float> (4, 0);
+    joyMsg.buttons = std::vector<int> (4, 0);
     
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
@@ -62,7 +50,7 @@ int main(int argc, char **argv)
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
 
     // ros init subscribers
-    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer_direct", 1, rc_direct_callback);
+    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
@@ -70,8 +58,6 @@ int main(int argc, char **argv)
     
     // serialcom init
     SerialCom serial_interface;                                              // create SerialCom instance
-    //serial_interface.set_device("/dev/ttyUSB1");                             // select the device
-    //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
     serial_interface.set_device("/dev/ttyUSB1");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
@@ -145,38 +131,21 @@ int main(int argc, char **argv)
             std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
         }
         
-        // serialcom send requests
+        // serial com send requests
         if (loop_counter % 5 == 0) {
-            //serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-            //serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
-
-            //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-            //serial_interface.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
         } else {
             if (loop_counter % 1 == 0) {
-                //serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
 
             if (loop_counter % 2 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
                 serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
@@ -192,7 +161,7 @@ int main(int argc, char **argv)
                     if (input_msg.msg_code == MULTIWII_STATUS) {
                         headerMsg.seq = received_status;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         statusMsg.header = headerMsg;
                         statusMsg.cycleTime = input_msg.msg_data.multiwii_status.cycleTime;
                         statusMsg.i2c_errors_count = input_msg.msg_data.multiwii_status.i2c_errors_count;
@@ -201,7 +170,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         joyMsg.header = headerMsg;
                         joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
                         joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
@@ -226,7 +195,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
                         headerMsg.seq = received_imu;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         imuMsg.header = headerMsg;
                         geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
                         imuMsg.orientation = quaternion;
@@ -235,7 +204,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_MOTOR) {
                         headerMsg.seq = received_motor;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         motorMsg.header = headerMsg;
                         motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
                         motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
@@ -246,7 +215,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_GPS) {
                         headerMsg.seq = received_gps;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         gpsMsg.header = headerMsg;
                         gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
                         gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
@@ -256,7 +225,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_GPS_WP) {
                         headerMsg.seq = received_gps_way_point;
                         headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
+                        headerMsg.frame_id = "naze_fc";
                         if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 16) {
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = input_msg.msg_data.multiwii_gps_way_point.coordLAT;
@@ -266,16 +235,14 @@ int main(int argc, char **argv)
                         }
                         received_gps_way_point++;
                     } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                        headerMsg.seq = received_altitude;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "naze_fc";
+                        altitudeMsg.header = headerMsg;
                         altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
                         altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
                         altitude_pub.publish(altitudeMsg);
                         received_altitude++;
-                    } else if (input_msg.msg_code == MARVIC_BATTERY) {
-                        received_battery++;
-                    } else if (input_msg.msg_code == MARVIC_SONAR) {
-                        received_sonar++;
-                    } else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
-                        received_autonomous++;
                     }
                 }
             }
