@@ -36,6 +36,7 @@ int main(int argc, char **argv)
     ros::Publisher sonar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/sonar", 1);
     ros::Publisher lidar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/lidar", 1);
     ros::Publisher infra_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/infra_red", 1);
+    ros::Publisher barometer_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
 
     // ros init subscriber
     
