@@ -10,15 +10,13 @@
 #include "phx_arduino_uart_bridge/Motor.h"
 #include "phx_arduino_uart_bridge/Status.h"
 #include "phx_arduino_uart_bridge/Altitude.h"
-#include "phx_arduino_uart_bridge/Battery.h"
-#include "phx_arduino_uart_bridge/Autonomous.h"
+#include "phx_arduino_uart_bridge/LEDstrip.h"
+#include "phx_arduino_uart_bridge/LED.h"
 
 #include <chrono>
 #include <iostream>
 #include "phx_arduino_uart_bridge/serial_com.h"
 
-void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
-void motor_computer_callback(const phx_arduino_uart_bridge::Motor::ConstPtr&);
 
 SerialCom multiwii_serial;                                              // create SerialCom instance
 
@@ -29,16 +27,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "UART_bridge_marvicAltitude");
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
-    sensor_msgs::Imu imuMsg;
-    sensor_msgs::Joy joyMsg;
-    joyMsg.axes = std::vector<float> (4, 0);
-    joyMsg.buttons = std::vector<int> (4, 0);
-    phx_arduino_uart_bridge::Motor motorMsg;
     phx_arduino_uart_bridge::Status statusMsg;
     phx_arduino_uart_bridge::Altitude altitudeMsg;
-    phx_arduino_uart_bridge::Battery batteryMsg;
-    phx_arduino_uart_bridge::Autonomous autonomousMsg;
-    sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
     ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/marvicAltitude/status", 1);
@@ -46,6 +36,7 @@ int main(int argc, char **argv)
     ros::Publisher sonar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/sonar", 1);
     ros::Publisher lidar_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/lidar", 1);
     ros::Publisher infra_red_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/infra_red", 1);
+    ros::Publisher barometer_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
 
     // ros init subscriber
     
@@ -75,6 +66,7 @@ int main(int argc, char **argv)
     uint32_t request_sonar = 0;         uint32_t received_sonar = 0;
     uint32_t request_lidar = 0;     uint32_t received_lidar = 0;
     uint32_t request_infra_red = 0;     uint32_t received_infra_red = 0;
+    uint32_t request_barometer = 0;     uint32_t received_barometer = 0;
     uint32_t request_autonomous = 0;    uint32_t received_autonomous = 0;
 
 
@@ -132,38 +124,16 @@ int main(int argc, char **argv)
         
         // serialcom send requests
         if (loop_counter % 5 == 0) {
-            //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-            //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-            //multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-            //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-            //multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-            //multiwii_serial.prepare_request(MARVIC_BATTERY); request_battery++; request_total++;
-            //multiwii_serial.prepare_request(MARVIC_SONAR, 'P'); request_sonar++; request_total++;
-            multiwii_serial.prepare_request(MARVIC_LIDAR, 'P'); request_lidar++; request_total++;
-            multiwii_serial.prepare_request(MARVIC_INFRA_RED, 'P'); request_infra_red++; request_total++;
-            //multiwii_serial.prepare_request(MARVIC_AUTONOMOUS_FLIGHT); request_autonomous++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_LIDAR, PHOENIX_PROTOCOL); request_lidar++; request_total++;
+            multiwii_serial.prepare_request(MARVIC_INFRA_RED, PHOENIX_PROTOCOL); request_infra_red++; request_total++;
 
         } else {
             if (loop_counter % 1 == 0) {
-                //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
 
             if (loop_counter % 2 == 0) {
-                //multiwii_serial.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-                //multiwii_serial.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
         }
         multiwii_serial.send_from_buffer();
@@ -181,98 +151,48 @@ int main(int argc, char **argv)
                         statusMsg.i2c_errors_count = input_msg.msg_data.multiwii_status.i2c_errors_count;
                         status_pub.publish(statusMsg);
                         received_status++;
-                    } /*else if (input_msg.msg_code == MULTIWII_RC) {
-                        headerMsg.seq = received_rc;
-                        headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
-                        joyMsg.header = headerMsg;
-                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                        joy_pub.publish(joyMsg);
-                        /*
-                        // this demonstrates that it is possible to fly the copter via the serial bridge by sending every second rc update back.
-                        if (received_rc % 2 == 0) {
-                            multiwii_serial.prepare_msg_rc((uint16_t) input_msg.msg_data.multiwii_rc.throttle,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.pitch,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.roll,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.yaw,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux1,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux2,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux3,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux4);
-                            multiwii_serial.send_from_buffer();
-                        }
-                        received_rc++;
-                    } else if (input_msg.msg_code == MULTIWII_IMU) {
-                        // if raw_imu data is received this is updated in the imu ros message but not directly published.
-                        // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
-                        imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
-                        imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
-                        imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
-                        imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
-                        imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
-                        received_imu++;
-                    } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
-                        headerMsg.seq = received_imu;
-                        headerMsg.stamp = ros::Time::now();
-                        headerMsg.frame_id = "multiwii";
-                        imuMsg.header = headerMsg;
-                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
-                        imuMsg.orientation = quaternion;
-                        imu_pub.publish(imuMsg);
-                        received_attitude++;
-                    } else if (input_msg.msg_code == MULTIWII_MOTOR) {
-                        motorMsg.motor0 = input_msg.msg_data.multiwii_motor.motor0;
-                        motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
-                        motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
-                        motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
-                        motor_pub.publish(motorMsg);
-                        received_motor++;
-                    } else if (input_msg.msg_code == MULTIWII_GPS) {
-                        gpsMsg.latitude = input_msg.msg_data.multiwii_gps.coordLAT;
-                        gpsMsg.longitude = input_msg.msg_data.multiwii_gps.coordLON;
-                        gpsMsg.altitude = input_msg.msg_data.multiwii_gps.altitude;
-                        gps_pub.publish(gpsMsg);
-                        received_gps++;
-                    } */ else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
+                    } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
                         altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
                         altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
                         altitude_pub.publish(altitudeMsg);
                         received_altitude++;
-                    } /* else if (input_msg.msg_code == MARVIC_BATTERY) {
-                        batteryMsg.cell1 = input_msg.msg_data.marvic_battery.cell1_mean;
-                        batteryMsg.cell2 = input_msg.msg_data.marvic_battery.cell2_mean;
-                        batteryMsg.cell3 = input_msg.msg_data.marvic_battery.cell3_mean;
-                        batteryMsg.cell4 = input_msg.msg_data.marvic_battery.cell4_mean;
-                        battery_pub.publish(batteryMsg);
-                        received_battery++;
-                    } else if (input_msg.msg_code == MARVIC_SONAR) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance_0;
-                        altitudeMsg.variation = input_msg.msg_data.marvic_sonar.distance_1;
-                        sonar_pub.publish(altitudeMsg);
-                        received_sonar++;
-                    } */ else if ((input_msg.msg_protocol == 'P') && (input_msg.msg_code == MARVIC_LIDAR)) {
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_LIDAR)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
                         altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         lidar_pub.publish(altitudeMsg);
                         received_lidar++;
-                    } else if ((input_msg.msg_protocol == 'P') && (input_msg.msg_code == MARVIC_INFRA_RED)) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_sonar.distance_0;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_INFRA_RED)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
                         altitudeMsg.variation = 0;
                         infra_red_pub.publish(altitudeMsg);
                         received_infra_red++;
-                    } /* else if (input_msg.msg_code == MARVIC_AUTONOMOUS_FLIGHT) {
-                        autonomousMsg.is_autonomous = input_msg.msg_data.marvic_autonomous.is_active;
-                        autonomous_pub.publish(autonomousMsg);
-                        received_autonomous++;
-                    } */
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_SONAR)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        sonar_pub.publish(altitudeMsg);
+                        received_sonar++;
+                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_BAROMETER)) {
+                        headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "marvicAltitude";
+                        altitudeMsg.header = headerMsg;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.variation = 0;
+                        barometer_pub.publish(altitudeMsg);
+                        received_barometer++;
+                    }
                 }
             }
         }
@@ -330,15 +250,3 @@ void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
     multiwii_serial.send_from_buffer();
 }
 
-void motor_computer_callback(const phx_arduino_uart_bridge::Motor::ConstPtr& motorMsg) {
-    std::cout << "\033[1;31m>>> motor_computer_callback" << (*motorMsg).motor0 << " " << (*motorMsg).motor1 << " "  << (*motorMsg).motor2 << " " << (*motorMsg).motor3 << "\033[0m"<< std::endl;
-    multiwii_serial.prepare_msg_motor((uint16_t) (*motorMsg).motor0,
-                                      (uint16_t) (*motorMsg).motor1,
-                                      (uint16_t) (*motorMsg).motor2,
-                                      (uint16_t) (*motorMsg).motor3,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000,
-                                      (uint16_t) 1000);
-    multiwii_serial.send_from_buffer();
-}

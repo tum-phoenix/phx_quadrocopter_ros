@@ -23,7 +23,6 @@ class Gui(Plugin):
 
     # Maybe this needs to run in a thread
 
-
-@staticmethod
+    @staticmethod
     def shutdown_plugin(self):
         self._widget.shutdown_all()

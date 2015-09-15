@@ -1,6 +1,6 @@
 Header header
-int16 LEDnumber
-int16 red
-int16 green
-int16 blue
-int16 mode
+uint8 led_index
+uint8 strip_id
+uint8 led_r
+uint8 led_g
+uint8 led_b

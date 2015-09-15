@@ -67,12 +67,17 @@ public:
     bool print_output_buffer();
 
     // preparing different messages -> they all call write_msg_to_buffer() in the end
-    bool prepare_msg_continuous_sending(uint8_t);
     bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+    bool prepare_msg_servo(uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0,
+                           uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0);
+    bool prepare_msg_led_strip(uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0,
+                               uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0,
+                               uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0);
+    bool prepare_msg_single_led(uint8_t, uint8_t, uint8_t=200, uint8_t=200, uint8_t=200);
     bool prepare_msg_gps_get_way_point(uint8_t);
     bool prepare_msg_gps_set_way_point(uint8_t, uint32_t, uint32_t, uint32_t, uint16_t, uint16_t, uint8_t);
-    bool prepare_request(MessageCode, uint8_t = 'M');                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
+    bool prepare_request(MessageCode, MessageProtocol=MULTIWII_PROTOCOL);                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
 
     // adding message to the output buffer -> afterwards send_from_buffer() can be used to send the message to the serial port
     bool write_msg_to_buffer(Message);
@@ -83,11 +88,12 @@ public:
     uint8_t read_from_input_buffer();               // reads the next byte from the input_buffer
     bool read_msg_from_buffer(Message*);            // this reads the next full message from the buffer and writes it into the given Message*
 
+    uint16_t error_count = 10;
     bool deinitialize();                            // closes the serial port properly
 private:
     bool do_debug_printout = false;
 
-    const char* serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
+    std::string serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
     uint32_t serial_device_baud_rate;               // the used baudrate like 9600, 57600 or 115200
     uint16_t buffer_io_max;                         // maximum numbers of bytes which are read or written during one cycle
     int serial_interface;                           // the handle for the serial device and its config after it is opened
