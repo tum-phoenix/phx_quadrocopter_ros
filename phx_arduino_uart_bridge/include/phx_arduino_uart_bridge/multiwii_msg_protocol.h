@@ -209,8 +209,8 @@ struct Payload {
         struct {
             uint8_t fix;
             uint8_t numSat;
-            uint32_t coordLAT;
-            uint32_t coordLON;
+            int32_t coordLAT;
+            int32_t coordLON;
             uint16_t altitude;
             uint16_t speed;
             uint16_t ground_course;
@@ -218,8 +218,8 @@ struct Payload {
 
         struct {
             uint8_t wp_number;
-            uint32_t coordLAT;
-            uint32_t coordLON;
+            int32_t coordLAT;
+            int32_t coordLON;
             uint32_t altitude;
             uint16_t heading;
             uint16_t stay_time;
@@ -227,20 +227,20 @@ struct Payload {
         } multiwii_gps_way_point;
 
         struct {
-            uint16_t roll;
-            uint16_t pitch;
-            uint16_t yaw;
+            int16_t roll;
+            int16_t pitch;
+            int16_t yaw;
         } multiwii_attitude;
 
         struct {
-            uint32_t estAlt;
+            int32_t estAlt;
             uint16_t variation;
         } multiwii_altitude;
 
         struct {
             uint8_t wp_number;
-            uint32_t coordLAT;
-            uint32_t coordLON;
+            int32_t coordLAT;
+            int32_t coordLON;
             uint32_t altitude;
             uint16_t heading;
             uint16_t stay_time;
