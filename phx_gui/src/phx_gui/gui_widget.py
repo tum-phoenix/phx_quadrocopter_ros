@@ -6,14 +6,14 @@ import rospkg
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, qWarning, Signal
-from python_qt_binding.QtGui import QFileDialog, QGraphicsView, QIcon, QWidget
+from python_qt_binding.QtGui import QFileDialog, QGraphicsView, QIcon, QWidget, QMainWindow
 
 class BagGraphicsView(QGraphicsView):
     def __init__(self, parent=None):
         super(BagGraphicsView, self).__init__()
 
 
-class GuiWidget(QWidget):
+class GuiWidget(QMainWindow): #QWidget
     """
         Widget for use with the OSC class
         Handles all widget callbacks
