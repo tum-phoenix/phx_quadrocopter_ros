@@ -1,16 +1,17 @@
 <launch>
     <!--  -->
 	<machine name="phoenix" address="localhost" />
+
+	<node name="UARTBridge_naze" pkg="phx_arduino_uart_bridge" type="phx_uart_bridge_node_naze" output="screen" machine="phoenix" />
+	<!-- <node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" /> -->
 	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/gps /phx/imu /camera_info /clock /image_color" machine="phoenix" />
-	<node name="UARTBridge_multiwii" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_multiwii" output="screen" machine="phoenix" />
-	<node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" />
 	
 	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
       		<param name="device" value="/dev/video0" />
       		<param name="width" value="640" />
       		<param name="height" value="480" />
       		<param name="format" value="YUYV" />
-      		<param name="fps" value="60" />
+      		<param name="fps" value="45" />
 		<param name="gain" value="0" />
 		<param name="Auto Exposure" value="0" />
     </node>
