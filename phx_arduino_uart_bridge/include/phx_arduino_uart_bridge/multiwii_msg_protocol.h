@@ -209,34 +209,33 @@ struct Payload {
         struct {
             uint8_t fix;
             uint8_t numSat;
-            int32_t coordLAT;
-            int32_t coordLON;
-            uint16_t altitude;
-            uint16_t speed;
-            uint16_t ground_course;
-        } multiwii_gps;
-
-        struct {
-            uint8_t fix;
-            uint8_t numSat;
-            uint8_t coordLAT0;
+            uint8_t coordLAT;
             uint8_t coordLAT1;
             uint8_t coordLAT2;
             uint8_t coordLAT3;
-            uint8_t coordLON0;
+            uint8_t coordLON;
             uint8_t coordLON1;
             uint8_t coordLON2;
             uint8_t coordLON3;
             uint16_t altitude;
             uint16_t speed;
             uint16_t ground_course;
-        } multiwii_gps_save;
+        } multiwii_gps;
 
         struct {
             uint8_t wp_number;
-            int32_t coordLAT;
-            int32_t coordLON;
-            uint32_t altitude;
+            uint8_t coordLAT;
+            uint8_t coordLAT1;
+            uint8_t coordLAT2;
+            uint8_t coordLAT3;
+            uint8_t coordLON;
+            uint8_t coordLON1;
+            uint8_t coordLON2;
+            uint8_t coordLON3;
+            uint8_t altitude;
+            uint8_t altitude1;
+            uint8_t altitude2;
+            uint8_t altitude3;
             uint16_t heading;
             uint16_t stay_time;
             uint8_t nav_flag;
@@ -255,9 +254,18 @@ struct Payload {
 
         struct {
             uint8_t wp_number;
-            int32_t coordLAT;
-            int32_t coordLON;
-            uint32_t altitude;
+            uint8_t coordLAT;
+            uint8_t coordLAT1;
+            uint8_t coordLAT2;
+            uint8_t coordLAT3;
+            uint8_t coordLON;
+            uint8_t coordLON1;
+            uint8_t coordLON2;
+            uint8_t coordLON3;
+            uint8_t altitude;
+            uint8_t altitude1;
+            uint8_t altitude2;
+            uint8_t altitude3;
             uint16_t heading;
             uint16_t stay_time;
             uint8_t nav_flag;
