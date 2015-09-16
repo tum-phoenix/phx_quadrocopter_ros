@@ -217,6 +217,22 @@ struct Payload {
         } multiwii_gps;
 
         struct {
+            uint8_t fix;
+            uint8_t numSat;
+            uint8_t coordLAT0;
+            uint8_t coordLAT1;
+            uint8_t coordLAT2;
+            uint8_t coordLAT3;
+            uint8_t coordLON0;
+            uint8_t coordLON1;
+            uint8_t coordLON2;
+            uint8_t coordLON3;
+            uint16_t altitude;
+            uint16_t speed;
+            uint16_t ground_course;
+        } multiwii_gps_save;
+
+        struct {
             uint8_t wp_number;
             int32_t coordLAT;
             int32_t coordLON;

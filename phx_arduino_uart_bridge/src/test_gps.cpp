@@ -96,6 +96,12 @@ int main(int argc, char **argv)
                         std::cout << "           lon: " << input_msg.msg_data.multiwii_gps.coordLON << std::endl;
                         std::cout << "           lat: " << input_msg.msg_data.multiwii_gps.coordLAT << std::endl;
                         std::cout << "           alt: " << input_msg.msg_data.multiwii_gps.altitude << std::endl;
+                        std::cout << "          raw msg: " << std::endl;
+                        std::cout << "           fix: " << printf("%c ", input_msg.msg_data.multiwii_gps_save.fix) << std::endl;
+                        std::cout << "           sat: " << printf("%c ", input_msg.msg_data.multiwii_gps_save.numSat) << std::endl;
+                        std::cout << "           lon: " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLON0) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLON1) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLON2) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLON3) << std::endl;
+                        std::cout << "           lat: " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLAT0) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLAT1) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLAT2) << " " << printf("%c ", input_msg.msg_data.multiwii_gps_save.coordLAT3) << std::endl;
+                        std::cout << "           alt: " << printf("%i ", input_msg.msg_data.multiwii_gps_save.altitude) << std::endl;
                     }
                 }
             }
