@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     if (argc >= 2) {
         multiwii_serial.set_device(argv[1]);
     } else {
-        multiwii_serial.set_device("/dev/tty.SLAB_USBtoUART");  //ttyUSB0");
+        multiwii_serial.set_device("/dev/ttyUSB0");
     }
     if (argc >= 3) {
         std::istringstream iss(argv[2]);
@@ -93,9 +93,11 @@ int main(int argc, char **argv)
                         std::cout << " gps msg received: " << std::endl;
                         std::cout << "           fix: " << input_msg.msg_data.multiwii_gps.fix << std::endl;
                         std::cout << "           sat: " << input_msg.msg_data.multiwii_gps.numSat << std::endl;
-                        std::cout << "           lon: " << input_msg.msg_data.multiwii_gps.coordLON << std::endl;
-                        std::cout << "           lat: " << input_msg.msg_data.multiwii_gps.coordLAT << std::endl;
+                        std::cout << "           lat: " << fix_int32(&input_msg.msg_data.multiwii_gps.coordLAT) << std::endl;
+                        std::cout << "           lon: " << fix_int32(&input_msg.msg_data.multiwii_gps.coordLON) << std::endl;
                         std::cout << "           alt: " << input_msg.msg_data.multiwii_gps.altitude << std::endl;
+                        std::cout << "          raw msg: " << std::endl;
+                        print_multiwii_message(&input_msg);
                     }
                 }
             }

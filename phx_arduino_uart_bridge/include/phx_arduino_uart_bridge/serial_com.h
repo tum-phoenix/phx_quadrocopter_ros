@@ -7,6 +7,7 @@
 #include "multiwii_msg_protocol.h"
 
 void print_multiwii_message(Message*);
+uint32_t fix_int32(uint8_t *input_pointer);
 
 class SerialCom {
 

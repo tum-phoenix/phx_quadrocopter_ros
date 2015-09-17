@@ -1,5 +1,27 @@
 #include "phx_arduino_uart_bridge/serial_com.h"
 
+uint32_t fix_int32(uint8_t *input_pointer) {
+    uint8_t raw_input[4];
+    memcpy(raw_input, input_pointer, 4);
+    // printf("\n byte0 %i\n", raw_input[0]);
+    // printf(" byte1 %i\n", raw_input[1]);
+    // printf(" byte2 %i\n", raw_input[2]);
+    // printf(" byte3 %i\n", raw_input[3]);
+    uint32_t raw_output = 0;
+    raw_output += raw_input[0];
+    raw_output += ((uint32_t) raw_input[1]) * 256;
+    raw_output += ((uint32_t) raw_input[2]) * 65536;
+    raw_output += ((uint32_t) raw_input[3]) * 16777216;
+
+    // uint8_t test[4];
+    // memcpy(test, &raw_output, 4);
+    // printf("\n out byte0 %i\n", test[0]);
+    // printf(" out byte1 %i\n", test[1]);
+    // printf(" out byte2 %i\n", test[2]);
+    // printf(" out byte3 %i\n", test[3]);
+    return raw_output;
+}
+
 bool SerialCom::set_device(std::string device_path) {
     serial_device_path = device_path;
     std::cout << "SerialCom::set_device  serial_device_path was set to " << serial_device_path << std::endl;
@@ -277,9 +299,24 @@ bool SerialCom::prepare_msg_gps_set_way_point(uint8_t wp_no, uint32_t lat, uint3
     msg.msg_length = MULTIWII_GPS_WP_SET_LENGTH;
     msg.msg_code = MULTIWII_GPS_WP_SET;
     msg.msg_data.multiwii_gps_set_way_point.wp_number = wp_no;
-    msg.msg_data.multiwii_gps_set_way_point.coordLAT = lat;
-    msg.msg_data.multiwii_gps_set_way_point.coordLON = lon;
-    msg.msg_data.multiwii_gps_set_way_point.altitude = alt;
+    uint8_t temp_lat[4];
+    memcpy(temp_lat, &lat, 4);
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[0];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[1];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[2];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[3];
+    uint8_t test_lon[4];
+    memcpy(test_lon, &lon, 4);
+    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[0];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[1];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[2];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[3];
+    uint8_t temp_alt[4];
+    memcpy(temp_alt, &alt, 4);
+    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[0];
+    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[1];
+    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[2];
+    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[3];
     msg.msg_data.multiwii_gps_set_way_point.heading = heading;
     msg.msg_data.multiwii_gps_set_way_point.stay_time = stay_time;
     msg.msg_data.multiwii_gps_set_way_point.nav_flag = nav_flag;
@@ -765,8 +802,8 @@ void print_multiwii_message(Message* msg) {
             printf("   msg_data: MULTIWII_GPS\n");
             printf("     fix:      %i\n", msg->msg_data.multiwii_gps.fix);
             printf("     numSat:   %i\n", msg->msg_data.multiwii_gps.numSat);
-            printf("     coordLAT: %i\n", msg->msg_data.multiwii_gps.coordLAT);
-            printf("     coordLON: %i\n", msg->msg_data.multiwii_gps.coordLON);
+            printf("     coordLAT: %i\n", fix_int32(&msg->msg_data.multiwii_gps.coordLAT));
+            printf("     coordLON: %i\n", fix_int32(&msg->msg_data.multiwii_gps.coordLON));
             printf("     altitude: %i\n", msg->msg_data.multiwii_gps.altitude);
             printf("     speed:    %i\n", msg->msg_data.multiwii_gps.speed);
             break;
