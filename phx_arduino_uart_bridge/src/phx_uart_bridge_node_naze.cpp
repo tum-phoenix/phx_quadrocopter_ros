@@ -196,9 +196,9 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
                         // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = input_msg.msg_data.multiwii_raw_imu.accx;
-                        imuMsg.linear_acceleration.y = input_msg.msg_data.multiwii_raw_imu.accy;
-                        imuMsg.linear_acceleration.z = input_msg.msg_data.multiwii_raw_imu.accz;
+                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 255.);
+                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 255.);
+                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 255.);
                         imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
                         imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
                         imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
