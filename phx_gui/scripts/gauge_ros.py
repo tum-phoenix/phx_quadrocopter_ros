@@ -70,15 +70,16 @@ gps_data = [[], []]  # [[lon], [lat]]
 
 
 def update_gps_plot():
+    #print 'plotting', gps_data
     gps_ax.cla()
     gps_ax.plot(gps_data[0], gps_data[1], 'g')
-    gps_ax.draw()
+    gps_canvas.draw()
 
 
 def callback_gps_msg(cur_gps_input):
+    print 'new gps:', cur_gps_input.longitude, cur_gps_input.latitude
     gps_data[0].append(cur_gps_input.longitude)
     gps_data[1].append(cur_gps_input.latitude)
-    update_gps_plot()
 
 
 ui_win.textBrowser.setText('test text')
@@ -276,7 +277,7 @@ def callback_cur_servo_cmd(cur_servo_cmd):
 rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_msg)
-update_interval = 20    # ms
+update_interval = 1000    # ms
 publish_servo = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
 
@@ -312,6 +313,7 @@ def mainloop():
         send_servos_msg.servo17 = get_parameters_slider(17)
         ros_publisher_servo_cmd.publish(send_servos_msg)
     print 'mainloop', win.keysPressed
+    update_gps_plot()
 
 win.show()
 # QTimer
