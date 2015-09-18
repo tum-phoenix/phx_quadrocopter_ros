@@ -58,23 +58,25 @@ ui_win.setupUi(win)
 win.setWindowTitle('gauge GUI - made for ROS')
 ui_win.statusbar.showMessage("starting up...")
 
+##########################################################################################
+# init tabs left
+##########################################################################################
+# text output
+ui_win.textBrowser.setText('test text')
 
-gps_figure = plt.figure()
-gps_canvas = FigureCanvas(gps_figure)
-gps_ax = gps_figure.add_axes([0.10, 0.10, 0.85, 0.85])
-gps_ax.set_ylabel('lat')
-gps_ax.set_xlabel('lon')
-ui_win.plot_tabs.addTab(gps_canvas, 'gps')
-
+# gps tab
 gps_data = [[], []]  # [[lon], [lat]]
+ui_win.gps_graphicsView.plotItem.showGrid(x=True, y=True, alpha=0.2)
+gps_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
+import pyqtgraph as pg
+gps_positions = []   # [{'pos': (42, 11), 'symbol': 'o'}]
+gps_scatter_plot = pg.ScatterPlotItem()
+gps_scatter_plot.setData(gps_positions)
+ui_win.gps_graphicsView.addItem(gps_scatter_plot)
 
 
 def update_gps_plot():
-    #print 'plotting', gps_data
-    gps_ax.cla()
-    gps_ax.plot(gps_data[0], gps_data[1], 'g')
-    gps_canvas.draw()
-
+    gps_qtgraph_plot.setData(gps_data[0], gps_data[1])
 
 def callback_gps_msg(cur_gps_input):
     print 'new gps:', cur_gps_input.longitude, cur_gps_input.latitude
@@ -82,7 +84,6 @@ def callback_gps_msg(cur_gps_input):
     gps_data[1].append(cur_gps_input.latitude)
 
 
-ui_win.textBrowser.setText('test text')
 
 
 def set_parameters_lcd(number, val=0):
@@ -277,7 +278,7 @@ def callback_cur_servo_cmd(cur_servo_cmd):
 rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_msg)
-update_interval = 1000    # ms
+update_interval = 20    # ms
 publish_servo = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
 

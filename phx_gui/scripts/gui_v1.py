@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Fri Sep 11 22:55:25 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Fri Sep 18 23:04:39 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -48,6 +48,12 @@ class Ui_MainWindow(object):
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
         self.verticalLayout_plots.addWidget(self.textBrowser)
         self.plot_tabs.addTab(self.InfoPage, _fromUtf8(""))
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName(_fromUtf8("tab"))
+        self.gps_graphicsView = PlotWidget(self.tab)
+        self.gps_graphicsView.setGeometry(QtCore.QRect(20, 20, 591, 491))
+        self.gps_graphicsView.setObjectName(_fromUtf8("gps_graphicsView"))
+        self.plot_tabs.addTab(self.tab, _fromUtf8(""))
         self.gui_output.addWidget(self.plot_tabs)
         self.gridLayout_sliders = QtGui.QGridLayout()
         self.gridLayout_sliders.setObjectName(_fromUtf8("gridLayout_sliders"))
@@ -266,7 +272,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addLayout(self.gridLayout_parameters)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1302, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1302, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -278,6 +284,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "phoenixGUI", None))
+        self.plot_tabs.setTabText(self.plot_tabs.indexOf(self.tab), _translate("MainWindow", "gps", None))
         self.label_17.setText(_translate("MainWindow", "dt", None))
         self.label_18.setText(_translate("MainWindow", "time", None))
         self.button_add_remove_plot.setText(_translate("MainWindow", "add/remove", None))
@@ -300,3 +307,4 @@ class Ui_MainWindow(object):
         self.label_parameter_16.setText(_translate("MainWindow", "parameter16", None))
         self.label_parameter_17.setText(_translate("MainWindow", "parameter17", None))
 
+from pyqtgraph import PlotWidget

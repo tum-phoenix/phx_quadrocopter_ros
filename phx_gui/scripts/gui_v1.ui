@@ -31,7 +31,7 @@
       <layout class="QVBoxLayout" name="gui_output">
        <item>
         <widget class="QTabWidget" name="plot_tabs">
-         <widget class="QWidget" name="InfoPage" native="true">
+         <widget class="QWidget" name="InfoPage">
           <attribute name="title">
            <string/>
           </attribute>
@@ -40,6 +40,21 @@
             <widget class="QTextBrowser" name="textBrowser"/>
            </item>
           </layout>
+         </widget>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>gps</string>
+          </attribute>
+          <widget class="PlotWidget" name="gps_graphicsView">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>591</width>
+             <height>491</height>
+            </rect>
+           </property>
+          </widget>
          </widget>
         </widget>
        </item>
@@ -422,12 +437,19 @@
      <x>0</x>
      <y>0</y>
      <width>1302</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
