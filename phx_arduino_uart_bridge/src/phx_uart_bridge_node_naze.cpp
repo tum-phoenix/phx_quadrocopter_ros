@@ -48,6 +48,7 @@ int main(int argc, char **argv)
     ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/fc/altitude", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps", 1);
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
+    ros::Publisher gps_home_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_home", 1);
 
     // ros init subscribers
     ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
@@ -148,6 +149,7 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
+            serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
         } else {
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
@@ -243,6 +245,12 @@ int main(int argc, char **argv)
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
                             gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
                             gps_wp_pub.publish(gpsMsg);
+                        } else if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 0) {
+                            gpsMsg.header = headerMsg;
+                            gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
+                            gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
+                            gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
+                            gps_home_pub.publish(gpsMsg);
                         }
                         received_gps_way_point++;
                     } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
