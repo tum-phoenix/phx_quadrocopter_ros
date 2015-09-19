@@ -13,6 +13,7 @@ from sensor_msgs.msg import NavSatFix
 
 # generate .py from .ui via pyuic4 gui_v0.ui -o gui_v0.py
 from gui_v1 import Ui_MainWindow
+import pyqtgraph as pg
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -66,24 +67,83 @@ ui_win.textBrowser.setText('test text')
 
 # gps tab
 gps_data = [[], []]  # [[lon], [lat]]
+gps_positions = {}
+
 ui_win.gps_graphicsView.plotItem.showGrid(x=True, y=True, alpha=0.2)
 gps_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
-import pyqtgraph as pg
-gps_positions = []   # [{'pos': (42, 11), 'symbol': 'o'}]
+# gps_qtgraph_plot.setData([1, 2, 3], [1, 3, 1])
+
 gps_scatter_plot = pg.ScatterPlotItem()
-gps_scatter_plot.setData(gps_positions)
+gps_scatter_plot.setData(gps_positions.values())
+# gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
 ui_win.gps_graphicsView.addItem(gps_scatter_plot)
 
-
-def update_gps_plot():
-    gps_qtgraph_plot.setData(gps_data[0], gps_data[1])
-
-def callback_gps_msg(cur_gps_input):
-    print 'new gps:', cur_gps_input.longitude, cur_gps_input.latitude
-    gps_data[0].append(cur_gps_input.longitude)
-    gps_data[1].append(cur_gps_input.latitude)
+# label = pg.TextItem(text='test')
+# ui_win.gps_graphicsView.addItem(label)
+# label.setPos(11, 42)
+# ui_win.gps_graphicsView.removeItem(label)
+gps_position_labels = {}
 
 
+def update_gps_plot(path=True, points=True):
+    if path:
+        # update gps path
+        gps_qtgraph_plot.setData(gps_data[0], gps_data[1])
+    if points:
+        # update gps points
+        gps_scatter_plot.setData(gps_positions.values())
+        # add labels and update position
+        for label in gps_positions.keys():
+            if label not in gps_position_labels.keys():
+                if label == 'home':
+                    color = (255, 255, 0)
+                elif label == 'phoenix':
+                    color = (0, 0, 255)
+                elif label == 'way_point':
+                    color = (0, 255, 0)
+                else:
+                    color = (200, 255, 200)
+                text_item = pg.TextItem(text=label, color=color)
+                ui_win.gps_graphicsView.addItem(text_item)
+                gps_position_labels[label] = text_item
+            gps_position_labels[label].setPos(gps_positions[label]['pos'][0], gps_positions[label]['pos'][1])
+        # remove unused labels
+        for label in gps_position_labels.keys():
+            if label not in gps_positions.keys():
+                text_item = gps_position_labels[label]
+                ui_win.gps_graphicsView.removeItem(text_item)
+                del gps_position_labels[label]
+
+
+def callback_gps_home(cur_gps_input):
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'home' in gps_positions.keys():
+        if gps_pos != gps_positions['home']['pos']:
+            gps_positions['home']['pos'] = gps_pos
+    else:
+        gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(255, 255, 0))}
+
+
+def callback_gps_way_point(cur_gps_input):
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'way_point' in gps_positions.keys():
+        if gps_pos != gps_positions['way_point']['pos']:
+            gps_positions['way_point']['pos'] = gps_pos
+    else:
+        gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 255, 0))}
+
+
+def callback_gps_position(cur_gps_input):
+    if (len(gps_data[0]) == 0) or (cur_gps_input.longitude != gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1]):
+        gps_data[0].append(cur_gps_input.longitude)
+        gps_data[1].append(cur_gps_input.latitude)
+
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'phoenix' in gps_positions.keys():
+        if gps_pos != gps_positions['phoenix']['pos']:
+            gps_positions['phoenix']['pos'] = gps_pos
+    else:
+        gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 0, 255))}
 
 
 def set_parameters_lcd(number, val=0):
@@ -277,8 +337,9 @@ def callback_cur_servo_cmd(cur_servo_cmd):
 
 rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
-ros_subscribe_gps = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_msg)
-update_interval = 20    # ms
+ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
+ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
+update_interval = 100    # ms
 publish_servo = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
 
@@ -290,7 +351,6 @@ def mainloop():
     #parameters = [get_parameters_slider(i) for i in range(0, 18)]
     #for i in range(0, 18):
     #    set_parameters_lcd(i, parameters[i])
-
     global publish_servo
     if publish_servo:
         send_servos_msg = Servo()
@@ -314,8 +374,11 @@ def mainloop():
         send_servos_msg.servo17 = get_parameters_slider(17)
         ros_publisher_servo_cmd.publish(send_servos_msg)
     print 'mainloop', win.keysPressed
-    update_gps_plot()
 
+    try:
+        update_gps_plot(path=True, points=True)
+    except:
+        print '>>> error in main loop'
 win.show()
 # QTimer
 timer = QtCore.QTimer()
@@ -327,4 +390,10 @@ app.exec_()
 
 print 'end'
 timer.stop()
+
+ros_subscribe_cur_servo_cmd.unregister()
+ros_subscribe_gps_position.unregister()
+ros_subscribe_gps_way_point.unregister()
+
+
 
