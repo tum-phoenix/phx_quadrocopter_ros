@@ -115,6 +115,35 @@ def update_gps_plot(path=True, points=True):
                 del gps_position_labels[label]
 
 
+def gps_plot_mouse_clicked(event):
+    if ui_win.gps_graphicsView.plotItem.sceneBoundingRect().contains(event.scenePos()):
+        mousePoint = ui_win.gps_graphicsView.plotItem.mapToView(event.scenePos())
+        button = event.button()         # 1: left   2:right
+        x_val = mousePoint.x()
+        y_val = mousePoint.y()
+        print 'gps_plot_mouse_clicked', x_val, y_val, button
+        way_point_msg = NavSatFix()
+        way_point_msg.longitude = x_val
+        way_point_msg.latitude = y_val
+        way_point_msg.altitude = 0              # need to fix this!
+        ros_publisher_gps_way_point.publish(way_point_msg)
+ui_win.gps_graphicsView.plotItem.scene().sigMouseClicked.connect(gps_plot_mouse_clicked)
+# another way of connecting the mouse events in case rateLimit is needed. Take care event will be a list of events
+#proxy = pg.SignalProxy(ui_win.gps_graphicsView.plotItem.scene().sigMouseClicked, rateLimit=60, slot=gps_plot_mouse_clicked)
+
+
+def gps_plot_mouse_moved(event):
+    if ui_win.gps_graphicsView.plotItem.sceneBoundingRect().contains(event):
+        mousePoint = ui_win.gps_graphicsView.plotItem.mapToView(event)
+        x_val = mousePoint.x()
+        y_val = mousePoint.y()
+        #print 'gps_plot_mouse_moved', x_val, y_val
+        ui_win.statusbar.showMessage('gps plot mouse lon: ' + str(x_val) + '  \t lat: ' + str(y_val))
+ui_win.gps_graphicsView.plotItem.scene().sigMouseMoved.connect(gps_plot_mouse_moved)
+
+
+
+
 def callback_gps_home(cur_gps_input):
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'home' in gps_positions.keys():
@@ -339,9 +368,11 @@ rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
+ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
 update_interval = 100    # ms
 publish_servo = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
+ros_publisher_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
 
 for i in range(0, 18):
     set_parameters_slider_limits(i, 300, 2450)
