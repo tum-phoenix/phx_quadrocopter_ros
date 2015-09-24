@@ -6,7 +6,8 @@ enum MessageDirection : uint8_t {
 
 enum MessageProtocol : uint8_t {
     MULTIWII_PROTOCOL = 'M',
-    PHOENIX_PROTOCOL = 'P'
+    PHOENIX_RC_PROTOCOL = 'R',
+    PHOENIX_LED_PROTOCOL = 'L'
 };
 
 enum MessageCode : uint8_t {

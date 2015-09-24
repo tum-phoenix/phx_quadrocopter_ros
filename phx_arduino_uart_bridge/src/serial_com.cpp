@@ -237,11 +237,11 @@ bool SerialCom::prepare_request(MessageCode msg_code, MessageProtocol protocol){
     return true;
 }
 
-bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4) {
+bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4, MessageProtocol msg_protocol) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = MULTIWII_PROTOCOL;
+    msg.msg_protocol = msg_protocol;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
@@ -401,7 +401,7 @@ bool SerialCom::prepare_msg_led_strip(uint8_t led_0_r, uint8_t led_0_g, uint8_t 
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_led sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = PHOENIX_PROTOCOL;
+    msg.msg_protocol = PHOENIX_LED_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MARVIC_STRIP_LED_LENGTH;
     if (strip_index  == 0) {
@@ -461,7 +461,7 @@ bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_single_led sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
-    msg.msg_protocol = PHOENIX_PROTOCOL;
+    msg.msg_protocol = PHOENIX_LED_PROTOCOL;
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MARVIC_SINGLE_LED_LENGTH;
     msg.msg_code = MARVIC_SINGLE_LED;
@@ -483,7 +483,10 @@ bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){
-    if (do_debug_printout == true) std::cout << "SerialCom::write_to_output_buffer sending byte"; printf(" %i", byte); std::cout << std::endl;
+    if (do_debug_printout == true) {std::cout << "SerialCom::write_to_output_buffer sending byte";
+                                    printf(" %i", byte);
+                                    std::cout << std::endl;
+                                    }
     output_buffer[output_buffer_write_position] = byte;
     output_buffer_write_position++;
     if (output_buffer_write_position >= output_buffer_length) {
@@ -576,7 +579,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
             if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found";
             msg_preamble = '$';
             uint8_t temp_protocol_type = read_from_input_buffer();
-            if (temp_protocol_type == 'M' || temp_protocol_type == 'P') {
+            if (temp_protocol_type == 'M' || temp_protocol_type == 'R' || temp_protocol_type == 'L') {
                 // MultiWii protocol byte found
                 if ((do_debug_printout == true) && (temp_protocol_type == 'M')) std::cout << "  >> MultiWii protocol byte found";
                 if ((do_debug_printout == true) && (temp_protocol_type == 'P')) std::cout << "  >> PHOENIX protocol byte found";
@@ -702,15 +705,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                 std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                 char cc;
                 for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
-                    //cc = printf("%c ", input_buffer[index]);
-                    cc = printf("%i ", input_buffer[index]);
-                    std::cout << cc;
+                    printf("%i ", input_buffer[index]);
                 }
                 std::cout << "\033[34;2m";
                 for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
-                    //cc = printf("%c ", input_buffer[index]);
-                    cc = printf("%i ", input_buffer[index]);
-                    std::cout << cc;
+                    printf("%i ", input_buffer[index]);
                 }
                 std::cout << "\033[0m" << std::endl;
                 input_buffer_read_position = analysis_start + 1;

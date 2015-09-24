@@ -68,7 +68,7 @@ public:
     bool print_output_buffer();
 
     // preparing different messages -> they all call write_msg_to_buffer() in the end
-    bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+    bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, MessageProtocol=MULTIWII_PROTOCOL);
     bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_msg_servo(uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0,
                            uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0);
