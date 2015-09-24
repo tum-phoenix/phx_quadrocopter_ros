@@ -9,6 +9,8 @@ import time
 # import ROS
 import rospy
 from phx_arduino_uart_bridge.msg import Servo
+from phx_arduino_uart_bridge.msg import LED
+from phx_arduino_uart_bridge.msg import LEDstrip
 from sensor_msgs.msg import NavSatFix
 
 
@@ -142,9 +144,27 @@ def gps_plot_mouse_moved(event):
         ui_win.statusbar.showMessage('gps plot mouse lon: ' + str(x_val) + '  \t lat: ' + str(y_val))
 ui_win.gps_graphicsView.plotItem.scene().sigMouseMoved.connect(gps_plot_mouse_moved)
 
+# led tab
+def generate_led_strip_msg(color_r, color_g, color_b):
+    LEDstrip_msg = LEDstrip()
+    color_r = int(color_r.value())
+    color_g = int(color_g.value())
+    color_b = int(color_b.value())
+    LEDstrip_msg.led_0_r = color_r; LEDstrip_msg.led_0_g = color_g; LEDstrip_msg.led_0_b = color_b
+    LEDstrip_msg.led_1_r = color_r; LEDstrip_msg.led_1_g = color_g; LEDstrip_msg.led_1_b = color_b
+    LEDstrip_msg.led_2_r = color_r; LEDstrip_msg.led_2_g = color_g; LEDstrip_msg.led_2_b = color_b
+    LEDstrip_msg.led_3_r = color_r; LEDstrip_msg.led_3_g = color_g; LEDstrip_msg.led_3_b = color_b
+    LEDstrip_msg.led_4_r = color_r; LEDstrip_msg.led_4_g = color_g; LEDstrip_msg.led_4_b = color_b
+    LEDstrip_msg.led_5_r = color_r; LEDstrip_msg.led_5_g = color_g; LEDstrip_msg.led_5_b = color_b
+    LEDstrip_msg.led_6_r = color_r; LEDstrip_msg.led_6_g = color_g; LEDstrip_msg.led_6_b = color_b
+    LEDstrip_msg.led_7_r = color_r; LEDstrip_msg.led_7_g = color_g; LEDstrip_msg.led_7_b = color_b
+    LEDstrip_msg.led_8_r = color_r; LEDstrip_msg.led_8_g = color_g; LEDstrip_msg.led_8_b = color_b
+    LEDstrip_msg.led_9_r = color_r; LEDstrip_msg.led_9_g = color_g; LEDstrip_msg.led_9_b = color_b
+    return LEDstrip_msg
 
-
-
+##########################################################################################
+# init ros callback functions
+##########################################################################################
 def callback_gps_home(cur_gps_input):
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'home' in gps_positions.keys():
@@ -164,7 +184,7 @@ def callback_gps_way_point(cur_gps_input):
 
 
 def callback_gps_position(cur_gps_input):
-    if (len(gps_data[0]) == 0) or (cur_gps_input.longitude != gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1]):
+    if (len(gps_data[0]) == 0) or ((cur_gps_input.longitude != gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1])):
         gps_data[0].append(cur_gps_input.longitude)
         gps_data[1].append(cur_gps_input.latitude)
 
@@ -176,6 +196,31 @@ def callback_gps_position(cur_gps_input):
         gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 0, 255))}
 
 
+def callback_cur_servo_cmd(cur_servo_cmd):
+    set_parameters_slider(0, cur_servo_cmd.servo0)
+    set_parameters_slider(1, cur_servo_cmd.servo1)
+    set_parameters_slider(2, cur_servo_cmd.servo2)
+    set_parameters_slider(3, cur_servo_cmd.servo3)
+    set_parameters_slider(4, cur_servo_cmd.servo4)
+    set_parameters_slider(5, cur_servo_cmd.servo5)
+    set_parameters_slider(6, cur_servo_cmd.servo6)
+    set_parameters_slider(7, cur_servo_cmd.servo7)
+    set_parameters_slider(8, cur_servo_cmd.servo8)
+    set_parameters_slider(9, cur_servo_cmd.servo9)
+    set_parameters_slider(10, cur_servo_cmd.servo10)
+    set_parameters_slider(11, cur_servo_cmd.servo11)
+    set_parameters_slider(12, cur_servo_cmd.servo12)
+    set_parameters_slider(13, cur_servo_cmd.servo13)
+    set_parameters_slider(14, cur_servo_cmd.servo14)
+    set_parameters_slider(15, cur_servo_cmd.servo15)
+    set_parameters_slider(16, cur_servo_cmd.servo16)
+    set_parameters_slider(17, cur_servo_cmd.servo17)
+    print ' -> updated sliders from cur_servo_cmd'
+
+##########################################################################################
+# init right side
+##########################################################################################
+# parameter slider
 def set_parameters_lcd(number, val=0):
     if number == 0:
         ui_win.lcdNumber_parameter_00.display(val)
@@ -343,37 +388,25 @@ def get_parameters_slider(number):
         return False
 
 
-def callback_cur_servo_cmd(cur_servo_cmd):
-    set_parameters_slider(0, cur_servo_cmd.servo0)
-    set_parameters_slider(1, cur_servo_cmd.servo1)
-    set_parameters_slider(2, cur_servo_cmd.servo2)
-    set_parameters_slider(3, cur_servo_cmd.servo3)
-    set_parameters_slider(4, cur_servo_cmd.servo4)
-    set_parameters_slider(5, cur_servo_cmd.servo5)
-    set_parameters_slider(6, cur_servo_cmd.servo6)
-    set_parameters_slider(7, cur_servo_cmd.servo7)
-    set_parameters_slider(8, cur_servo_cmd.servo8)
-    set_parameters_slider(9, cur_servo_cmd.servo9)
-    set_parameters_slider(10, cur_servo_cmd.servo10)
-    set_parameters_slider(11, cur_servo_cmd.servo11)
-    set_parameters_slider(12, cur_servo_cmd.servo12)
-    set_parameters_slider(13, cur_servo_cmd.servo13)
-    set_parameters_slider(14, cur_servo_cmd.servo14)
-    set_parameters_slider(15, cur_servo_cmd.servo15)
-    set_parameters_slider(16, cur_servo_cmd.servo16)
-    set_parameters_slider(17, cur_servo_cmd.servo17)
-    print ' -> updated sliders from cur_servo_cmd'
 
-
+##########################################################################################
+# init ros
+##########################################################################################
 rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
-update_interval = 100    # ms
-publish_servo = True
+update_interval = 10    # ms
+publish_servo = False
+publish_led = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
 ros_publisher_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
+publisher_led_strip_last_update = 0
+ros_publisher_led_strip_0_cmd = rospy.Publisher('phx/led/led_strip_0', LEDstrip, queue_size=1)
+ros_publisher_led_strip_1_cmd = rospy.Publisher('phx/led/led_strip_1', LEDstrip, queue_size=1)
+ros_publisher_led_strip_2_cmd = rospy.Publisher('phx/led/led_strip_2', LEDstrip, queue_size=1)
+ros_publisher_led_strip_3_cmd = rospy.Publisher('phx/led/led_strip_3', LEDstrip, queue_size=1)
 
 for i in range(0, 18):
     set_parameters_slider_limits(i, 300, 2450)
@@ -383,34 +416,59 @@ def mainloop():
     #parameters = [get_parameters_slider(i) for i in range(0, 18)]
     #for i in range(0, 18):
     #    set_parameters_lcd(i, parameters[i])
-    global publish_servo
+    global publish_servo, publisher_led_strip_last_update
     if publish_servo:
-        send_servos_msg = Servo()
-        send_servos_msg.servo0 = get_parameters_slider(0)
-        send_servos_msg.servo1 = get_parameters_slider(1)
-        send_servos_msg.servo2 = get_parameters_slider(2)
-        send_servos_msg.servo3 = get_parameters_slider(3)
-        send_servos_msg.servo4 = get_parameters_slider(4)
-        send_servos_msg.servo5 = get_parameters_slider(5)
-        send_servos_msg.servo6 = get_parameters_slider(6)
-        send_servos_msg.servo7 = get_parameters_slider(7)
-        send_servos_msg.servo8 = get_parameters_slider(8)
-        send_servos_msg.servo9 = get_parameters_slider(9)
-        send_servos_msg.servo10 = get_parameters_slider(10)
-        send_servos_msg.servo11 = get_parameters_slider(11)
-        send_servos_msg.servo12 = get_parameters_slider(12)
-        send_servos_msg.servo13 = get_parameters_slider(13)
-        send_servos_msg.servo14 = get_parameters_slider(14)
-        send_servos_msg.servo15 = get_parameters_slider(15)
-        send_servos_msg.servo16 = get_parameters_slider(16)
-        send_servos_msg.servo17 = get_parameters_slider(17)
-        ros_publisher_servo_cmd.publish(send_servos_msg)
+        publish_servos()
+
+    if publish_led and ui_win.checkBox_led_strip_update_continuous.isChecked():
+        if time.time() > publisher_led_strip_last_update + 0.1:
+            # update led strips from sliders
+            print 'updating LEDs'
+            publish_led_strips()
+            publisher_led_strip_last_update = time.time()
     print 'mainloop', win.keysPressed
 
     try:
         update_gps_plot(path=True, points=True)
     except:
         print '>>> error in main loop'
+
+#######################################################################################################################
+# gui button callbacks
+#######################################################################################################################
+def publish_led_strips():
+    print 'publishing LED strip'
+    ros_publisher_led_strip_0_cmd.publish(generate_led_strip_msg(ui_win.horizontalSlider_led_0_r, ui_win.horizontalSlider_led_0_g, ui_win.horizontalSlider_led_0_b))
+    ros_publisher_led_strip_1_cmd.publish(generate_led_strip_msg(ui_win.horizontalSlider_led_1_r, ui_win.horizontalSlider_led_1_g, ui_win.horizontalSlider_led_1_b))
+    ros_publisher_led_strip_2_cmd.publish(generate_led_strip_msg(ui_win.horizontalSlider_led_2_r, ui_win.horizontalSlider_led_2_g, ui_win.horizontalSlider_led_2_b))
+    ros_publisher_led_strip_3_cmd.publish(generate_led_strip_msg(ui_win.horizontalSlider_led_3_r, ui_win.horizontalSlider_led_3_g, ui_win.horizontalSlider_led_3_b))
+
+
+def publish_servos():
+    send_servos_msg = Servo()
+    send_servos_msg.servo0 = get_parameters_slider(0)
+    send_servos_msg.servo1 = get_parameters_slider(1)
+    send_servos_msg.servo2 = get_parameters_slider(2)
+    send_servos_msg.servo3 = get_parameters_slider(3)
+    send_servos_msg.servo4 = get_parameters_slider(4)
+    send_servos_msg.servo5 = get_parameters_slider(5)
+    send_servos_msg.servo6 = get_parameters_slider(6)
+    send_servos_msg.servo7 = get_parameters_slider(7)
+    send_servos_msg.servo8 = get_parameters_slider(8)
+    send_servos_msg.servo9 = get_parameters_slider(9)
+    send_servos_msg.servo10 = get_parameters_slider(10)
+    send_servos_msg.servo11 = get_parameters_slider(11)
+    send_servos_msg.servo12 = get_parameters_slider(12)
+    send_servos_msg.servo13 = get_parameters_slider(13)
+    send_servos_msg.servo14 = get_parameters_slider(14)
+    send_servos_msg.servo15 = get_parameters_slider(15)
+    send_servos_msg.servo16 = get_parameters_slider(16)
+    send_servos_msg.servo17 = get_parameters_slider(17)
+    ros_publisher_servo_cmd.publish(send_servos_msg)
+
+QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), publish_led_strips)
+
+
 win.show()
 # QTimer
 timer = QtCore.QTimer()
