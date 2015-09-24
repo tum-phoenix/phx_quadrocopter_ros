@@ -96,7 +96,7 @@ private:
 
     std::string serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
     uint32_t serial_device_baud_rate;               // the used baudrate like 9600, 57600 or 115200
-    uint16_t buffer_io_max;                         // maximum numbers of bytes which are read or written during one cycle
+    uint16_t buffer_io_max = 255;                         // maximum numbers of bytes which are read or written during one cycle
     int serial_interface;                           // the handle for the serial device and its config after it is opened
     struct termios usb_tio;                         // for configuration during init
 
@@ -110,10 +110,10 @@ private:
     static const uint16_t output_buffer_length = 256;
 
     uint8_t input_buffer[input_buffer_length];
-    uint16_t input_buffer_write_position;
-    uint16_t input_buffer_read_position;
+    uint16_t input_buffer_write_position = 0;
+    uint16_t input_buffer_read_position = 0;
 
     uint8_t output_buffer[output_buffer_length];
-    uint16_t output_buffer_write_position;
-    uint16_t output_buffer_read_position;
+    uint16_t output_buffer_write_position = 0;
+    uint16_t output_buffer_read_position = 0;
 };

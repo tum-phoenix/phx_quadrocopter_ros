@@ -58,14 +58,14 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(500);
     
     // serialcom init
-    SerialCom serial_interface;                                              // create SerialCom instance
+    //SerialCom serial_interface;                                              // create SerialCom instance
     //serial_interface.set_device("/dev/ttyUSB1");                             // select the device
     //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
     serial_interface.set_device("/dev/ttyUSB0");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
-    sleep(12);                                                              // wait for boot loader and calibration
+    sleep(5);                                                              // wait for boot loader and calibration
     serial_interface.clear_input_buffer();                                   // clear serial buffer
     Message input_msg;                                                      // the latest received message
     uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
@@ -154,7 +154,6 @@ int main(int argc, char **argv)
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             }
-
             if (loop_counter % 2 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
@@ -198,9 +197,9 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
                         // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 255.);
-                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 255.);
-                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 255.);
+                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 5.);
+                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 5.);
+                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 5.);
                         imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
                         imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
                         imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
@@ -240,12 +239,14 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
                         if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 16) {
+                            std::cout << " publishing way point" << std::endl;
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
                             gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
                             gps_wp_pub.publish(gpsMsg);
                         } else if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 0) {
+                            std::cout << " publishing home point" << std::endl;
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
@@ -334,9 +335,9 @@ void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr& set_gps_way_point) {
     std::cout << "\033[1;31m>>> gps_way_point_callback\033[0m"<< std::endl;
     serial_interface.prepare_msg_gps_set_way_point((uint8_t) 16,
-                                                   (uint32_t) set_gps_way_point->latitude,
-                                                   (uint32_t) set_gps_way_point->longitude,
-                                                   (uint32_t) set_gps_way_point->altitude,
+                                                   (uint32_t) (set_gps_way_point->latitude * 10000000.0),
+                                                   (uint32_t) (set_gps_way_point->longitude * 10000000.0),
+                                                   (uint32_t) 0, //set_gps_way_point->altitude,
                                                    (uint16_t) 0,
                                                    (uint16_t) 0,
                                                    (uint8_t) 0);

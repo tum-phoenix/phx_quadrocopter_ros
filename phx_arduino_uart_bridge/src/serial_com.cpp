@@ -137,9 +137,7 @@ bool SerialCom::receive_to_buffer() {
                 input_buffer[input_buffer_write_position] = msg_buffer[index];
                 new_stuff++;
                 if (do_debug_printout == true) {
-                    char cc;
-                    cc = printf("%i ", input_buffer[input_buffer_write_position]);
-                    std::cout << cc;
+                    printf("%i ", input_buffer[input_buffer_write_position]);
                 }
                 input_buffer_write_position++;
                 if (input_buffer_write_position == input_buffer_length) {
@@ -169,14 +167,15 @@ bool SerialCom::receive_to_buffer() {
 bool SerialCom::send_from_buffer() {
     if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  starts sending on serial port " << serial_device_path << std::endl;
     int result, loopCount = buffer_io_max;
-    char temp_buffer;
-
+    uint8_t temp_buffer;
+    if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  sends " << std::endl;
     while (loopCount-- > 0) {
-        //std::cout << "SerialCom::send_from_buffer  " << loopCount << " sends" << std::endl;
         if (output_buffer_read_position < output_buffer_write_position) {
             temp_buffer = output_buffer[output_buffer_read_position];
             result = write(serial_interface, &temp_buffer, 1);
-            //std::cout << "SerialCom::send_from_buffer  " << loopCount << " sent " << temp_buffer << " with result " << result << std::endl;
+            if (do_debug_printout == true) {
+                printf("%i ", temp_buffer);
+            }
             if (result != -1) {
                 // if there was no error while reading then add reading to input buffer.
                 output_buffer_read_position++;
@@ -186,7 +185,7 @@ bool SerialCom::send_from_buffer() {
                 error_count++;
             }
         } else {
-            if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;
+            if (do_debug_printout == true) std::cout << std::endl << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;
             output_buffer_read_position = 0;
             output_buffer_write_position = 0;
             return true;
@@ -200,9 +199,7 @@ bool SerialCom::print_input_buffer() {
     std::cout << "SerialCom::print_input_buffer  ";
     char cc;
     for (uint16_t index=0; index < input_buffer_write_position; index++) {
-        cc = printf("%c ", input_buffer[index]);
-        //cc = printf("%i ", input_buffer[index]);
-        std::cout << cc;
+        printf("%i ", input_buffer[index]);
     }
     std::cout << std::endl;
     return true;
@@ -213,8 +210,7 @@ bool SerialCom::print_output_buffer() {
     char cc;
     for (uint16_t index=0; index < output_buffer_write_position; index++) {
         std::cout << "\033[34;1m";
-        cc = printf("%i ", output_buffer[index]);
-        std::cout << cc;
+        printf("%i ", output_buffer[index]);
         std::cout << "\033[0m";
     }
     std::cout << std::endl;
@@ -302,15 +298,15 @@ bool SerialCom::prepare_msg_gps_set_way_point(uint8_t wp_no, uint32_t lat, uint3
     uint8_t temp_lat[4];
     memcpy(temp_lat, &lat, 4);
     msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[0];
-    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[1];
-    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[2];
-    msg.msg_data.multiwii_gps_set_way_point.coordLAT = temp_lat[3];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT1 = temp_lat[1];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT2 = temp_lat[2];
+    msg.msg_data.multiwii_gps_set_way_point.coordLAT3 = temp_lat[3];
     uint8_t test_lon[4];
     memcpy(test_lon, &lon, 4);
     msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[0];
-    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[1];
-    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[2];
-    msg.msg_data.multiwii_gps_set_way_point.coordLON = test_lon[3];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON1 = test_lon[1];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON2 = test_lon[2];
+    msg.msg_data.multiwii_gps_set_way_point.coordLON3 = test_lon[3];
     uint8_t temp_alt[4];
     memcpy(temp_alt, &alt, 4);
     msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[0];
@@ -487,11 +483,16 @@ bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint
 }
 
 bool SerialCom::write_to_output_buffer(uint8_t byte){
+    if (do_debug_printout == true) std::cout << "SerialCom::write_to_output_buffer sending byte"; printf(" %i", byte); std::cout << std::endl;
     output_buffer[output_buffer_write_position] = byte;
     output_buffer_write_position++;
     if (output_buffer_write_position >= output_buffer_length) {
         output_buffer_write_position -= output_buffer_length;
     }
+    //if (do_debug_printout == true) std::cout << "SerialCom::write_to_output_buffer output_buffer_write_position " << output_buffer_write_position << std::endl;
+    //if (do_debug_printout == true) std::cout << "SerialCom::write_to_output_buffer output_buffer_read_position " << output_buffer_read_position << std::endl;
+
+
     return true;
 }
 
@@ -538,13 +539,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
         for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
             if ((input_buffer[index] == '$') || (input_buffer[index] == 'M') || (input_buffer[index] == '<') || (input_buffer[index] == '>') || (input_buffer[index] == '!')) {
                 std::cout << "\033[34;1m";
-                cc = printf("%c ", input_buffer[index]);
-                std::cout << cc;
+                printf("%c ", input_buffer[index]);
                 std::cout << "\033[0m";
             } else {
                 std::cout << "\033[34;2m";
-                cc = printf("%i ", input_buffer[index]);
-                std::cout << cc;
+                printf("%i ", input_buffer[index]);
                 std::cout << "\033[0m";
             }
         }
@@ -597,15 +596,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                         char cc;
                         for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
-                            //cc = printf("%c ", input_buffer[index]);
-                            cc = printf("%i ", input_buffer[index]);
-                            std::cout << cc;
+                            printf("%i ", input_buffer[index]);
                         }
                         std::cout << "\033[34;2m";
                         for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
-                            //cc = printf("%c ", input_buffer[index]);
-                            cc = printf("%i ", input_buffer[index]);
-                            std::cout << cc;
+                            printf("%i ", input_buffer[index]);
                         }
                         std::cout << "\033[0m" << std::endl;
                     }
@@ -633,15 +628,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                             std::cout << "SerialCom::read_msg_from_buffer   >>> message was: " << "\033[34;1m";
                             char cc;
                             for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
-                                //cc = printf("%c ", input_buffer[index]);
-                                cc = printf("%i ", input_buffer[index]);
-                                std::cout << cc;
+                                printf("%i ", input_buffer[index]);
                             }
                             std::cout << "\033[34;2m";
                             for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
-                                //cc = printf("%c ", input_buffer[index]);
-                                cc = printf("%i ", input_buffer[index]);
-                                std::cout << cc;
+                                printf("%i ", input_buffer[index]);
                             }
                             std::cout << "\033[0m" << std::endl;
                         }
@@ -669,15 +660,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                             std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                             char cc;
                             for (uint16_t index=analysis_start; index < input_buffer_read_position; index++) {
-                                //cc = printf("%c ", input_buffer[index]);
-                                cc = printf("%i ", input_buffer[index]);
-                                std::cout << cc;
+                                printf("%i ", input_buffer[index]);
                             }
                             std::cout << "\033[34;2m";
                             for (uint16_t index=input_buffer_read_position; index < input_buffer_write_position; index++) {
-                                //cc = printf("%c ", input_buffer[index]);
-                                cc = printf("%i ", input_buffer[index]);
-                                std::cout << cc;
+                                printf("%i ", input_buffer[index]);
                             }
                             std::cout << "\033[0m" << std::endl;
                         }

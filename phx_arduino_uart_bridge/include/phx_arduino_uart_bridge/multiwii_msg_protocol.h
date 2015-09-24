@@ -33,6 +33,7 @@ enum MessageCode : uint8_t {
     MULTIWII_SERVO_SET = 213,           // setting servos
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
+    MULTIWII_SET_RAW_GPS = 201,
 //    MULTIWII_PID_SET = 202,
     MULTIWII_GPS_WP_SET = 209           // setting gps way point
 };
