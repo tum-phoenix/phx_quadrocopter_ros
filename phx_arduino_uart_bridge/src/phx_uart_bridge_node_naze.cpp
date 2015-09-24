@@ -200,9 +200,9 @@ int main(int argc, char **argv)
                         imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 5.);
                         imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 5.);
                         imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 5.);
-                        imuMsg.angular_velocity.x = input_msg.msg_data.multiwii_raw_imu.gyrx;
-                        imuMsg.angular_velocity.y = input_msg.msg_data.multiwii_raw_imu.gyry;
-                        imuMsg.angular_velocity.z = input_msg.msg_data.multiwii_raw_imu.gyrz;
+                        imuMsg.angular_velocity.x = ((float) input_msg.msg_data.multiwii_raw_imu.gyrx / 8192 * 2000);
+                        imuMsg.angular_velocity.y = ((float) input_msg.msg_data.multiwii_raw_imu.gyry / 8192 * 2000);
+                        imuMsg.angular_velocity.z = ((float) input_msg.msg_data.multiwii_raw_imu.gyrz / 8192 * 2000);
                         received_imu++;
                     } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
                         headerMsg.seq = received_imu;
