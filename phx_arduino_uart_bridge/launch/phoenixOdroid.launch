@@ -4,7 +4,7 @@
 
 	<node name="UARTBridge_naze" pkg="phx_arduino_uart_bridge" type="phx_uart_bridge_node_naze" output="screen" machine="phoenix" />
 	<!-- <node name="UARTBridge_marvic" pkg="phx_arduino_uart_bridge" type="phx_arduino_uart_bridge_node_marvic" output="screen" machine="phoenix" /> -->
-	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/gps /phx/imu /camera_info /clock /image_mono" machine="phoenix" />
+	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_home /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/gps /phx/imu /camera_info /clock /image_mono" machine="phoenix" />
 	
 	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
       		<param name="device" value="/dev/video0" />
@@ -20,4 +20,13 @@
             <remap from="image_raw" to="/image_raw" />
             <remap from="camera_info" to="/camera_info" />
     </node>
+    
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+      <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
+      <param name="yaw_offset" value="1.5707963"/> <!-- yaw offset for zero point not facing east but north  -->
+      <remap from="/imu/data" to="/phx/imu" />
+      <remap from="/gps/fix" to="/phx/gps" />
+      <remap from="/odometry/filtered" to="/your/robot_localization/output/topic" />
+    </node>
+    
 </launch>

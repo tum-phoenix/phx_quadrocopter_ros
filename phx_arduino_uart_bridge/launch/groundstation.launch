@@ -4,14 +4,21 @@
 
 <launch>
   	<machine name="groundstation"  address="localhost" />
-  	<node name="LiveFeed" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen" machine="groundstation" >
-  		<remap from="image" to="/camera/image/compressed"/>
+  	
+  	<node name="Control" pkg="phx_gui" type="gauge_ros.py" respawn="false" output="screen" machine="groundstation" >
   	</node>
+  	
+  	<node name="LiveFeed" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen" machine="groundstation" >
+  		<remap from="image" to="/image_mono"/>
+  	</node>
+  	
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find phx_arduino_uart_bridge)/launch/phoenix.rviz“ />
+  	
   	<!-- <node name="LsdSlamViewer" pkg="lsd_slam_viewer" type="viewer" respawn="false" output="screen" machine="groundstation" /> -->
   	<!-- <node name="LsdSlamCore" pkg="lsd_slam_core" type="live_slam" args="image:=/camera/image/compressed camera_info:=/camera/camera_info" respawn="false" output="screen" machine="groundstation" /> -->  	
-	<node pkg="svo_ros" type="vo" name="svo" clear_params="true" output="screen">
+	<!-- <node pkg="svo_ros" type="vo" name="svo" clear_params="true" output="screen">
         <param name="cam_topic" value="/camera/image/compressed" type="str" />        
         <rosparam file="$(find svo_ros)/param/camera_atan.yaml" />
         <rosparam file="$(find svo_ros)/param/vo_fast.yaml" />
-    </node>
+    </node> --> 
 </launch>

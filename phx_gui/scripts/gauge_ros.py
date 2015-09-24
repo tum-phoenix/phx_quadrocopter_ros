@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 __author__ = 'manuelviermetz'
 
 from PyQt4 import uic, QtCore, QtGui
