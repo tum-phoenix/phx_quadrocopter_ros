@@ -135,20 +135,18 @@ int main(int argc, char **argv)
         }
         
         // serialcom send requests
-        if (loop_counter % 5 == 0) {
+        if (loop_counter % 10 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+            serial_interface.prepare_request(MARVIC_BAROMETER, PHOENIX_RC_PROTOCOL); request_barometer++; request_total++;
         } else {
-            if (loop_counter % 1 == 0) {
-                serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-
-                serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-                serial_interface.prepare_request(MARVIC_LIDAR, PHOENIX_PROTOCOL); request_lidar++; request_total++;
-                serial_interface.prepare_request(MARVIC_INFRA_RED, PHOENIX_PROTOCOL); request_infra_red++; request_total++;
-                serial_interface.prepare_request(MARVIC_SONAR, PHOENIX_PROTOCOL); request_sonar++; request_total++;
-                serial_interface.prepare_request(MARVIC_BAROMETER, PHOENIX_PROTOCOL); request_barometer++; request_total++;
-            }
-
             if (loop_counter % 2 == 0) {
+                serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+                serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+            }
+            if (loop_counter % 3 == 0) {
+            serial_interface.prepare_request(MARVIC_LIDAR, PHOENIX_RC_PROTOCOL); request_lidar++; request_total++;
+            serial_interface.prepare_request(MARVIC_INFRA_RED, PHOENIX_RC_PROTOCOL); request_infra_red++; request_total++;
+            serial_interface.prepare_request(MARVIC_SONAR, PHOENIX_RC_PROTOCOL); request_sonar++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
@@ -200,7 +198,7 @@ int main(int argc, char **argv)
                         altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
                         altitude_pub.publish(altitudeMsg);
                         received_altitude++;
-                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_LIDAR)) {
+                    } else if ((input_msg.msg_protocol == PHOENIX_RC_PROTOCOL) && (input_msg.msg_code == MARVIC_LIDAR)) {
                         headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
@@ -209,7 +207,7 @@ int main(int argc, char **argv)
                         altitudeMsg.variation = 0;
                         lidar_pub.publish(altitudeMsg);
                         received_lidar++;
-                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_INFRA_RED)) {
+                    } else if ((input_msg.msg_protocol == PHOENIX_RC_PROTOCOL) && (input_msg.msg_code == MARVIC_INFRA_RED)) {
                         headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
@@ -218,7 +216,7 @@ int main(int argc, char **argv)
                         altitudeMsg.variation = 0;
                         infra_red_pub.publish(altitudeMsg);
                         received_infra_red++;
-                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_SONAR)) {
+                    } else if ((input_msg.msg_protocol == PHOENIX_RC_PROTOCOL) && (input_msg.msg_code == MARVIC_SONAR)) {
                         headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
@@ -227,7 +225,7 @@ int main(int argc, char **argv)
                         altitudeMsg.variation = 0;
                         sonar_pub.publish(altitudeMsg);
                         received_sonar++;
-                    } else if ((input_msg.msg_protocol == PHOENIX_PROTOCOL) && (input_msg.msg_code == MARVIC_BAROMETER)) {
+                    } else if ((input_msg.msg_protocol == PHOENIX_RC_PROTOCOL) && (input_msg.msg_code == MARVIC_BAROMETER)) {
                         headerMsg.seq = input_msg.msg_data.marvic_altitude.millisecond_time_stamp;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
@@ -240,7 +238,6 @@ int main(int argc, char **argv)
                 }
             }
         }
-
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -292,7 +289,8 @@ void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
                                     (uint16_t) joyMsg->buttons[0],
                                     (uint16_t) joyMsg->buttons[1],
                                     (uint16_t) joyMsg->buttons[2],
-                                    (uint16_t) joyMsg->buttons[3]);
+                                    (uint16_t) joyMsg->buttons[3],
+                                    PHOENIX_RC_PROTOCOL);
     serial_interface.send_from_buffer();
 }
 
