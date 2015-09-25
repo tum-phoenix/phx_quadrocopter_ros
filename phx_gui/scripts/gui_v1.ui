@@ -30,7 +30,7 @@
      <item>
       <widget class="QTabWidget" name="left_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="InfoPage">
         <attribute name="title">
@@ -56,8 +56,6 @@
           </rect>
          </property>
         </widget>
-        <zorder>gps_graphicsView</zorder>
-        <zorder>right_tabs</zorder>
        </widget>
        <widget class="QWidget" name="ledPage">
         <attribute name="title">
@@ -393,25 +391,36 @@
           <string>continuous</string>
          </property>
         </widget>
+        <zorder>gridLayoutWidget</zorder>
+        <zorder>led_label_0</zorder>
+        <zorder>gridLayoutWidget_2</zorder>
+        <zorder>led_label_1</zorder>
+        <zorder>gridLayoutWidget_3</zorder>
+        <zorder>led_label_2</zorder>
+        <zorder>led_label_3</zorder>
+        <zorder>gridLayoutWidget_4</zorder>
+        <zorder>pushButton_led_strip_update</zorder>
+        <zorder>checkBox_led_strip_update_continuous</zorder>
+        <zorder>right_tabs</zorder>
        </widget>
       </widget>
      </item>
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
          <string>parameters</string>
         </attribute>
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="layoutWidget">
          <property name="geometry">
           <rect>
            <x>10</x>
            <y>10</y>
            <width>611</width>
-           <height>561</height>
+           <height>566</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_parameters">
@@ -1095,6 +1104,150 @@
          </property>
         </widget>
        </widget>
+       <widget class="QWidget" name="rc_fc">
+        <attribute name="title">
+         <string>rc_fc</string>
+        </attribute>
+        <widget class="QSlider" name="remote_slider_rc_fc_throttle">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_yaw">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>140</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_pitch">
+         <property name="geometry">
+          <rect>
+           <x>320</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_roll">
+         <property name="geometry">
+          <rect>
+           <x>250</x>
+           <y>140</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_aux1">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_aux2">
+         <property name="geometry">
+          <rect>
+           <x>490</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_aux3">
+         <property name="geometry">
+          <rect>
+           <x>530</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_fc_aux4">
+         <property name="geometry">
+          <rect>
+           <x>570</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="PlotWidget" name="graphicsView_rc_fc">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>260</y>
+           <width>601</width>
+           <height>361</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>40</y>
+           <width>171</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Remote Control:   NAZE</string>
+         </property>
+        </widget>
+       </widget>
        <widget class="QWidget" name="altitude_tab">
         <attribute name="title">
          <string>altitude</string>
@@ -1109,6 +1262,37 @@
           </rect>
          </property>
         </widget>
+        <widget class="QSlider" name="slider_altitude">
+         <property name="geometry">
+          <rect>
+           <x>540</x>
+           <y>10</y>
+           <width>22</width>
+           <height>371</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="video_tab">
+        <attribute name="title">
+         <string>video</string>
+        </attribute>
+        <widget class="QCheckBox" name="checkBox">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>30</y>
+           <width>201</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>activate video stream</string>
+         </property>
+        </widget>
        </widget>
       </widget>
      </item>
@@ -1121,7 +1305,7 @@
      <x>0</x>
      <y>0</y>
      <width>1302</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
