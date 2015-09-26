@@ -72,16 +72,42 @@ ui_win.textBrowser.setText('test text')
 
 # gps tab # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 gps_data = [[], []]  # [[lon], [lat]]
+gps_geo_cycle_data = None
 gps_positions = {}
 
 ui_win.gps_graphicsView.plotItem.showGrid(x=True, y=True, alpha=0.2)
 gps_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
+gps_geo_cycle_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
+gps_geo_cycle_qtgraph_plot.setPen(pg.mkPen(color=(0,0,200)))
 # gps_qtgraph_plot.setData([1, 2, 3], [1, 3, 1])
 
 gps_scatter_plot = pg.ScatterPlotItem()
 gps_scatter_plot.setData(gps_positions.values())
 # gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
 ui_win.gps_graphicsView.addItem(gps_scatter_plot)
+
+
+def calc_geo_distance(lon0, lat0, lon1, lat1):
+    earth_radius = 6371000                      # metre
+    lat_0 = 2. * np.pi * (lat0/360.)            # rad
+    lat_1 = 2. * np.pi * (lat1/360.)            # rad
+    d_phi = 2. * np.pi * ((lat1-lat0)/360.)     # rad
+    d_lamda = 2. * np.pi * ((lon1-lon0)/360.)   # rad
+    a = np.sin(d_phi/2) * np.sin(d_phi/2) + np.cos(lat_0) * np.cos(lat_1) *  np.sin(d_lamda/2) * np.sin(d_lamda/2)
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
+    d = earth_radius * c                        # meter
+    return d
+
+
+def generate_geo_circle(est_lon, est_lat, diameter):
+    approximate_scale_lon_to_meter = calc_geo_distance(est_lon, est_lat, est_lon + 0.00001, est_lat) / 0.00001
+    approximate_scale_lat_to_meter = calc_geo_distance(est_lon, est_lat, est_lon, est_lat + 0.00001) / 0.00001
+    diameter_x = diameter / approximate_scale_lon_to_meter
+    diameter_y = diameter / approximate_scale_lat_to_meter
+    t = np.linspace(0, 2 * np.pi, 20)
+    x = np.sin(t) * 0.5 * diameter_x
+    y = np.cos(t) * 0.5 * diameter_y
+    return [x, y]
 
 # label = pg.TextItem(text='test')
 # ui_win.gps_graphicsView.addItem(label)
@@ -94,6 +120,11 @@ def update_gps_plot(path=True, points=True):
     if path:
         # update gps path
         gps_qtgraph_plot.setData(gps_data[0], gps_data[1])
+    if gps_geo_cycle_data:
+        if 'phoenix' in gps_positions.keys():
+            cur_pos_lon = gps_positions['phoenix']['pos'][0]
+            cur_pos_lat = gps_positions['phoenix']['pos'][1]
+            gps_geo_cycle_qtgraph_plot.setData(gps_geo_cycle_data[0] + cur_pos_lon, gps_geo_cycle_data[1] + cur_pos_lat)
     if points:
         # update gps points
         gps_scatter_plot.setData(gps_positions.values())
@@ -362,7 +393,9 @@ rc_fc_qtgraph_plot_yaw.setPen(pg.mkPen(color=(0, 0, 200)))
 rc_fc_qtgraph_plot_throttle = ui_win.graphicsView_rc_fc.plotItem.plot()
 rc_fc_qtgraph_plot_throttle.setPen(pg.mkPen(color=(0, 200, 0)))
 
+
 def set_fc_rc():
+    global fc_rc
     ui_win.remote_slider_rc_fc_pitch.setValue(fc_rc[-1, 0])
     ui_win.remote_slider_rc_fc_roll.setValue(fc_rc[-1, 1])
     ui_win.remote_slider_rc_fc_yaw.setValue(fc_rc[-1, 2])
@@ -400,7 +433,9 @@ def callback_gps_way_point(cur_gps_input):
 
 
 def callback_gps_position(cur_gps_input):
+    global gps_geo_cycle_data, gps_data, gps_positions
     if (len(gps_data[0]) == 0):
+        gps_geo_cycle_data = generate_geo_circle(cur_gps_input.longitude, cur_gps_input.latitude, 5)
         gps_data[0].append(cur_gps_input.longitude)
         gps_data[1].append(cur_gps_input.latitude)
     elif ((cur_gps_input.longitude == gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1])):
@@ -441,6 +476,7 @@ def callback_cur_servo_cmd(cur_servo_cmd):
 
 
 def callback_fc_rc(cur_joy_cmd):
+    global fc_rc
     fc_rc[:-1, :] = fc_rc[1:, :]
     fc_rc[-1, 0] = cur_joy_cmd.axes[0]
     fc_rc[-1, 1] = cur_joy_cmd.axes[1]
@@ -461,7 +497,7 @@ ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gp
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
 ros_subscribe_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, callback_fc_rc)
-update_interval = 20    # ms
+update_interval = 10    # ms
 publish_servo = False
 publish_led = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
@@ -488,11 +524,10 @@ def mainloop():
             publish_led_strips()
             publi3sher_led_strip_last_update = time.time()
 
-    set_fc_rc()
-
     print 'mainloop', win.keysPressed
 
     try:
+        set_fc_rc()
         update_gps_plot(path=True, points=True)
     except:
         print '>>> error in main loop'
@@ -548,6 +583,8 @@ timer.stop()
 ros_subscribe_cur_servo_cmd.unregister()
 ros_subscribe_gps_position.unregister()
 ros_subscribe_gps_way_point.unregister()
+ros_subscribe_gps_home.unregister()
+ros_subscribe_fc_rc.unregister()
 
 
 
