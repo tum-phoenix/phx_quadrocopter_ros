@@ -12,6 +12,7 @@ import rospy
 from phx_arduino_uart_bridge.msg import Servo
 from phx_arduino_uart_bridge.msg import LED
 from phx_arduino_uart_bridge.msg import LEDstrip
+from phx_arduino_uart_bridge.msg import Altitude
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
 
@@ -75,16 +76,16 @@ gps_data = [[], []]  # [[lon], [lat]]
 gps_geo_cycle_data = None
 gps_positions = {}
 
-ui_win.gps_graphicsView.plotItem.showGrid(x=True, y=True, alpha=0.2)
-gps_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
-gps_geo_cycle_qtgraph_plot = ui_win.gps_graphicsView.plotItem.plot()
+ui_win.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
+gps_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
+gps_geo_cycle_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
 gps_geo_cycle_qtgraph_plot.setPen(pg.mkPen(color=(0,0,200)))
 # gps_qtgraph_plot.setData([1, 2, 3], [1, 3, 1])
 
 gps_scatter_plot = pg.ScatterPlotItem()
 gps_scatter_plot.setData(gps_positions.values())
 # gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
-ui_win.gps_graphicsView.addItem(gps_scatter_plot)
+ui_win.graphicsView_gps.addItem(gps_scatter_plot)
 
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
@@ -110,9 +111,9 @@ def generate_geo_circle(est_lon, est_lat, diameter):
     return [x, y]
 
 # label = pg.TextItem(text='test')
-# ui_win.gps_graphicsView.addItem(label)
+# ui_win.graphicsView_gps.addItem(label)
 # label.setPos(11, 42)
-# ui_win.gps_graphicsView.removeItem(label)
+# ui_win.graphicsView_gps.removeItem(label)
 gps_position_labels = {}
 
 
@@ -140,20 +141,20 @@ def update_gps_plot(path=True, points=True):
                 else:
                     color = (200, 255, 200)
                 text_item = pg.TextItem(text=label, color=color)
-                ui_win.gps_graphicsView.addItem(text_item)
+                ui_win.graphicsView_gps.addItem(text_item)
                 gps_position_labels[label] = text_item
             gps_position_labels[label].setPos(gps_positions[label]['pos'][0], gps_positions[label]['pos'][1])
         # remove unused labels
         for label in gps_position_labels.keys():
             if label not in gps_positions.keys():
                 text_item = gps_position_labels[label]
-                ui_win.gps_graphicsView.removeItem(text_item)
+                ui_win.graphicsView_gps.removeItem(text_item)
                 del gps_position_labels[label]
 
 
 def gps_plot_mouse_clicked(event):
-    if ui_win.gps_graphicsView.plotItem.sceneBoundingRect().contains(event.scenePos()):
-        mousePoint = ui_win.gps_graphicsView.plotItem.mapToView(event.scenePos())
+    if ui_win.graphicsView_gps.plotItem.sceneBoundingRect().contains(event.scenePos()):
+        mousePoint = ui_win.graphicsView_gps.plotItem.mapToView(event.scenePos())
         button = event.button()         # 1: left   2:right
         x_val = mousePoint.x()
         y_val = mousePoint.y()
@@ -163,19 +164,19 @@ def gps_plot_mouse_clicked(event):
         way_point_msg.latitude = y_val
         way_point_msg.altitude = 0              # need to fix this!
         ros_publisher_gps_way_point.publish(way_point_msg)
-ui_win.gps_graphicsView.plotItem.scene().sigMouseClicked.connect(gps_plot_mouse_clicked)
+ui_win.graphicsView_gps.plotItem.scene().sigMouseClicked.connect(gps_plot_mouse_clicked)
 # another way of connecting the mouse events in case rateLimit is needed. Take care event will be a list of events
-#proxy = pg.SignalProxy(ui_win.gps_graphicsView.plotItem.scene().sigMouseClicked, rateLimit=60, slot=gps_plot_mouse_clicked)
+#proxy = pg.SignalProxy(ui_win.graphicsView_gps.plotItem.scene().sigMouseClicked, rateLimit=60, slot=gps_plot_mouse_clicked)
 
 
 def gps_plot_mouse_moved(event):
-    if ui_win.gps_graphicsView.plotItem.sceneBoundingRect().contains(event):
-        mousePoint = ui_win.gps_graphicsView.plotItem.mapToView(event)
+    if ui_win.graphicsView_gps.plotItem.sceneBoundingRect().contains(event):
+        mousePoint = ui_win.graphicsView_gps.plotItem.mapToView(event)
         x_val = mousePoint.x()
         y_val = mousePoint.y()
         #print 'gps_plot_mouse_moved', x_val, y_val
         ui_win.statusbar.showMessage('gps plot mouse lon: ' + str(x_val) + '  \t lat: ' + str(y_val))
-ui_win.gps_graphicsView.plotItem.scene().sigMouseMoved.connect(gps_plot_mouse_moved)
+ui_win.graphicsView_gps.plotItem.scene().sigMouseMoved.connect(gps_plot_mouse_moved)
 
 # led tab # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 def generate_led_strip_msg(color_r, color_g, color_b):

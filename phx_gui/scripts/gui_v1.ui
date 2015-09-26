@@ -46,7 +46,7 @@
         <attribute name="title">
          <string>gps</string>
         </attribute>
-        <widget class="PlotWidget" name="gps_graphicsView">
+        <widget class="PlotWidget" name="graphicsView_gps">
          <property name="geometry">
           <rect>
            <x>20</x>
@@ -54,6 +54,19 @@
            <width>591</width>
            <height>491</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="gps_label_reference_radius">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>520</y>
+           <width>161</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>reference diameter 5m</string>
          </property>
         </widget>
        </widget>
@@ -66,27 +79,27 @@
           <rect>
            <x>70</x>
            <y>60</y>
-           <width>160</width>
+           <width>251</width>
            <height>101</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_led_strip0">
           <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="label_0_b">
             <property name="text">
              <string>blue</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="label_0_r">
             <property name="text">
              <string>red</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="label_0_g">
             <property name="text">
              <string>green</string>
             </property>
@@ -124,10 +137,10 @@
           </item>
          </layout>
         </widget>
-        <widget class="QLabel" name="led_label_0">
+        <widget class="QLabel" name="led_label_strip_0">
          <property name="geometry">
           <rect>
-           <x>70</x>
+           <x>80</x>
            <y>40</y>
            <width>91</width>
            <height>17</height>
@@ -140,29 +153,22 @@
         <widget class="QWidget" name="gridLayoutWidget_2">
          <property name="geometry">
           <rect>
-           <x>270</x>
+           <x>350</x>
            <y>60</y>
-           <width>160</width>
+           <width>251</width>
            <height>101</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_led_strip1">
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>blue</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_9">
+           <widget class="QLabel" name="label_1_r">
             <property name="text">
              <string>red</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="label_1_g">
             <property name="text">
              <string>green</string>
             </property>
@@ -198,12 +204,19 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_1_b">
+            <property name="text">
+             <string>blue</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
-        <widget class="QLabel" name="led_label_1">
+        <widget class="QLabel" name="led_label_strip_1">
          <property name="geometry">
           <rect>
-           <x>270</x>
+           <x>360</x>
            <y>40</y>
            <width>91</width>
            <height>17</height>
@@ -218,27 +231,27 @@
           <rect>
            <x>70</x>
            <y>200</y>
-           <width>160</width>
+           <width>251</width>
            <height>101</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_led_strip2">
           <item row="2" column="0">
-           <widget class="QLabel" name="label_11">
+           <widget class="QLabel" name="label_2_b">
             <property name="text">
              <string>blue</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="label_2_r">
             <property name="text">
              <string>red</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="label_2_g">
             <property name="text">
              <string>green</string>
             </property>
@@ -276,10 +289,10 @@
           </item>
          </layout>
         </widget>
-        <widget class="QLabel" name="led_label_2">
+        <widget class="QLabel" name="led_label_strip_2">
          <property name="geometry">
           <rect>
-           <x>70</x>
+           <x>80</x>
            <y>180</y>
            <width>91</width>
            <height>17</height>
@@ -289,10 +302,10 @@
           <string>LED strip 2</string>
          </property>
         </widget>
-        <widget class="QLabel" name="led_label_3">
+        <widget class="QLabel" name="led_label_strip_3">
          <property name="geometry">
           <rect>
-           <x>270</x>
+           <x>360</x>
            <y>180</y>
            <width>91</width>
            <height>17</height>
@@ -305,29 +318,29 @@
         <widget class="QWidget" name="gridLayoutWidget_4">
          <property name="geometry">
           <rect>
-           <x>270</x>
+           <x>350</x>
            <y>200</y>
-           <width>160</width>
+           <width>251</width>
            <height>101</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_led_strip3">
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="label__3_b">
             <property name="text">
              <string>blue</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_15">
+           <widget class="QLabel" name="label_3_r">
             <property name="text">
              <string>red</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_16">
+           <widget class="QLabel" name="label_3_g">
             <property name="text">
              <string>green</string>
             </property>
@@ -369,7 +382,7 @@
          <property name="geometry">
           <rect>
            <x>470</x>
-           <y>270</y>
+           <y>320</y>
            <width>131</width>
            <height>27</height>
           </rect>
@@ -381,10 +394,10 @@
         <widget class="QCheckBox" name="checkBox_led_strip_update_continuous">
          <property name="geometry">
           <rect>
-           <x>470</x>
-           <y>240</y>
+           <x>320</x>
+           <y>320</y>
            <width>131</width>
-           <height>22</height>
+           <height>31</height>
           </rect>
          </property>
          <property name="text">
@@ -392,12 +405,12 @@
          </property>
         </widget>
         <zorder>gridLayoutWidget</zorder>
-        <zorder>led_label_0</zorder>
+        <zorder>led_label_strip_0</zorder>
         <zorder>gridLayoutWidget_2</zorder>
-        <zorder>led_label_1</zorder>
+        <zorder>led_label_strip_1</zorder>
         <zorder>gridLayoutWidget_3</zorder>
-        <zorder>led_label_2</zorder>
-        <zorder>led_label_3</zorder>
+        <zorder>led_label_strip_2</zorder>
+        <zorder>led_label_strip_3</zorder>
         <zorder>gridLayoutWidget_4</zorder>
         <zorder>pushButton_led_strip_update</zorder>
         <zorder>checkBox_led_strip_update_continuous</zorder>
@@ -1111,11 +1124,20 @@
         <widget class="QSlider" name="remote_slider_rc_fc_throttle">
          <property name="geometry">
           <rect>
-           <x>120</x>
+           <x>100</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
           </rect>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="value">
+          <number>1000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1127,11 +1149,17 @@
         <widget class="QSlider" name="remote_slider_rc_fc_yaw">
          <property name="geometry">
           <rect>
-           <x>50</x>
+           <x>30</x>
            <y>140</y>
            <width>160</width>
            <height>22</height>
           </rect>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -1143,11 +1171,17 @@
         <widget class="QSlider" name="remote_slider_rc_fc_pitch">
          <property name="geometry">
           <rect>
-           <x>320</x>
+           <x>300</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
           </rect>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1159,69 +1193,23 @@
         <widget class="QSlider" name="remote_slider_rc_fc_roll">
          <property name="geometry">
           <rect>
-           <x>250</x>
+           <x>230</x>
            <y>140</y>
            <width>160</width>
            <height>22</height>
           </rect>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="tickPosition">
           <enum>QSlider::NoTicks</enum>
-         </property>
-        </widget>
-        <widget class="QSlider" name="remote_slider_rc_fc_aux1">
-         <property name="geometry">
-          <rect>
-           <x>460</x>
-           <y>70</y>
-           <width>22</width>
-           <height>160</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-        <widget class="QSlider" name="remote_slider_rc_fc_aux2">
-         <property name="geometry">
-          <rect>
-           <x>500</x>
-           <y>70</y>
-           <width>22</width>
-           <height>160</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-        <widget class="QSlider" name="remote_slider_rc_fc_aux3">
-         <property name="geometry">
-          <rect>
-           <x>540</x>
-           <y>70</y>
-           <width>22</width>
-           <height>160</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-        <widget class="QSlider" name="remote_slider_rc_fc_aux4">
-         <property name="geometry">
-          <rect>
-           <x>580</x>
-           <y>70</y>
-           <width>22</width>
-           <height>160</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
          </property>
         </widget>
         <widget class="PlotWidget" name="graphicsView_rc_fc">
@@ -1234,11 +1222,11 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="rc_fc_label_headline">
          <property name="geometry">
           <rect>
-           <x>50</x>
-           <y>40</y>
+           <x>40</x>
+           <y>20</y>
            <width>171</width>
            <height>16</height>
           </rect>
@@ -1250,7 +1238,7 @@
         <widget class="QLabel" name="rc_fc_label_throttle">
          <property name="geometry">
           <rect>
-           <x>140</x>
+           <x>120</x>
            <y>70</y>
            <width>66</width>
            <height>17</height>
@@ -1272,7 +1260,7 @@
         <widget class="QLabel" name="rc_fc_label_yaw">
          <property name="geometry">
           <rect>
-           <x>180</x>
+           <x>160</x>
            <y>160</y>
            <width>31</width>
            <height>17</height>
@@ -1294,7 +1282,7 @@
         <widget class="QLabel" name="rc_fc_label_pitch">
          <property name="geometry">
           <rect>
-           <x>340</x>
+           <x>320</x>
            <y>70</y>
            <width>66</width>
            <height>17</height>
@@ -1316,7 +1304,7 @@
         <widget class="QLabel" name="rc_fc_label_roll">
          <property name="geometry">
           <rect>
-           <x>390</x>
+           <x>370</x>
            <y>160</y>
            <width>41</width>
            <height>17</height>
@@ -1333,72 +1321,6 @@
          </property>
          <property name="text">
           <string>roll</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="rc_fc_label_gps">
-         <property name="geometry">
-          <rect>
-           <x>460</x>
-           <y>50</y>
-           <width>31</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>gps</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="rc_fc_label_baro">
-         <property name="geometry">
-          <rect>
-           <x>580</x>
-           <y>50</y>
-           <width>31</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>baro</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="rc_fc_label_mag">
-         <property name="geometry">
-          <rect>
-           <x>540</x>
-           <y>50</y>
-           <width>31</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>mag</string>
          </property>
         </widget>
         <widget class="QLabel" name="rc_fc_label_gps_home">
@@ -1445,17 +1367,328 @@
           <string>pos</string>
          </property>
         </widget>
+        <widget class="Line" name="line_separator_rc_fc_0">
+         <property name="geometry">
+          <rect>
+           <x>7</x>
+           <y>40</y>
+           <width>611</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="Line" name="line_separator_rc_fc_1">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>50</y>
+           <width>20</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="Line" name="line_separator_rc_fc_2">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>50</y>
+           <width>20</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QWidget" name="gridLayoutWidget_5">
+         <property name="geometry">
+          <rect>
+           <x>460</x>
+           <y>50</y>
+           <width>160</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_aux_rc_fc">
+          <item row="1" column="2">
+           <widget class="QSlider" name="remote_slider_rc_fc_aux3">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="rc_fc_label_mag">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>mag</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSlider" name="remote_slider_rc_fc_aux1">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="rc_fc_label_gps">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>gps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QSlider" name="remote_slider_rc_fc_aux4">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="remote_slider_rc_fc_aux2">
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="rc_fc_label_baro">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>baro</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="rc_fc_label_aux1">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="rc_fc_label_aux1_2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="rc_fc_label_aux1_3">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux3</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="rc_fc_label_aux1_4">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux4</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_read_only">
+         <property name="geometry">
+          <rect>
+           <x>530</x>
+           <y>20</y>
+           <width>91</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>read only</string>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_fc_throttle">
+         <property name="geometry">
+          <rect>
+           <x>143</x>
+           <y>90</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_fc_yaw">
+         <property name="geometry">
+          <rect>
+           <x>143</x>
+           <y>180</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_fc_roll">
+         <property name="geometry">
+          <rect>
+           <x>343</x>
+           <y>180</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_fc_pitch">
+         <property name="geometry">
+          <rect>
+           <x>343</x>
+           <y>90</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <zorder>remote_slider_rc_fc_throttle</zorder>
+        <zorder>remote_slider_rc_fc_yaw</zorder>
+        <zorder>remote_slider_rc_fc_pitch</zorder>
+        <zorder>remote_slider_rc_fc_roll</zorder>
+        <zorder>graphicsView_rc_fc</zorder>
+        <zorder>rc_fc_label_headline</zorder>
+        <zorder>rc_fc_label_throttle</zorder>
+        <zorder>rc_fc_label_yaw</zorder>
+        <zorder>rc_fc_label_pitch</zorder>
+        <zorder>rc_fc_label_roll</zorder>
+        <zorder>rc_fc_label_gps_home</zorder>
+        <zorder>rc_fc_label_gps_3</zorder>
+        <zorder>line_separator_rc_fc_0</zorder>
+        <zorder>line_separator_rc_fc_1</zorder>
+        <zorder>line_separator_rc_fc_2</zorder>
+        <zorder>gridLayoutWidget_5</zorder>
+        <zorder>rc_fc_label_read_only</zorder>
+        <zorder>lcdNumber_rc_fc_throttle</zorder>
+        <zorder>lcdNumber_rc_fc_yaw</zorder>
+        <zorder>lcdNumber_rc_fc_roll</zorder>
+        <zorder>lcdNumber_rc_fc_pitch</zorder>
+        <zorder>left_tabs</zorder>
        </widget>
        <widget class="QWidget" name="altitude_tab">
         <attribute name="title">
          <string>altitude</string>
         </attribute>
-        <widget class="PlotWidget" name="graphicsView">
+        <widget class="PlotWidget" name="graphicsView_altitude">
          <property name="geometry">
           <rect>
-           <x>30</x>
+           <x>20</x>
            <y>10</y>
-           <width>451</width>
+           <width>461</width>
            <height>371</height>
           </rect>
          </property>
@@ -1517,5 +1750,70 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>remote_slider_rc_fc_throttle</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_fc_throttle</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>763</x>
+     <y>216</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>814</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_fc_yaw</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_fc_yaw</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>762</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>814</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_fc_pitch</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_fc_pitch</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>963</x>
+     <y>216</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1014</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_fc_roll</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_fc_roll</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>962</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1014</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
