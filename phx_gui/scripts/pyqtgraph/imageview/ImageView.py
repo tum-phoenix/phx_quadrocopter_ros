@@ -198,6 +198,39 @@ class ImageView(QtGui.QWidget):
         
         self.roiClicked() ## initialize roi plot to correct shape / visibility
 
+        ############################################################################
+        self.keys_pressed = []
+        self.key_hits = []
+        self.mouse_clicks = []
+        self.roi_mean = 0
+        self.roi_var = 0
+        self.roi_x = [0, 0]
+        self.roi_y = [0, 0]
+
+    def mousePressEvent(self, ev):
+        #print ev.button()
+        #print self.view.ItemTransformOriginPointChange
+        #print ev.x(), ev.y(), ev.pos()
+        ev.accept()
+        self.mouse_clicks.append([ptime.time(), ev.x(), ev.y(), ev.pos(), ev.button()])
+
+    def keyPressEvent(self, ev):
+        #print ev.key(), QtCore.Qt.Key_Up
+        ev.accept()
+        if ev.key() not in self.keyHits:
+            self.key_hits.append(ev.key())
+        if ev.isAutoRepeat():
+            return
+        self.keys_pressed.append(ev.key())
+
+    def keyReleaseEvent(self, ev):
+        ev.accept()
+        if ev.isAutoRepeat():
+            return
+        if ev.key() in self.keysPressed:
+            self.keys_pressed.remove(ev.key())
+        else:
+            print "keyhit of", ev.key() , "not detected"
 
     def setImage(self, img, autoRange=True, autoLevels=True, levels=None, axes=None, xvals=None, pos=None, scale=None, transform=None, autoHistogramRange=True):
         """
@@ -543,6 +576,10 @@ class ImageView(QtGui.QWidget):
         else:
             return
         data, coords = self.roi.getArrayRegion(image.view(np.ndarray), self.imageItem, axes, returnMappedCoords=True)
+        self.roi_var = np.std(data)
+        self.roi_mean = np.mean(data)
+        self.roi_x = [int(coords[0, 0, 0]), int(coords[0, -1, -1])]
+        self.roi_y = [int(coords[1, 0, 0]), int(coords[1, -1, -1])]
         if data is not None:
             while data.ndim > 1:
                 data = data.mean(axis=1)
