@@ -1175,7 +1175,7 @@
         <widget class="QSlider" name="remote_slider_rc_fc_aux1">
          <property name="geometry">
           <rect>
-           <x>450</x>
+           <x>460</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
@@ -1188,7 +1188,7 @@
         <widget class="QSlider" name="remote_slider_rc_fc_aux2">
          <property name="geometry">
           <rect>
-           <x>490</x>
+           <x>500</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
@@ -1201,7 +1201,7 @@
         <widget class="QSlider" name="remote_slider_rc_fc_aux3">
          <property name="geometry">
           <rect>
-           <x>530</x>
+           <x>540</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
@@ -1214,7 +1214,7 @@
         <widget class="QSlider" name="remote_slider_rc_fc_aux4">
          <property name="geometry">
           <rect>
-           <x>570</x>
+           <x>580</x>
            <y>70</y>
            <width>22</width>
            <height>160</height>
@@ -1245,6 +1245,204 @@
          </property>
          <property name="text">
           <string>Remote Control:   NAZE</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>70</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,200,0) }</string>
+         </property>
+         <property name="text">
+          <string>throttle</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_yaw">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>160</y>
+           <width>31</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,0,250) }</string>
+         </property>
+         <property name="text">
+          <string>yaw</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_pitch">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>70</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(250,0,250) }</string>
+         </property>
+         <property name="text">
+          <string>pitch</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_roll">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>160</y>
+           <width>41</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(255,0,0) }</string>
+         </property>
+         <property name="text">
+          <string>roll</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_gps">
+         <property name="geometry">
+          <rect>
+           <x>460</x>
+           <y>50</y>
+           <width>31</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>gps</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_baro">
+         <property name="geometry">
+          <rect>
+           <x>580</x>
+           <y>50</y>
+           <width>31</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>baro</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_mag">
+         <property name="geometry">
+          <rect>
+           <x>540</x>
+           <y>50</y>
+           <width>31</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>mag</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_gps_home">
+         <property name="geometry">
+          <rect>
+           <x>420</x>
+           <y>70</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>home</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_gps_3">
+         <property name="geometry">
+          <rect>
+           <x>430</x>
+           <y>140</y>
+           <width>31</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>pos</string>
          </property>
         </widget>
        </widget>
@@ -1305,7 +1503,7 @@
      <x>0</x>
      <y>0</y>
      <width>1302</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

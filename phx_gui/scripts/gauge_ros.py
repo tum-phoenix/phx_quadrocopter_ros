@@ -5,6 +5,7 @@ from PyQt4 import uic, QtCore, QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import time
+import numpy as np
 
 # import ROS
 import rospy
@@ -12,6 +13,7 @@ from phx_arduino_uart_bridge.msg import Servo
 from phx_arduino_uart_bridge.msg import LED
 from phx_arduino_uart_bridge.msg import LEDstrip
 from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import Joy
 
 
 # generate .py from .ui via pyuic4 gui_v0.ui -o gui_v0.py
@@ -65,10 +67,10 @@ ui_win.statusbar.showMessage("starting up...")
 ##########################################################################################
 # init tabs left
 ##########################################################################################
-# text output
+# text output # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ui_win.textBrowser.setText('test text')
 
-# gps tab
+# gps tab # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 gps_data = [[], []]  # [[lon], [lat]]
 gps_positions = {}
 
@@ -144,7 +146,7 @@ def gps_plot_mouse_moved(event):
         ui_win.statusbar.showMessage('gps plot mouse lon: ' + str(x_val) + '  \t lat: ' + str(y_val))
 ui_win.gps_graphicsView.plotItem.scene().sigMouseMoved.connect(gps_plot_mouse_moved)
 
-# led tab
+# led tab # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 def generate_led_strip_msg(color_r, color_g, color_b):
     LEDstrip_msg = LEDstrip()
     color_r = int(color_r.value())
@@ -162,65 +164,13 @@ def generate_led_strip_msg(color_r, color_g, color_b):
     LEDstrip_msg.led_9_r = color_r; LEDstrip_msg.led_9_g = color_g; LEDstrip_msg.led_9_b = color_b
     return LEDstrip_msg
 
-##########################################################################################
-# init ros callback functions
-##########################################################################################
-def callback_gps_home(cur_gps_input):
-    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
-    if 'home' in gps_positions.keys():
-        if gps_pos != gps_positions['home']['pos']:
-            gps_positions['home']['pos'] = gps_pos
-    else:
-        gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(255, 255, 0))}
 
 
-def callback_gps_way_point(cur_gps_input):
-    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
-    if 'way_point' in gps_positions.keys():
-        if gps_pos != gps_positions['way_point']['pos']:
-            gps_positions['way_point']['pos'] = gps_pos
-    else:
-        gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 255, 0))}
-
-
-def callback_gps_position(cur_gps_input):
-    if (len(gps_data[0]) == 0) or ((cur_gps_input.longitude != gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1])):
-        gps_data[0].append(cur_gps_input.longitude)
-        gps_data[1].append(cur_gps_input.latitude)
-
-    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
-    if 'phoenix' in gps_positions.keys():
-        if gps_pos != gps_positions['phoenix']['pos']:
-            gps_positions['phoenix']['pos'] = gps_pos
-    else:
-        gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 0, 255))}
-
-
-def callback_cur_servo_cmd(cur_servo_cmd):
-    set_parameters_slider(0, cur_servo_cmd.servo0)
-    set_parameters_slider(1, cur_servo_cmd.servo1)
-    set_parameters_slider(2, cur_servo_cmd.servo2)
-    set_parameters_slider(3, cur_servo_cmd.servo3)
-    set_parameters_slider(4, cur_servo_cmd.servo4)
-    set_parameters_slider(5, cur_servo_cmd.servo5)
-    set_parameters_slider(6, cur_servo_cmd.servo6)
-    set_parameters_slider(7, cur_servo_cmd.servo7)
-    set_parameters_slider(8, cur_servo_cmd.servo8)
-    set_parameters_slider(9, cur_servo_cmd.servo9)
-    set_parameters_slider(10, cur_servo_cmd.servo10)
-    set_parameters_slider(11, cur_servo_cmd.servo11)
-    set_parameters_slider(12, cur_servo_cmd.servo12)
-    set_parameters_slider(13, cur_servo_cmd.servo13)
-    set_parameters_slider(14, cur_servo_cmd.servo14)
-    set_parameters_slider(15, cur_servo_cmd.servo15)
-    set_parameters_slider(16, cur_servo_cmd.servo16)
-    set_parameters_slider(17, cur_servo_cmd.servo17)
-    print ' -> updated sliders from cur_servo_cmd'
 
 ##########################################################################################
 # init right side
 ##########################################################################################
-# parameter slider
+# parameters # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 def set_parameters_lcd(number, val=0):
     if number == 0:
         ui_win.lcdNumber_parameter_00.display(val)
@@ -387,6 +337,119 @@ def get_parameters_slider(number):
         print ' -> get_parameters_slider requested number', number, 'not available'
         return False
 
+for i in range(0, 18):
+    set_parameters_slider_limits(i, 300, 2450)
+
+
+# flight controller rc # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+record_fc_rc = 200
+fc_rc = np.zeros((record_fc_rc, 8), dtype=int) + 1000
+ui_win.remote_slider_rc_fc_pitch.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_roll.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_yaw.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_throttle.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_aux1.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_aux2.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_aux3.setRange(1000, 2000)
+ui_win.remote_slider_rc_fc_aux4.setRange(1000, 2000)
+
+rc_fc_qtgraph_plot_pitch = ui_win.graphicsView_rc_fc.plotItem.plot()
+rc_fc_qtgraph_plot_pitch.setPen(pg.mkPen(color=(200, 0, 100)))
+rc_fc_qtgraph_plot_roll = ui_win.graphicsView_rc_fc.plotItem.plot()
+rc_fc_qtgraph_plot_roll.setPen(pg.mkPen(color=(255, 0, 0)))
+rc_fc_qtgraph_plot_yaw = ui_win.graphicsView_rc_fc.plotItem.plot()
+rc_fc_qtgraph_plot_yaw.setPen(pg.mkPen(color=(0, 0, 200)))
+rc_fc_qtgraph_plot_throttle = ui_win.graphicsView_rc_fc.plotItem.plot()
+rc_fc_qtgraph_plot_throttle.setPen(pg.mkPen(color=(0, 200, 0)))
+
+def set_fc_rc():
+    ui_win.remote_slider_rc_fc_pitch.setValue(fc_rc[-1, 0])
+    ui_win.remote_slider_rc_fc_roll.setValue(fc_rc[-1, 1])
+    ui_win.remote_slider_rc_fc_yaw.setValue(fc_rc[-1, 2])
+    ui_win.remote_slider_rc_fc_throttle.setValue(fc_rc[-1, 3])
+    ui_win.remote_slider_rc_fc_aux1.setValue(fc_rc[-1, 4])
+    ui_win.remote_slider_rc_fc_aux2.setValue(fc_rc[-1, 5])
+    ui_win.remote_slider_rc_fc_aux3.setValue(fc_rc[-1, 6])
+    ui_win.remote_slider_rc_fc_aux4.setValue(fc_rc[-1, 7])
+
+    rc_fc_qtgraph_plot_pitch.setData(np.arange(0, fc_rc.shape[0]), fc_rc[:, 0])
+    rc_fc_qtgraph_plot_roll.setData(np.arange(0, fc_rc.shape[0]), fc_rc[:, 1])
+    rc_fc_qtgraph_plot_yaw.setData(np.arange(0, fc_rc.shape[0]), fc_rc[:, 2])
+    rc_fc_qtgraph_plot_throttle.setData(np.arange(0, fc_rc.shape[0]), fc_rc[:, 3])
+
+
+##########################################################################################
+# init ros callback functions
+##########################################################################################
+def callback_gps_home(cur_gps_input):
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'home' in gps_positions.keys():
+        if gps_pos != gps_positions['home']['pos']:
+            gps_positions['home']['pos'] = gps_pos
+    else:
+        gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(255, 255, 0))}
+
+
+def callback_gps_way_point(cur_gps_input):
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'way_point' in gps_positions.keys():
+        if gps_pos != gps_positions['way_point']['pos']:
+            gps_positions['way_point']['pos'] = gps_pos
+    else:
+        gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 255, 0))}
+
+
+def callback_gps_position(cur_gps_input):
+    if (len(gps_data[0]) == 0):
+        gps_data[0].append(cur_gps_input.longitude)
+        gps_data[1].append(cur_gps_input.latitude)
+    elif ((cur_gps_input.longitude == gps_data[0][-1]) and (cur_gps_input.latitude != gps_data[1][-1])):
+        # new position is identical to previous one
+        pass
+    else:
+        gps_data[0].append(cur_gps_input.longitude)
+        gps_data[1].append(cur_gps_input.latitude)
+
+    gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
+    if 'phoenix' in gps_positions.keys():
+        if gps_pos != gps_positions['phoenix']['pos']:
+            gps_positions['phoenix']['pos'] = gps_pos
+    else:
+        gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 0, 255))}
+
+
+def callback_cur_servo_cmd(cur_servo_cmd):
+    set_parameters_slider(0, cur_servo_cmd.servo0)
+    set_parameters_slider(1, cur_servo_cmd.servo1)
+    set_parameters_slider(2, cur_servo_cmd.servo2)
+    set_parameters_slider(3, cur_servo_cmd.servo3)
+    set_parameters_slider(4, cur_servo_cmd.servo4)
+    set_parameters_slider(5, cur_servo_cmd.servo5)
+    set_parameters_slider(6, cur_servo_cmd.servo6)
+    set_parameters_slider(7, cur_servo_cmd.servo7)
+    set_parameters_slider(8, cur_servo_cmd.servo8)
+    set_parameters_slider(9, cur_servo_cmd.servo9)
+    set_parameters_slider(10, cur_servo_cmd.servo10)
+    set_parameters_slider(11, cur_servo_cmd.servo11)
+    set_parameters_slider(12, cur_servo_cmd.servo12)
+    set_parameters_slider(13, cur_servo_cmd.servo13)
+    set_parameters_slider(14, cur_servo_cmd.servo14)
+    set_parameters_slider(15, cur_servo_cmd.servo15)
+    set_parameters_slider(16, cur_servo_cmd.servo16)
+    set_parameters_slider(17, cur_servo_cmd.servo17)
+    print ' -> updated sliders from cur_servo_cmd'
+
+
+def callback_fc_rc(cur_joy_cmd):
+    fc_rc[:-1, :] = fc_rc[1:, :]
+    fc_rc[-1, 0] = cur_joy_cmd.axes[0]
+    fc_rc[-1, 1] = cur_joy_cmd.axes[1]
+    fc_rc[-1, 2] = cur_joy_cmd.axes[2]
+    fc_rc[-1, 3] = cur_joy_cmd.axes[3]          # Throttle
+    fc_rc[-1, 4] = cur_joy_cmd.buttons[0]       # gps
+    fc_rc[-1, 5] = cur_joy_cmd.buttons[1]       #
+    fc_rc[-1, 6] = cur_joy_cmd.buttons[2]       #
+    fc_rc[-1, 7] = cur_joy_cmd.buttons[3]       # barometer
 
 
 ##########################################################################################
@@ -397,7 +460,8 @@ ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd'
 ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
-update_interval = 10    # ms
+ros_subscribe_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, callback_fc_rc)
+update_interval = 20    # ms
 publish_servo = False
 publish_led = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
@@ -407,9 +471,6 @@ ros_publisher_led_strip_0_cmd = rospy.Publisher('phx/led/led_strip_0', LEDstrip,
 ros_publisher_led_strip_1_cmd = rospy.Publisher('phx/led/led_strip_1', LEDstrip, queue_size=1)
 ros_publisher_led_strip_2_cmd = rospy.Publisher('phx/led/led_strip_2', LEDstrip, queue_size=1)
 ros_publisher_led_strip_3_cmd = rospy.Publisher('phx/led/led_strip_3', LEDstrip, queue_size=1)
-
-for i in range(0, 18):
-    set_parameters_slider_limits(i, 300, 2450)
 
 
 def mainloop():
@@ -425,7 +486,10 @@ def mainloop():
             # update led strips from sliders
             print 'updating LEDs'
             publish_led_strips()
-            publisher_led_strip_last_update = time.time()
+            publi3sher_led_strip_last_update = time.time()
+
+    set_fc_rc()
+
     print 'mainloop', win.keysPressed
 
     try:
