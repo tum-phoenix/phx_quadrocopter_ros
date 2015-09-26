@@ -421,7 +421,7 @@
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
@@ -1784,7 +1784,7 @@
           <string>activate video stream</string>
          </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
         <widget class="QGraphicsView" name="graphicsView_video">

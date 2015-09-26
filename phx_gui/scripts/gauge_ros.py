@@ -650,6 +650,7 @@ def ros_subscription_update():
 
 QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('stateChanged(int)'), publish_led_strips)
 QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('clicked()'), ros_subscription_update)
+ros_subscription_update()
 
 
 win.show()

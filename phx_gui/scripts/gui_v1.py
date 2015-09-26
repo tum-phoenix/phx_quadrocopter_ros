@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Sat Sep 26 21:45:40 2015
+# Created: Sat Sep 26 23:14:38 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -692,7 +692,7 @@ class Ui_MainWindow(object):
         self.video_tab.setObjectName(_fromUtf8("video_tab"))
         self.checkBox_video_active = QtGui.QCheckBox(self.video_tab)
         self.checkBox_video_active.setGeometry(QtCore.QRect(410, 30, 201, 21))
-        self.checkBox_video_active.setChecked(True)
+        self.checkBox_video_active.setChecked(False)
         self.checkBox_video_active.setObjectName(_fromUtf8("checkBox_video_active"))
         self.graphicsView_video = QtGui.QGraphicsView(self.video_tab)
         self.graphicsView_video.setGeometry(QtCore.QRect(10, 70, 611, 421))
@@ -713,7 +713,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.left_tabs.setCurrentIndex(2)
-        self.right_tabs.setCurrentIndex(3)
+        self.right_tabs.setCurrentIndex(1)
         QtCore.QObject.connect(self.remote_slider_rc_fc_throttle, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_throttle.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_yaw, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_yaw.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_pitch, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_pitch.display)
