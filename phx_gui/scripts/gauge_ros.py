@@ -2,8 +2,7 @@
 __author__ = 'manuelviermetz'
 
 from PyQt4 import uic, QtCore, QtGui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
+import pyqtgraph
 import time
 import numpy as np
 
@@ -15,11 +14,10 @@ from phx_arduino_uart_bridge.msg import LEDstrip
 from phx_arduino_uart_bridge.msg import Altitude
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
-
+from sensor_msgs.msg import Image
 
 # generate .py from .ui via pyuic4 gui_v0.ui -o gui_v0.py
 from gui_v1 import Ui_MainWindow
-import pyqtgraph as pg
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -79,10 +77,10 @@ gps_positions = {}
 ui_win.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
 gps_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
 gps_geo_cycle_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
-gps_geo_cycle_qtgraph_plot.setPen(pg.mkPen(color=(0,0,200)))
+gps_geo_cycle_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0,0,200)))
 # gps_qtgraph_plot.setData([1, 2, 3], [1, 3, 1])
 
-gps_scatter_plot = pg.ScatterPlotItem()
+gps_scatter_plot = pyqtgraph.ScatterPlotItem()
 gps_scatter_plot.setData(gps_positions.values())
 # gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
 ui_win.graphicsView_gps.addItem(gps_scatter_plot)
@@ -110,7 +108,7 @@ def generate_geo_circle(est_lon, est_lat, diameter):
     y = np.cos(t) * 0.5 * diameter_y
     return [x, y]
 
-# label = pg.TextItem(text='test')
+# label = pyqtgraph.TextItem(text='test')
 # ui_win.graphicsView_gps.addItem(label)
 # label.setPos(11, 42)
 # ui_win.graphicsView_gps.removeItem(label)
@@ -140,7 +138,7 @@ def update_gps_plot(path=True, points=True):
                     color = (0, 255, 0)
                 else:
                     color = (200, 255, 200)
-                text_item = pg.TextItem(text=label, color=color)
+                text_item = pyqtgraph.TextItem(text=label, color=color)
                 ui_win.graphicsView_gps.addItem(text_item)
                 gps_position_labels[label] = text_item
             gps_position_labels[label].setPos(gps_positions[label]['pos'][0], gps_positions[label]['pos'][1])
@@ -166,7 +164,7 @@ def gps_plot_mouse_clicked(event):
         ros_publisher_gps_way_point.publish(way_point_msg)
 ui_win.graphicsView_gps.plotItem.scene().sigMouseClicked.connect(gps_plot_mouse_clicked)
 # another way of connecting the mouse events in case rateLimit is needed. Take care event will be a list of events
-#proxy = pg.SignalProxy(ui_win.graphicsView_gps.plotItem.scene().sigMouseClicked, rateLimit=60, slot=gps_plot_mouse_clicked)
+#proxy = pyqtgraph.SignalProxy(ui_win.graphicsView_gps.plotItem.scene().sigMouseClicked, rateLimit=60, slot=gps_plot_mouse_clicked)
 
 
 def gps_plot_mouse_moved(event):
@@ -374,28 +372,20 @@ for i in range(0, 18):
 
 
 # flight controller rc # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-record_fc_rc = 200
-fc_rc = np.zeros((record_fc_rc, 8), dtype=int) + 1000
-ui_win.remote_slider_rc_fc_pitch.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_roll.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_yaw.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_throttle.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_aux1.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_aux2.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_aux3.setRange(1000, 2000)
-ui_win.remote_slider_rc_fc_aux4.setRange(1000, 2000)
+record_fc_rc = 600
+fc_rc = np.zeros((record_fc_rc, 8), dtype=np.uint16) + 1000
 
 rc_fc_qtgraph_plot_pitch = ui_win.graphicsView_rc_fc.plotItem.plot()
-rc_fc_qtgraph_plot_pitch.setPen(pg.mkPen(color=(200, 0, 100)))
+rc_fc_qtgraph_plot_pitch.setPen(pyqtgraph.mkPen(color=(200, 0, 100)))
 rc_fc_qtgraph_plot_roll = ui_win.graphicsView_rc_fc.plotItem.plot()
-rc_fc_qtgraph_plot_roll.setPen(pg.mkPen(color=(255, 0, 0)))
+rc_fc_qtgraph_plot_roll.setPen(pyqtgraph.mkPen(color=(255, 0, 0)))
 rc_fc_qtgraph_plot_yaw = ui_win.graphicsView_rc_fc.plotItem.plot()
-rc_fc_qtgraph_plot_yaw.setPen(pg.mkPen(color=(0, 0, 200)))
+rc_fc_qtgraph_plot_yaw.setPen(pyqtgraph.mkPen(color=(0, 0, 200)))
 rc_fc_qtgraph_plot_throttle = ui_win.graphicsView_rc_fc.plotItem.plot()
-rc_fc_qtgraph_plot_throttle.setPen(pg.mkPen(color=(0, 200, 0)))
+rc_fc_qtgraph_plot_throttle.setPen(pyqtgraph.mkPen(color=(0, 200, 0)))
 
 
-def set_fc_rc():
+def update_fc_remote_control():
     global fc_rc
     ui_win.remote_slider_rc_fc_pitch.setValue(fc_rc[-1, 0])
     ui_win.remote_slider_rc_fc_roll.setValue(fc_rc[-1, 1])
@@ -412,6 +402,68 @@ def set_fc_rc():
     rc_fc_qtgraph_plot_throttle.setData(np.arange(0, fc_rc.shape[0]), fc_rc[:, 3])
 
 
+# altitude # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+record_altitude = 600
+altitude_dataset_index = {'fc_barometer': 0, 'fc_gps': 1} # {'fc_barometer': 0, 'fc_gps': 1, 'marvic_ir': 2, 'marvic_lidar': 3, 'marvic_baro': 4, 'marvic_sonar': 5}
+altitude_dataset = np.zeros((record_altitude, len(altitude_dataset_index)), dtype=np.int16)
+
+altitude_qtgraph_plot_fc_barometer = ui_win.graphicsView_altitude.plotItem.plot()
+altitude_qtgraph_plot_fc_barometer.setPen(pyqtgraph.mkPen(color=(200, 0, 200)))
+altitude_qtgraph_plot_fc_gps = ui_win.graphicsView_altitude.plotItem.plot()
+altitude_qtgraph_plot_fc_gps.setPen(pyqtgraph.mkPen(color=(200, 0, 0)))
+
+
+def update_altitude_plot():
+    altitude_qtgraph_plot_fc_barometer.setData(altitude_dataset[:, altitude_dataset_index['fc_barometer']])
+    altitude_qtgraph_plot_fc_gps.setData(altitude_dataset[:, altitude_dataset_index['fc_gps']])
+
+# video # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+live_image = np.zeros((480, 640), dtype=np.uint8)
+image_mask = np.zeros((480, 640), dtype=np.uint8)
+video_qtgraph_plot = pyqtgraph.ImageView(ui_win.graphicsView_video)
+video_auto_range = False
+video_auto_level = False
+video_auto_histogram_range = False
+video_qtgraph_plot.setFixedWidth(611)
+video_qtgraph_plot.setFixedHeight(421)
+video_qtgraph_plot.setImage(np.swapaxes(live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
+a = video_qtgraph_plot.scene
+
+def update_video_mask():
+    global image_mask, video_qtgraph_plot
+    while len(video_qtgraph_plot.mouse_clicks) > 0:
+        click = video_qtgraph_plot.mouse_clicks.pop()
+        x0, x1, button = click[1], click[2], click[4]
+        if button == 1:
+            borders = video_qtgraph_plot.imageItem.sceneBoundingRect()
+            if x0 < borders.left() or x0 > borders.right() or x1 < borders.top() or x1 > borders.bottom():
+                # click outside the image
+                print 'new click outside'
+                break
+            img_x0 = (x0 - borders.left()) / borders.width()
+            img_x1 = (x1 - borders.top()) / borders.height()
+            y = int(img_x0 * image_mask.shape[1])
+            x = int(img_x1 * image_mask.shape[0])
+
+            print 'new click inside', x, y, button
+            image_mask *= 0
+            for dx in range(-10, 12):
+                image_mask[x + dx, y] = 100
+                image_mask[x + dx, y + 1] = 100
+            for dy in range(-10, 12):
+                image_mask[x, y + dy] = 100
+                image_mask[x + 1, y + dy] = 100
+
+def update_video():
+    #live_image[0, 0] = 0
+    #live_image[-1, -1] = 255
+    if ui_win.checkBox_video_active.isChecked():
+        if ui_win.checkBox_video_reset_ranges.isChecked():
+            video_qtgraph_plot.setImage(np.swapaxes(live_image + image_mask, 0, 1), levels=(0, 255), autoHistogramRange=False)
+        else:
+            video_qtgraph_plot.setImage(np.swapaxes(live_image + image_mask, 0, 1), autoLevels=video_auto_range, autoRange=video_auto_range, autoHistogramRange=video_auto_histogram_range)
+    video_qtgraph_plot.update()
+
 ##########################################################################################
 # init ros callback functions
 ##########################################################################################
@@ -421,7 +473,7 @@ def callback_gps_home(cur_gps_input):
         if gps_pos != gps_positions['home']['pos']:
             gps_positions['home']['pos'] = gps_pos
     else:
-        gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(255, 255, 0))}
+        gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(255, 255, 0))}
 
 
 def callback_gps_way_point(cur_gps_input):
@@ -430,11 +482,11 @@ def callback_gps_way_point(cur_gps_input):
         if gps_pos != gps_positions['way_point']['pos']:
             gps_positions['way_point']['pos'] = gps_pos
     else:
-        gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 255, 0))}
+        gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(0, 255, 0))}
 
 
 def callback_gps_position(cur_gps_input):
-    global gps_geo_cycle_data, gps_data, gps_positions
+    global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index
     if (len(gps_data[0]) == 0):
         gps_geo_cycle_data = generate_geo_circle(cur_gps_input.longitude, cur_gps_input.latitude, 5)
         gps_data[0].append(cur_gps_input.longitude)
@@ -446,12 +498,17 @@ def callback_gps_position(cur_gps_input):
         gps_data[0].append(cur_gps_input.longitude)
         gps_data[1].append(cur_gps_input.latitude)
 
+    if altitude_dataset_index and 'fc_gps' in altitude_dataset_index.keys():
+        index = altitude_dataset_index['fc_gps']
+        altitude_dataset[:-1, index] = altitude_dataset[1:, index]
+        altitude_dataset[-1, index] = cur_gps_input.altitude
+
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'phoenix' in gps_positions.keys():
         if gps_pos != gps_positions['phoenix']['pos']:
             gps_positions['phoenix']['pos'] = gps_pos
     else:
-        gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pg.mkBrush(color=(0, 0, 255))}
+        gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(0, 0, 255))}
 
 
 def callback_cur_servo_cmd(cur_servo_cmd):
@@ -489,6 +546,16 @@ def callback_fc_rc(cur_joy_cmd):
     fc_rc[-1, 7] = cur_joy_cmd.buttons[3]       # barometer
 
 
+def callback_fc_altitude(cur_altitude):
+    index = altitude_dataset_index['fc_barometer']
+    altitude_dataset[:-1, index] = altitude_dataset[1:, index]
+    altitude_dataset[-1, index] = cur_altitude.estimated_altitude
+
+
+def callback_image_mono(cur_image_mono):
+    global live_image
+    live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
+
 ##########################################################################################
 # init ros
 ##########################################################################################
@@ -498,6 +565,7 @@ ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gp
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
 ros_subscribe_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, callback_fc_rc)
+ros_subscribe_image_mono = rospy.Subscriber('/image_mono', Image, callback_image_mono)
 update_interval = 10    # ms
 publish_servo = False
 publish_led = True
@@ -528,8 +596,11 @@ def mainloop():
     print 'mainloop', win.keysPressed
 
     try:
-        set_fc_rc()
+        update_video_mask()
+        update_video()
+        update_fc_remote_control()
         update_gps_plot(path=True, points=True)
+        update_altitude_plot()
     except:
         print '>>> error in main loop'
 
@@ -586,6 +657,7 @@ ros_subscribe_gps_position.unregister()
 ros_subscribe_gps_way_point.unregister()
 ros_subscribe_gps_home.unregister()
 ros_subscribe_fc_rc.unregister()
+ros_subscribe_image_mono.unregister()
 
 
 
