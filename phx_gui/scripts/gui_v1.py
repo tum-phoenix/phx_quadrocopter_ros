@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Sat Sep 26 23:14:38 2015
+# Created: Sat Sep 26 23:17:16 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -712,7 +712,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.left_tabs.setCurrentIndex(2)
+        self.left_tabs.setCurrentIndex(1)
         self.right_tabs.setCurrentIndex(1)
         QtCore.QObject.connect(self.remote_slider_rc_fc_throttle, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_throttle.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_yaw, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_yaw.display)

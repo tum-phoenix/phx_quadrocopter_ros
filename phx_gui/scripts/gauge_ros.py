@@ -419,6 +419,8 @@ def update_altitude_plot():
 
 # video # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 live_image = np.zeros((480, 640), dtype=np.uint8)
+time_of_last_image = 0
+video_fps = 0
 image_mask = np.zeros((480, 640), dtype=np.uint8)
 video_qtgraph_plot = pyqtgraph.ImageView(ui_win.graphicsView_video)
 video_auto_range = False
@@ -465,6 +467,8 @@ def update_video():
         else:
             video_qtgraph_plot.setImage(np.swapaxes(live_image + image_mask, 0, 1), autoLevels=video_auto_range, autoRange=video_auto_range, autoHistogramRange=video_auto_histogram_range)
     video_qtgraph_plot.update()
+
+    ui_win.statusbar.showMessage(str("video playing with: " + str(video_fps) + " FPS"))
 
 ##########################################################################################
 # init ros callback functions
@@ -555,10 +559,10 @@ def callback_fc_altitude(cur_altitude):
 
 
 def callback_image_mono(cur_image_mono):
-    print 'callback_image_mono'
-    global live_image
+    global live_image, time_of_last_image, video_fps
     live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
-
+    video_fps = 1. / (time.time() - time_of_last_image)
+    time_of_last_image = time.time()
 ##########################################################################################
 # init ros
 ##########################################################################################

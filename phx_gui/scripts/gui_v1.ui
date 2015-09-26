@@ -30,7 +30,7 @@
      <item>
       <widget class="QTabWidget" name="left_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="InfoPage">
         <attribute name="title">
