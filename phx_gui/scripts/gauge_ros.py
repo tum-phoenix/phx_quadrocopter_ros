@@ -429,6 +429,7 @@ video_qtgraph_plot.setFixedHeight(421)
 video_qtgraph_plot.setImage(np.swapaxes(live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
 a = video_qtgraph_plot.scene
 
+
 def update_video_mask():
     global image_mask, video_qtgraph_plot
     while len(video_qtgraph_plot.mouse_clicks) > 0:
@@ -453,6 +454,7 @@ def update_video_mask():
             for dy in range(-10, 12):
                 image_mask[x, y + dy] = 100
                 image_mask[x + 1, y + dy] = 100
+
 
 def update_video():
     #live_image[0, 0] = 0
@@ -553,6 +555,7 @@ def callback_fc_altitude(cur_altitude):
 
 
 def callback_image_mono(cur_image_mono):
+    print 'callback_image_mono'
     global live_image
     live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
 
@@ -637,7 +640,16 @@ def publish_servos():
     send_servos_msg.servo17 = get_parameters_slider(17)
     ros_publisher_servo_cmd.publish(send_servos_msg)
 
-QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), publish_led_strips)
+
+def ros_subscription_update():
+    global ros_subscribe_image_mono
+    if ui_win.checkBox_video_active.isChecked() and ros_subscribe_image_mono.callback == None:
+        ros_subscribe_image_mono = rospy.Subscriber('/image_mono', Image, callback_image_mono)
+    if not ui_win.checkBox_video_active.isChecked() and ros_subscribe_image_mono.callback != None:
+        ros_subscribe_image_mono.unregister()
+
+QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('stateChanged(int)'), publish_led_strips)
+QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('clicked()'), ros_subscription_update)
 
 
 win.show()
