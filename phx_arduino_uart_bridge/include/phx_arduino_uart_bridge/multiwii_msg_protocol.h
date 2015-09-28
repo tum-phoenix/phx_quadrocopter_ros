@@ -16,6 +16,7 @@ enum MessageCode : uint8_t {
     MARVIC_LED_2 = 52,
     MARVIC_LED_3 = 53,
     MARVIC_SINGLE_LED = 54,
+    MARVIC_MODE_LED = 55,
     MARVIC_BATTERY = 66,
     MARVIC_SONAR = 68,
     MARVIC_INFRA_RED = 69,
@@ -106,6 +107,15 @@ struct Payload {
             uint8_t led_g;
             uint8_t led_b;
         } marvic_led_single;                // MARVIC_SINGLE_LED = 54
+
+        struct {
+            uint8_t strip_index;            // 0: only strip 0    1: only strip 1    2: only strip 2    3: only strip 3    4: all strips
+            uint8_t mode;                   // 0: full off    1: continuous    2: blink    3: half-blink    4: pulse    5: half-pulse    6: special position light (e.g. continuous base color and last led heart beating white)
+            uint8_t alarm;                  // scales blink or pulse speed or special position external blink color (0: white-OK, 1: blue-GPSposhold, 2: red-BatteryLow)
+            uint8_t led_r;                  // base color
+            uint8_t led_g;                  // base color
+            uint8_t led_b;                  // base color
+        } marvic_led_mode;                  // MARVIC_MODE_LED = 55
 
         struct {
             uint32_t millisecond_time_stamp;
