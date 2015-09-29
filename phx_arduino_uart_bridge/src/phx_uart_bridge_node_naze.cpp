@@ -84,6 +84,7 @@ int main(int argc, char **argv)
     uint32_t request_sonar = 0;         uint32_t received_sonar = 0;
     uint32_t request_autonomous = 0;    uint32_t received_autonomous = 0;
 
+    float prevLAT = -1, prevLON= -1, prevALT= -1;
 
     // set start timestamps in real and in cpu time
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
@@ -244,7 +245,15 @@ int main(int argc, char **argv)
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
                             gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
-                            gps_wp_pub.publish(gpsMsg);
+                            
+                            if ((gpsMsg.latitude != prevLAT ) || ( gpsMsg.longitude !=  prevLON) || ( gpsMsg.altitude != prevALT)) {
+                                gps_wp_pub.publish(gpsMsg);
+                            }
+                            
+                            prevLAT = gpsMsg.latitude;
+                            prevLON = gpsMsg.longitude;
+                            prevALT = gpsMsg.altitude;
+                            
                         } else if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 0) {
                             std::cout << " publishing home point" << std::endl;
                             gpsMsg.header = headerMsg;
