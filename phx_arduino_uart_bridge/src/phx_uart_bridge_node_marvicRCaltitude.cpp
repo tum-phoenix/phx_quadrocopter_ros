@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(500);
     
     // serialcom init
-    serial_interface.set_device("/dev/ttyUSB0");                             // select the device
+    serial_interface.set_device("/dev/marvic");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
