@@ -598,7 +598,7 @@ def mainloop():
             # update led strips from sliders
             print 'updating LEDs'
             publish_led_strips()
-            publi3sher_led_strip_last_update = time.time()
+            publisher_led_strip_last_update = time.time()
 
     print 'mainloop', win.keysPressed
 
