@@ -65,11 +65,15 @@ int main(int argc, char **argv)
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
-    sleep(5);                                                              // wait for boot loader and calibration
+    sleep(5);                                                                // wait for boot loader and calibration
     serial_interface.clear_input_buffer();                                   // clear serial buffer
-    Message input_msg;                                                      // the latest received message
-    uint32_t loop_counter = 0;                                              // a counter which is used for sending requests
-    
+    Message input_msg;                                                       // the latest received message
+    uint32_t loop_counter = 0;                                               // a counter which is used for sending requests
+
+    // MICRO CONTROLLER IDENTIFIER
+    uint8_t controller_version = 1;
+    uint8_t controller_type = 3;
+
     // init statistics
     uint32_t request_total = 0;         uint32_t received_total = 0;
     uint32_t request_status = 0;        uint32_t received_status = 0;
@@ -179,6 +183,14 @@ int main(int argc, char **argv)
                         statusMsg.cycleTime = input_msg.msg_data.multiwii_status.cycleTime;
                         statusMsg.i2c_errors_count = input_msg.msg_data.multiwii_status.i2c_errors_count;
                         status_pub.publish(statusMsg);
+                        received_status++;
+                    } else if (input_msg.msg_code == MARVIC_IDENTIFIER) {
+                        if ((controller_version != input_msg.msg_data.identifier.version) || (controller_type != input_msg.msg_data.identifier.type)) {
+                            ROS_INFO("uart bridge is probably connected to wrong micro controller");
+                            ROS_INFO(prints("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type));
+                        }
+                        std::cout << "-> received controller info: version " << input_msg.msg_data.identifier.version << " type " << input_msg.msg_data.identifier.type << std::endl;
+                        printf("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type)
                         received_status++;
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
