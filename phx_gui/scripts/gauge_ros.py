@@ -404,18 +404,27 @@ def update_fc_remote_control():
 
 # altitude # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 record_altitude = 600
-altitude_dataset_index = {'fc_barometer': 0, 'fc_gps': 1} # {'fc_barometer': 0, 'fc_gps': 1, 'marvic_ir': 2, 'marvic_lidar': 3, 'marvic_baro': 4, 'marvic_sonar': 5}
-altitude_dataset = np.zeros((record_altitude, len(altitude_dataset_index)), dtype=np.int16)
-
+altitude_dataset_index = {'fc_barometer': 0, 'fc_gps': 1, 'marvic_ir': 2, 'marvic_lidar': 3, 'marvic_baro': 4, 'marvic_sonar': 5, 'marvic_fused': 6}
+altitude_dataset = np.zeros((record_altitude, len(altitude_dataset_index), 2)) #, dtype=np.uint16)
 altitude_qtgraph_plot_fc_barometer = ui_win.graphicsView_altitude.plotItem.plot()
 altitude_qtgraph_plot_fc_barometer.setPen(pyqtgraph.mkPen(color=(200, 0, 200)))
 altitude_qtgraph_plot_fc_gps = ui_win.graphicsView_altitude.plotItem.plot()
 altitude_qtgraph_plot_fc_gps.setPen(pyqtgraph.mkPen(color=(200, 0, 0)))
+altitude_qtgraph_plot_marvic_lidar = ui_win.graphicsView_altitude.plotItem.plot()
+altitude_qtgraph_plot_marvic_lidar.setPen(pyqtgraph.mkPen(color=(0, 0, 200)))
+altitude_qtgraph_plot_marvic_infra_red = ui_win.graphicsView_altitude.plotItem.plot()
+altitude_qtgraph_plot_marvic_infra_red.setPen(pyqtgraph.mkPen(color=(0, 200, 0)))
+altitude_qtgraph_plot_marvic_fused = ui_win.graphicsView_altitude.plotItem.plot()
+altitude_qtgraph_plot_marvic_fused.setPen(pyqtgraph.mkPen(color=(100, 100, 100)))
 
 
 def update_altitude_plot():
-    altitude_qtgraph_plot_fc_barometer.setData(altitude_dataset[:, altitude_dataset_index['fc_barometer']])
-    altitude_qtgraph_plot_fc_gps.setData(altitude_dataset[:, altitude_dataset_index['fc_gps']])
+    cur_time = altitude_dataset[:, :, 1].max()
+    altitude_qtgraph_plot_fc_barometer.setData(altitude_dataset[:, altitude_dataset_index['fc_barometer'], 1]-cur_time, altitude_dataset[:, altitude_dataset_index['fc_barometer'], 0])
+    altitude_qtgraph_plot_fc_gps.setData(altitude_dataset[:, altitude_dataset_index['fc_gps'], 1]-cur_time, altitude_dataset[:, altitude_dataset_index['fc_gps'], 0])
+    altitude_qtgraph_plot_marvic_infra_red.setData(altitude_dataset[:, altitude_dataset_index['marvic_ir'], 1]-cur_time, altitude_dataset[:, altitude_dataset_index['marvic_ir'], 0])
+    altitude_qtgraph_plot_marvic_lidar.setData(altitude_dataset[:, altitude_dataset_index['marvic_lidar'], 1]-cur_time, altitude_dataset[:, altitude_dataset_index['marvic_lidar'], 0])
+    altitude_qtgraph_plot_marvic_fused.setData(altitude_dataset[:, altitude_dataset_index['marvic_fused'], 1]-cur_time, altitude_dataset[:, altitude_dataset_index['marvic_fused'], 0])
 
 # video # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 live_image = np.zeros((480, 640), dtype=np.uint8)
@@ -429,7 +438,7 @@ video_auto_histogram_range = False
 video_qtgraph_plot.setFixedWidth(611)
 video_qtgraph_plot.setFixedHeight(421)
 video_qtgraph_plot.setImage(np.swapaxes(live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
-a = video_qtgraph_plot.scene
+#a = video_qtgraph_plot.scene
 
 
 def update_video_mask():
@@ -492,7 +501,8 @@ def callback_gps_way_point(cur_gps_input):
 
 
 def callback_gps_position(cur_gps_input):
-    global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index
+    global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index, a
+    time_stamp = cur_gps_input.header.stamp.to_nsec() / 1e6
     if (len(gps_data[0]) == 0):
         gps_geo_cycle_data = generate_geo_circle(cur_gps_input.longitude, cur_gps_input.latitude, 5)
         gps_data[0].append(cur_gps_input.longitude)
@@ -506,8 +516,9 @@ def callback_gps_position(cur_gps_input):
 
     if altitude_dataset_index and 'fc_gps' in altitude_dataset_index.keys():
         index = altitude_dataset_index['fc_gps']
-        altitude_dataset[:-1, index] = altitude_dataset[1:, index]
-        altitude_dataset[-1, index] = cur_gps_input.altitude
+        altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
+        altitude_dataset[-1, index, 0] = cur_gps_input.altitude
+        altitude_dataset[-1, index, 1] = time_stamp
 
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'phoenix' in gps_positions.keys():
@@ -553,9 +564,35 @@ def callback_fc_rc(cur_joy_cmd):
 
 
 def callback_fc_altitude(cur_altitude):
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
     index = altitude_dataset_index['fc_barometer']
-    altitude_dataset[:-1, index] = altitude_dataset[1:, index]
-    altitude_dataset[-1, index] = cur_altitude.estimated_altitude
+    altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
+    altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
+    altitude_dataset[-1, index, 1] = time_stamp
+
+
+def callback_marvic_altitude_fused(cur_altitude):
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    index = altitude_dataset_index['marvic_fused']
+    altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
+    altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
+    altitude_dataset[-1, index, 1] = time_stamp
+
+
+def callback_marvic_altitude_lidar(cur_altitude):
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    index = altitude_dataset_index['marvic_lidar']
+    altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
+    altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
+    altitude_dataset[-1, index, 1] = time_stamp
+
+
+def callback_marvic_altitude_infra_red(cur_altitude):
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    index = altitude_dataset_index['marvic_ir']
+    altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
+    altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
+    altitude_dataset[-1, index, 1] = time_stamp
 
 
 def callback_image_mono(cur_image_mono):
@@ -566,12 +603,17 @@ def callback_image_mono(cur_image_mono):
 ##########################################################################################
 # init ros
 ##########################################################################################
-rospy.init_node('gauge_gui')
+rospy.init_node('gauge_gui_v')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
 ros_subscribe_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, callback_fc_rc)
+ros_subscribe_fc_altitude = rospy.Subscriber('/phx/fc/altitude', Altitude, callback_fc_altitude)
+ros_subscribe_marvic_altitude = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, callback_marvic_altitude_fused)
+ros_subscribe_marvic_lidar = rospy.Subscriber('/phx/marvicAltitude/lidar', Altitude, callback_marvic_altitude_lidar)
+ros_subscribe_marvic_infra_red = rospy.Subscriber('/phx/marvicAltitude/infra_red', Altitude, callback_marvic_altitude_infra_red)
+#ros_subscribe_fc_rc = rospy.Subscriber('/phx/marvicRC/rc_input', Joy, callback_fc_rc)
 ros_subscribe_image_mono = rospy.Subscriber('/image_mono', Image, callback_image_mono)
 update_interval = 10    # ms
 publish_servo = False
@@ -652,8 +694,8 @@ def ros_subscription_update():
     if not ui_win.checkBox_video_active.isChecked() and ros_subscribe_image_mono.callback != None:
         ros_subscribe_image_mono.unregister()
 
-QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('stateChanged(int)'), publish_led_strips)
-QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('clicked()'), ros_subscription_update)
+QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), publish_led_strips)
+QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('stateChanged(int)'), ros_subscription_update)
 ros_subscription_update()
 
 
@@ -675,6 +717,6 @@ ros_subscribe_gps_way_point.unregister()
 ros_subscribe_gps_home.unregister()
 ros_subscribe_fc_rc.unregister()
 ros_subscribe_image_mono.unregister()
-
-
-
+ros_subscribe_marvic_infra_red.unregister()
+ros_subscribe_marvic_lidar.unregister()
+ros_subscribe_marvic_altitude.unregister()
