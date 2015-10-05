@@ -438,7 +438,6 @@ video_auto_histogram_range = False
 video_qtgraph_plot.setFixedWidth(611)
 video_qtgraph_plot.setFixedHeight(421)
 video_qtgraph_plot.setImage(np.swapaxes(live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
-#a = video_qtgraph_plot.scene
 
 
 def update_video_mask():
@@ -475,9 +474,9 @@ def update_video():
             video_qtgraph_plot.setImage(np.swapaxes(live_image + image_mask, 0, 1), levels=(0, 255), autoHistogramRange=False)
         else:
             video_qtgraph_plot.setImage(np.swapaxes(live_image + image_mask, 0, 1), autoLevels=video_auto_range, autoRange=video_auto_range, autoHistogramRange=video_auto_histogram_range)
-    video_qtgraph_plot.update()
+        video_qtgraph_plot.update()
 
-    ui_win.statusbar.showMessage(str("video playing with: " + str(video_fps) + " FPS"))
+        ui_win.statusbar.showMessage(str("video playing with: " + str(video_fps) + " FPS"))
 
 ##########################################################################################
 # init ros callback functions
@@ -501,9 +500,9 @@ def callback_gps_way_point(cur_gps_input):
 
 
 def callback_gps_position(cur_gps_input):
-    global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index, a
+    global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index
     time_stamp = cur_gps_input.header.stamp.to_nsec() / 1e6
-    if (len(gps_data[0]) == 0):
+    if len(gps_data[0]) == 0:
         gps_geo_cycle_data = generate_geo_circle(cur_gps_input.longitude, cur_gps_input.latitude, 5)
         gps_data[0].append(cur_gps_input.longitude)
         gps_data[1].append(cur_gps_input.latitude)
