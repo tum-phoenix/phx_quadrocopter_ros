@@ -22,6 +22,7 @@ enum MessageCode : uint8_t {
     MARVIC_INFRA_RED = 69,
     MARVIC_LIDAR = 70,
     MARVIC_BAROMETER = 71,
+    MARVIC_IDENTIFIER = 100,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
     MULTIWII_SERVO = 103,
@@ -49,6 +50,7 @@ enum MessageLength : uint8_t {
     MARVIC_BAROMETER_LENGTH = 6,
     MARVIC_STRIP_LED_LENGTH = 30,
     MARVIC_SINGLE_LED_LENGTH = 5,
+    MARVIC_IDENTIFIER = 4,
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
     MULTIWII_SERVO_LENGTH = 16,
@@ -136,6 +138,13 @@ struct Payload {
             uint32_t flag;
             uint8_t global_conf;
         } multiwii_status;
+
+        struct {
+            uint8_t version;
+            uint8_t type;
+            uint8_t empty0;
+            uint8_t empty1;
+        } identifier;
 
         struct {
             int16_t accx;

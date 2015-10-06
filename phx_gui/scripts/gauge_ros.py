@@ -77,7 +77,7 @@ gps_positions = {}
 ui_win.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
 gps_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
 gps_geo_cycle_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
-gps_geo_cycle_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0,0,200)))
+gps_geo_cycle_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0, 0, 200)))
 # gps_qtgraph_plot.setData([1, 2, 3], [1, 3, 1])
 
 gps_scatter_plot = pyqtgraph.ScatterPlotItem()
@@ -87,14 +87,14 @@ ui_win.graphicsView_gps.addItem(gps_scatter_plot)
 
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
-    earth_radius = 6371000                      # metre
-    lat_0 = 2. * np.pi * (lat0/360.)            # rad
-    lat_1 = 2. * np.pi * (lat1/360.)            # rad
-    d_phi = 2. * np.pi * ((lat1-lat0)/360.)     # rad
-    d_lamda = 2. * np.pi * ((lon1-lon0)/360.)   # rad
-    a = np.sin(d_phi/2) * np.sin(d_phi/2) + np.cos(lat_0) * np.cos(lat_1) *  np.sin(d_lamda/2) * np.sin(d_lamda/2)
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
-    d = earth_radius * c                        # meter
+    earth_radius = 6371000                          # metre
+    lat_0 = 2. * np.pi * (lat0 / 360.)              # rad
+    lat_1 = 2. * np.pi * (lat1 / 360.)              # rad
+    d_phi = 2. * np.pi * ((lat1 - lat0) / 360.)     # rad
+    d_lamda = 2. * np.pi * ((lon1 - lon0) / 360.)   # rad
+    a = np.sin(d_phi/2) * np.sin(d_phi / 2) + np.cos(lat_0) * np.cos(lat_1) *  np.sin(d_lamda / 2) * np.sin(d_lamda / 2)
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    d = earth_radius * c                            # meter
     return d
 
 
@@ -598,7 +598,7 @@ def mainloop():
             # update led strips from sliders
             print 'updating LEDs'
             publish_led_strips()
-            publi3sher_led_strip_last_update = time.time()
+            publisher_led_strip_last_update = time.time()
 
     print 'mainloop', win.keysPressed
 
