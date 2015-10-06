@@ -187,7 +187,7 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MARVIC_IDENTIFIER) {
                         if ((controller_version != input_msg.msg_data.identifier.version) || (controller_type != input_msg.msg_data.identifier.type)) {
                             ROS_INFO("uart bridge is probably connected to wrong micro controller");
-                            ROS_INFO(prints("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type));
+                            ROS_INFO("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type);
                         }
                         std::cout << "-> received controller info: version " << input_msg.msg_data.identifier.version << " type " << input_msg.msg_data.identifier.type << std::endl;
                         printf("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type)
