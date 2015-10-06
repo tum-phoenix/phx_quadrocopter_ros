@@ -181,8 +181,7 @@ bool SerialCom::send_from_buffer() {
                 output_buffer_read_position++;
             } else {
                 // we will skip errors here
-                std::cout << "SerialCom::send_from_buffer  error" << std::endl;
-                error_count++;
+                std::cout << "SerialCom::send_from_buffer  error -> count " << error_count++ << std::endl;
             }
         } else {
             if (do_debug_printout == true) std::cout << std::endl << "SerialCom::send_from_buffer  all serial data was sent from the output_buffer to the serial device" << std::endl;

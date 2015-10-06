@@ -190,7 +190,7 @@ int main(int argc, char **argv)
                             ROS_INFO("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type);
                         }
                         std::cout << "-> received controller info: version " << input_msg.msg_data.identifier.version << " type " << input_msg.msg_data.identifier.type << std::endl;
-                        printf("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type)
+                        printf("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type);
                         received_status++;
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
