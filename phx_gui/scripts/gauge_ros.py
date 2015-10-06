@@ -85,6 +85,10 @@ gps_scatter_plot.setData(gps_positions.values())
 # gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
 ui_win.graphicsView_gps.addItem(gps_scatter_plot)
 
+# img = pyqtgraph.ImageItem(np.zeros((19,19)))
+# ui_win.graphicsView_gps.addItem(img)
+# img.setZValue(-1)
+# img.setX(10); img.setY(11,5)
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
     earth_radius = 6371000                          # metre
