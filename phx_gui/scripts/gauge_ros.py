@@ -421,6 +421,11 @@ altitude_qtgraph_plot_marvic_infra_red.setPen(pyqtgraph.mkPen(color=(0, 200, 0))
 altitude_qtgraph_plot_marvic_fused = ui_win.graphicsView_altitude.plotItem.plot()
 altitude_qtgraph_plot_marvic_fused.setPen(pyqtgraph.mkPen(color=(100, 100, 100)))
 
+# naze baro - lila
+# naze gps - red
+# lidar - blue
+# ir - green
+# fused - grey
 
 def update_altitude_plot():
     cur_time = altitude_dataset[:, :, 1].max()
@@ -486,6 +491,7 @@ def update_video():
 # init ros callback functions
 ##########################################################################################
 def callback_gps_home(cur_gps_input):
+    print 'home', cur_gps_input.altitude
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'home' in gps_positions.keys():
         if gps_pos != gps_positions['home']['pos']:
@@ -495,6 +501,7 @@ def callback_gps_home(cur_gps_input):
 
 
 def callback_gps_way_point(cur_gps_input):
+    print cur_gps_input.altitude
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'way_point' in gps_positions.keys():
         if gps_pos != gps_positions['way_point']['pos']:
@@ -556,9 +563,9 @@ def callback_cur_servo_cmd(cur_servo_cmd):
 def callback_fc_rc(cur_joy_cmd):
     global fc_rc
     fc_rc[:-1, :] = fc_rc[1:, :]
-    fc_rc[-1, 0] = cur_joy_cmd.axes[0]
-    fc_rc[-1, 1] = cur_joy_cmd.axes[1]
-    fc_rc[-1, 2] = cur_joy_cmd.axes[2]
+    fc_rc[-1, 0] = cur_joy_cmd.axes[1]          # pitch
+    fc_rc[-1, 1] = cur_joy_cmd.axes[0]          # roll
+    fc_rc[-1, 2] = cur_joy_cmd.axes[2]          # yaw
     fc_rc[-1, 3] = cur_joy_cmd.axes[3]          # Throttle
     fc_rc[-1, 4] = cur_joy_cmd.buttons[0]       # gps
     fc_rc[-1, 5] = cur_joy_cmd.buttons[1]       #
