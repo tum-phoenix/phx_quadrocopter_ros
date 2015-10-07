@@ -59,16 +59,95 @@
         <widget class="QLabel" name="gps_label_reference_radius">
          <property name="geometry">
           <rect>
-           <x>450</x>
+           <x>550</x>
            <y>520</y>
-           <width>161</width>
+           <width>71</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>ref. ø 5m</string>
+         </property>
+        </widget>
+        <widget class="QTextBrowser" name="gps_position_home_TextBrowser">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>550</y>
+           <width>181</width>
+           <height>61</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QTextBrowser" name="gps_position_way_point_TextBrowser">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>550</y>
+           <width>181</width>
+           <height>61</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="gps_position_home_label">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>530</y>
+           <width>131</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>reference diameter 5m</string>
+          <string>home position</string>
          </property>
         </widget>
+        <widget class="QLabel" name="gps_position_way_point_label">
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>530</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>way point position</string>
+         </property>
+        </widget>
+        <widget class="QTextBrowser" name="gps_position_current_TextBrowser">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>550</y>
+           <width>181</width>
+           <height>61</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="gps_position_current_label">
+         <property name="geometry">
+          <rect>
+           <x>410</x>
+           <y>530</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>current position</string>
+         </property>
+        </widget>
+        <zorder>graphicsView_gps</zorder>
+        <zorder>gps_label_reference_radius</zorder>
+        <zorder>right_tabs</zorder>
+        <zorder>right_tabs</zorder>
+        <zorder>gps_position_home_TextBrowser</zorder>
+        <zorder>gps_position_way_point_TextBrowser</zorder>
+        <zorder>gps_position_home_label</zorder>
+        <zorder>gps_position_way_point_label</zorder>
+        <zorder>gps_position_current_TextBrowser</zorder>
+        <zorder>gps_position_current_label</zorder>
        </widget>
        <widget class="QWidget" name="ledPage">
         <attribute name="title">
@@ -404,24 +483,13 @@
           <string>continuous</string>
          </property>
         </widget>
-        <zorder>gridLayoutWidget</zorder>
-        <zorder>led_label_strip_0</zorder>
-        <zorder>gridLayoutWidget_2</zorder>
-        <zorder>led_label_strip_1</zorder>
-        <zorder>gridLayoutWidget_3</zorder>
-        <zorder>led_label_strip_2</zorder>
-        <zorder>led_label_strip_3</zorder>
-        <zorder>gridLayoutWidget_4</zorder>
-        <zorder>pushButton_led_strip_update</zorder>
-        <zorder>checkBox_led_strip_update_continuous</zorder>
-        <zorder>right_tabs</zorder>
        </widget>
       </widget>
      </item>
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
@@ -1716,28 +1784,606 @@
           <number>4</number>
          </property>
         </widget>
-        <zorder>remote_slider_rc_fc_throttle</zorder>
-        <zorder>remote_slider_rc_fc_yaw</zorder>
-        <zorder>remote_slider_rc_fc_pitch</zorder>
-        <zorder>remote_slider_rc_fc_roll</zorder>
-        <zorder>graphicsView_rc_fc</zorder>
-        <zorder>rc_fc_label_headline</zorder>
-        <zorder>rc_fc_label_throttle</zorder>
-        <zorder>rc_fc_label_yaw</zorder>
-        <zorder>rc_fc_label_pitch</zorder>
-        <zorder>rc_fc_label_roll</zorder>
-        <zorder>rc_fc_label_gps_home</zorder>
-        <zorder>rc_fc_label_gps_3</zorder>
-        <zorder>line_separator_rc_fc_0</zorder>
-        <zorder>line_separator_rc_fc_1</zorder>
-        <zorder>line_separator_rc_fc_2</zorder>
-        <zorder>gridLayoutWidget_5</zorder>
-        <zorder>rc_fc_label_read_only</zorder>
-        <zorder>lcdNumber_rc_fc_throttle</zorder>
-        <zorder>lcdNumber_rc_fc_yaw</zorder>
-        <zorder>lcdNumber_rc_fc_roll</zorder>
-        <zorder>lcdNumber_rc_fc_pitch</zorder>
-        <zorder>left_tabs</zorder>
+       </widget>
+       <widget class="QWidget" name="rc_marvic">
+        <attribute name="title">
+         <string>rc_marvic</string>
+        </attribute>
+        <widget class="QLabel" name="rc_marvic_label_headline">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>20</y>
+           <width>201</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Remote Control:   marvic</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_separator_rc_marvic_1">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>50</y>
+           <width>20</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="Line" name="line_separator_rc_marvic_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>40</y>
+           <width>611</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_read_only">
+         <property name="geometry">
+          <rect>
+           <x>530</x>
+           <y>20</y>
+           <width>91</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>read only</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_separator_rc_marvic_3">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>50</y>
+           <width>20</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QWidget" name="gridLayoutWidget_7">
+         <property name="geometry">
+          <rect>
+           <x>460</x>
+           <y>50</y>
+           <width>160</width>
+           <height>201</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_aux_rc_marvic">
+          <item row="1" column="2">
+           <widget class="QSlider" name="remote_slider_rc_marvic_aux3">
+            <property name="cursor">
+             <cursorShape>ForbiddenCursor</cursorShape>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="rc_marvic_label_mag">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>mag</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSlider" name="remote_slider_rc_marvic_aux1">
+            <property name="cursor">
+             <cursorShape>ForbiddenCursor</cursorShape>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="rc_marvic_label_gps">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>gps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QSlider" name="remote_slider_rc_marvic_aux4">
+            <property name="cursor">
+             <cursorShape>ForbiddenCursor</cursorShape>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="remote_slider_rc_marvic_aux2">
+            <property name="cursor">
+             <cursorShape>ForbiddenCursor</cursorShape>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="minimum">
+             <number>1000</number>
+            </property>
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="rc_marvic_label_baro">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>baro</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="rc_marvic_label_aux1">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="rc_marvic_label_aux4">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="rc_marvic_label_aux3">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux3</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="rc_marvic_label_aux2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>aux4</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_gps_home">
+         <property name="geometry">
+          <rect>
+           <x>420</x>
+           <y>70</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>home</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_gps_pos">
+         <property name="geometry">
+          <rect>
+           <x>430</x>
+           <y>140</y>
+           <width>31</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>pos</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_pitch">
+         <property name="geometry">
+          <rect>
+           <x>320</x>
+           <y>70</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(250,0,250) }</string>
+         </property>
+         <property name="text">
+          <string>pitch</string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_marvic_pitch">
+         <property name="geometry">
+          <rect>
+           <x>300</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>ForbiddenCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="tracking">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_marvic_pitch">
+         <property name="geometry">
+          <rect>
+           <x>343</x>
+           <y>90</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_marvic_roll">
+         <property name="geometry">
+          <rect>
+           <x>343</x>
+           <y>180</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_marvic_roll">
+         <property name="geometry">
+          <rect>
+           <x>230</x>
+           <y>140</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>ForbiddenCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="tracking">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_roll">
+         <property name="geometry">
+          <rect>
+           <x>370</x>
+           <y>160</y>
+           <width>41</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(255,0,0) }</string>
+         </property>
+         <property name="text">
+          <string>roll</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_throttle">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>70</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,200,0) }</string>
+         </property>
+         <property name="text">
+          <string>throttle</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_marvic_label_yaw">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>160</y>
+           <width>31</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,0,250) }</string>
+         </property>
+         <property name="text">
+          <string>yaw</string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_marvic_throttle">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>70</y>
+           <width>22</width>
+           <height>160</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>ForbiddenCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="value">
+          <number>1000</number>
+         </property>
+         <property name="tracking">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="remote_slider_rc_marvic_yaw">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>140</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>ForbiddenCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="minimum">
+          <number>1000</number>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="tracking">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_marvic_throttle">
+         <property name="geometry">
+          <rect>
+           <x>143</x>
+           <y>90</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_rc_marvic_yaw">
+         <property name="geometry">
+          <rect>
+           <x>143</x>
+           <y>180</y>
+           <width>51</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="numDigits">
+          <number>4</number>
+         </property>
+        </widget>
+        <widget class="PlotWidget" name="graphicsView_rc_marvic">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>260</y>
+           <width>601</width>
+           <height>361</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="altitude_tab">
         <attribute name="title">
@@ -1748,15 +2394,15 @@
           <rect>
            <x>20</x>
            <y>10</y>
-           <width>461</width>
-           <height>371</height>
+           <width>571</width>
+           <height>481</height>
           </rect>
          </property>
         </widget>
         <widget class="QSlider" name="slider_altitude">
          <property name="geometry">
           <rect>
-           <x>540</x>
+           <x>600</x>
            <y>10</y>
            <width>22</width>
            <height>371</height>
@@ -1764,6 +2410,116 @@
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle_2">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>500</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,200,0) }</string>
+         </property>
+         <property name="text">
+          <string>infra red</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle_3">
+         <property name="geometry">
+          <rect>
+           <x>240</x>
+           <y>500</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(0,0,200) }</string>
+         </property>
+         <property name="text">
+          <string>lidar</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle_4">
+         <property name="geometry">
+          <rect>
+           <x>300</x>
+           <y>500</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(100,100,100) }</string>
+         </property>
+         <property name="text">
+          <string>fused</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle_5">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>500</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(200,0,0) }</string>
+         </property>
+         <property name="text">
+          <string>gps</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="rc_fc_label_throttle_6">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>500</y>
+           <width>66</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{ color: rgb(200,0,200) }</string>
+         </property>
+         <property name="text">
+          <string>naze_fc</string>
          </property>
         </widget>
        </widget>
