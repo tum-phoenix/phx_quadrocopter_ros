@@ -5,6 +5,7 @@ from PyQt4 import uic, QtCore, QtGui
 import pyqtgraph
 import time
 import numpy as np
+from goompy import GooMPy
 
 # import ROS
 import rospy
