@@ -71,7 +71,7 @@ public:
     bool prepare_msg_rc(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, MessageProtocol=MULTIWII_PROTOCOL);
     bool prepare_msg_motor(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
     bool prepare_msg_servo(uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0,
-                           uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0);
+                           uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, uint16_t=0, MessageProtocol=MULTIWII_PROTOCOL);
     bool prepare_msg_led_strip(uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0,
                                uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0,
                                uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0, uint8_t=0);
