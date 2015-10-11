@@ -148,6 +148,7 @@
         <zorder>gps_position_current_label</zorder>
         <zorder>right_tabs</zorder>
         <zorder>right_tabs</zorder>
+        <zorder>right_tabs</zorder>
        </widget>
        <widget class="QWidget" name="ledPage">
         <attribute name="title">
@@ -2574,9 +2575,9 @@
         <widget class="QWidget" name="gridLayoutWidget_6">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>20</x>
            <y>20</y>
-           <width>616</width>
+           <width>591</width>
            <height>405</height>
           </rect>
          </property>
@@ -2667,6 +2668,12 @@
           </item>
           <item row="12" column="0">
            <widget class="QLabel" name="pid_label_yaw">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>yaw</string>
             </property>
@@ -2702,6 +2709,12 @@
           </item>
           <item row="10" column="0">
            <widget class="QLabel" name="pid_label_roll">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>roll</string>
             </property>
@@ -2877,6 +2890,12 @@
           </item>
           <item row="16" column="0">
            <widget class="QLabel" name="pid_label_posrate">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>posRate</string>
             </property>
@@ -2996,6 +3015,12 @@
           </item>
           <item row="11" column="0">
            <widget class="QLabel" name="pid_label_pitch">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>pitch</string>
             </property>
@@ -3059,6 +3084,12 @@
           </item>
           <item row="15" column="0">
            <widget class="QLabel" name="pid_label_pos">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>pos</string>
             </property>
@@ -3066,6 +3097,12 @@
           </item>
           <item row="18" column="0">
            <widget class="QLabel" name="pid_label_level">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>level</string>
             </property>
@@ -3129,6 +3166,12 @@
           </item>
           <item row="17" column="0">
            <widget class="QLabel" name="pid_label_navrate">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>navRate</string>
             </property>
@@ -3136,6 +3179,12 @@
           </item>
           <item row="14" column="0">
            <widget class="QLabel" name="pid_label_vel">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>vel</string>
             </property>
@@ -3339,6 +3388,12 @@
           </item>
           <item row="13" column="0">
            <widget class="QLabel" name="pid_label_yaw_2">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>alt</string>
             </property>
@@ -3402,6 +3457,12 @@
           </item>
           <item row="19" column="0">
            <widget class="QLabel" name="pid_label_mag">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>mag</string>
             </property>
@@ -3493,22 +3554,49 @@
           </item>
           <item row="9" column="1">
            <widget class="QLabel" name="pid_label_proportional">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="text">
              <string>proportional</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item row="9" column="2">
            <widget class="QLabel" name="pid_label_integral">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="text">
              <string>proportional</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item row="9" column="3">
            <widget class="QLabel" name="pid_label_differential">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="text">
              <string>proportional</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -3517,7 +3605,7 @@
         <widget class="QPushButton" name="pushButton_pid_set">
          <property name="geometry">
           <rect>
-           <x>480</x>
+           <x>510</x>
            <y>480</y>
            <width>98</width>
            <height>27</height>
@@ -3530,7 +3618,7 @@
         <widget class="QCheckBox" name="checkBox_pid_active">
          <property name="geometry">
           <rect>
-           <x>480</x>
+           <x>510</x>
            <y>450</y>
            <width>97</width>
            <height>22</height>
@@ -3543,7 +3631,7 @@
         <widget class="QCheckBox" name="checkBox_pid_update">
          <property name="geometry">
           <rect>
-           <x>370</x>
+           <x>400</x>
            <y>480</y>
            <width>97</width>
            <height>31</height>
@@ -3551,6 +3639,68 @@
          </property>
          <property name="text">
           <string>update</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_pid_config_storage_load">
+         <property name="geometry">
+          <rect>
+           <x>510</x>
+           <y>560</y>
+           <width>98</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>load</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_pid_config_storage_save">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>560</y>
+           <width>98</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>save</string>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="spinBox_pid_config_storage">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>560</y>
+           <width>60</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="maximum">
+          <number>9</number>
+         </property>
+        </widget>
+        <widget class="QLabel" name="pid_label_config_storage">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>530</y>
+           <width>181</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>pid config storage</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="pid_lineEdit_config_storage">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>560</y>
+           <width>301</width>
+           <height>27</height>
+          </rect>
          </property>
         </widget>
        </widget>

@@ -527,10 +527,107 @@ def update_video():
 
 
 # pid # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+pid_config_storage_comments_file = 'pid_config_storage_comments.txt'
+pid_config_storage_comments = np.loadtxt(pid_config_storage_comments_file, dtype=np.str)
+pid_config_storage_file = 'pid_config_storage.txt'
+pid_config_storage = np.loadtxt(pid_config_storage_file, dtype=np.uint8)
+
+
+def pid_config_save(comments, values, comment_file, value_file):
+    f = open(comment_file, 'w')
+    for line in comments:
+        f.write(str(line))
+        f.write('\n')
+    f.close()
+    f = open(value_file, 'w')
+    for line in values:
+        for integer in line:
+            f.write(str(integer))
+            f.write('\t')
+        f.write('\n')
+    f.close()
+    print 'pid_config_save done'
+
+
+def pid_config_storage_comment_update(index):
+    ui_win.pid_lineEdit_config_storage.setText(pid_config_storage_comments[index])
+    print pid_config_storage_comments[index]
+
+
+def pid_config_storage_comment_save():
+    index = ui_win.spinBox_pid_config_storage.value()
+    pid_config_storage[index, 0] = ui_win.pid_spinBox_roll_p.value()
+    pid_config_storage[index, 1] = ui_win.pid_spinBox_roll_i.value()
+    pid_config_storage[index, 2] = ui_win.pid_spinBox_roll_d.value()
+    pid_config_storage[index, 3] = ui_win.pid_spinBox_pitch_p.value()
+    pid_config_storage[index, 4] = ui_win.pid_spinBox_pitch_i.value()
+    pid_config_storage[index, 5] = ui_win.pid_spinBox_pitch_d.value()
+    pid_config_storage[index, 6] = ui_win.pid_spinBox_yaw_p.value()
+    pid_config_storage[index, 7] = ui_win.pid_spinBox_yaw_i.value()
+    pid_config_storage[index, 8] = ui_win.pid_spinBox_yaw_d.value()
+    pid_config_storage[index, 9] = ui_win.pid_spinBox_alt_p.value()
+    pid_config_storage[index, 10] = ui_win.pid_spinBox_alt_i.value()
+    pid_config_storage[index, 11] = ui_win.pid_spinBox_alt_d.value()
+    pid_config_storage[index, 12] = ui_win.pid_spinBox_vel_p.value()
+    pid_config_storage[index, 13] = ui_win.pid_spinBox_vel_i.value()
+    pid_config_storage[index, 14] = ui_win.pid_spinBox_vel_d.value()
+    pid_config_storage[index, 15] = ui_win.pid_spinBox_pos_p.value()
+    pid_config_storage[index, 16] = ui_win.pid_spinBox_pos_i.value()
+    pid_config_storage[index, 17] = ui_win.pid_spinBox_pos_d.value()
+    pid_config_storage[index, 18] = ui_win.pid_spinBox_posrate_p.value()
+    pid_config_storage[index, 19] = ui_win.pid_spinBox_posrate_i.value()
+    pid_config_storage[index, 20] = ui_win.pid_spinBox_posrate_d.value()
+    pid_config_storage[index, 21] = ui_win.pid_spinBox_navrate_p.value()
+    pid_config_storage[index, 22] = ui_win.pid_spinBox_navrate_i.value()
+    pid_config_storage[index, 23] = ui_win.pid_spinBox_navrate_d.value()
+    pid_config_storage[index, 24] = ui_win.pid_spinBox_level_p.value()
+    pid_config_storage[index, 25] = ui_win.pid_spinBox_level_i.value()
+    pid_config_storage[index, 26] = ui_win.pid_spinBox_level_d.value()
+    pid_config_storage[index, 27] = ui_win.pid_spinBox_mag_p.value()
+    pid_config_storage[index, 28] = ui_win.pid_spinBox_mag_i.value()
+    pid_config_storage[index, 29] = ui_win.pid_spinBox_mag_d.value()
+
+    print ui_win.pid_lineEdit_config_storage.text()
+    pid_config_storage_comments[index] = str(ui_win.pid_lineEdit_config_storage.text())
+    pid_config_save(pid_config_storage_comments, pid_config_storage, pid_config_storage_comments_file, pid_config_storage_file)
+
+
+def pid_config_storage_comment_load():
+    index = ui_win.spinBox_pid_config_storage.value()
+    ui_win.pid_spinBox_roll_p.setValue(pid_config_storage[index, 0])
+    ui_win.pid_spinBox_roll_i.setValue(pid_config_storage[index, 1])
+    ui_win.pid_spinBox_roll_d.setValue(pid_config_storage[index, 2])
+    ui_win.pid_spinBox_pitch_p.setValue(pid_config_storage[index, 3])
+    ui_win.pid_spinBox_pitch_i.setValue(pid_config_storage[index, 4])
+    ui_win.pid_spinBox_pitch_d.setValue(pid_config_storage[index, 5])
+    ui_win.pid_spinBox_yaw_p.setValue(pid_config_storage[index, 6])
+    ui_win.pid_spinBox_yaw_i.setValue(pid_config_storage[index, 7])
+    ui_win.pid_spinBox_yaw_d.setValue(pid_config_storage[index, 8])
+    ui_win.pid_spinBox_alt_p.setValue(pid_config_storage[index, 9])
+    ui_win.pid_spinBox_alt_i.setValue(pid_config_storage[index, 10])
+    ui_win.pid_spinBox_alt_d.setValue(pid_config_storage[index, 11])
+    ui_win.pid_spinBox_vel_p.setValue(pid_config_storage[index, 12])
+    ui_win.pid_spinBox_vel_i.setValue(pid_config_storage[index, 13])
+    ui_win.pid_spinBox_vel_d.setValue(pid_config_storage[index, 14])
+    ui_win.pid_spinBox_pos_p.setValue(pid_config_storage[index, 15])
+    ui_win.pid_spinBox_pos_i.setValue(pid_config_storage[index, 16])
+    ui_win.pid_spinBox_pos_d.setValue(pid_config_storage[index, 17])
+    ui_win.pid_spinBox_posrate_p.setValue(pid_config_storage[index, 18])
+    ui_win.pid_spinBox_posrate_i.setValue(pid_config_storage[index, 19])
+    ui_win.pid_spinBox_posrate_d.setValue(pid_config_storage[index, 20])
+    ui_win.pid_spinBox_navrate_p.setValue(pid_config_storage[index, 21])
+    ui_win.pid_spinBox_navrate_i.setValue(pid_config_storage[index, 22])
+    ui_win.pid_spinBox_navrate_d.setValue(pid_config_storage[index, 23])
+    ui_win.pid_spinBox_level_p.setValue(pid_config_storage[index, 24])
+    ui_win.pid_spinBox_level_i.setValue(pid_config_storage[index, 25])
+    ui_win.pid_spinBox_level_d.setValue(pid_config_storage[index, 26])
+    ui_win.pid_spinBox_mag_p.setValue(pid_config_storage[index, 27])
+    ui_win.pid_spinBox_mag_i.setValue(pid_config_storage[index, 28])
+    ui_win.pid_spinBox_mag_d.setValue(pid_config_storage[index, 29])
+
 def send_pid_values():
     if ui_win.checkBox_pid_active.isChecked():
         pid_msg = PID_cleanflight()
-        print ui_win.pid_spinBox_roll_p.value()
         pid_msg.roll.p = ui_win.pid_spinBox_roll_p.value()
         pid_msg.roll.i = ui_win.pid_spinBox_roll_i.value()
         pid_msg.roll.d = ui_win.pid_spinBox_roll_d.value()
@@ -791,7 +888,7 @@ def mainloop():
             publish_led_strips()
             publisher_led_strip_last_update = time.time()
 
-    print 'mainloop', win.keysPressed, gps_positions['phoenix']['pos'][1], gps_positions['phoenix']['pos'][0]
+    print 'mainloop', win.keysPressed
 
     try:
         update_video_mask()
@@ -851,6 +948,9 @@ def ros_subscription_update():
 QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), publish_led_strips)
 QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('stateChanged(int)'), ros_subscription_update)
 QtCore.QObject.connect(ui_win.pushButton_pid_set, QtCore.SIGNAL('clicked()'), send_pid_values)
+QtCore.QObject.connect(ui_win.spinBox_pid_config_storage, QtCore.SIGNAL('valueChanged(int)'), pid_config_storage_comment_update)
+QtCore.QObject.connect(ui_win.pushButton_pid_config_storage_save, QtCore.SIGNAL('clicked()'), pid_config_storage_comment_save)
+QtCore.QObject.connect(ui_win.pushButton_pid_config_storage_load, QtCore.SIGNAL('clicked()'), pid_config_storage_comment_load)
 
 
 ros_subscription_update()

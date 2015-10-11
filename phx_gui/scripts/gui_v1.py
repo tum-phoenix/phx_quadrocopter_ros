@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Sun Oct 11 12:56:15 2015
+# Created: Sun Oct 11 14:59:22 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -1426,14 +1426,30 @@ class Ui_MainWindow(object):
         self.pid_label_differential.setObjectName(_fromUtf8("pid_label_differential"))
         self.gridLayout_pid.addWidget(self.pid_label_differential, 9, 3, 1, 1)
         self.pushButton_pid_set = QtGui.QPushButton(self.pid_tab)
-        self.pushButton_pid_set.setGeometry(QtCore.QRect(480, 480, 98, 27))
+        self.pushButton_pid_set.setGeometry(QtCore.QRect(510, 480, 98, 27))
         self.pushButton_pid_set.setObjectName(_fromUtf8("pushButton_pid_set"))
         self.checkBox_pid_active = QtGui.QCheckBox(self.pid_tab)
-        self.checkBox_pid_active.setGeometry(QtCore.QRect(480, 450, 97, 22))
+        self.checkBox_pid_active.setGeometry(QtCore.QRect(510, 450, 97, 22))
         self.checkBox_pid_active.setObjectName(_fromUtf8("checkBox_pid_active"))
         self.checkBox_pid_update = QtGui.QCheckBox(self.pid_tab)
-        self.checkBox_pid_update.setGeometry(QtCore.QRect(370, 480, 97, 31))
+        self.checkBox_pid_update.setGeometry(QtCore.QRect(400, 480, 97, 31))
         self.checkBox_pid_update.setObjectName(_fromUtf8("checkBox_pid_update"))
+        self.pushButton_pid_config_storage_load = QtGui.QPushButton(self.pid_tab)
+        self.pushButton_pid_config_storage_load.setGeometry(QtCore.QRect(510, 560, 98, 27))
+        self.pushButton_pid_config_storage_load.setObjectName(_fromUtf8("pushButton_pid_config_storage_load"))
+        self.pushButton_pid_config_storage_save = QtGui.QPushButton(self.pid_tab)
+        self.pushButton_pid_config_storage_save.setGeometry(QtCore.QRect(400, 560, 98, 27))
+        self.pushButton_pid_config_storage_save.setObjectName(_fromUtf8("pushButton_pid_config_storage_save"))
+        self.spinBox_pid_config_storage = QtGui.QSpinBox(self.pid_tab)
+        self.spinBox_pid_config_storage.setGeometry(QtCore.QRect(20, 560, 60, 27))
+        self.spinBox_pid_config_storage.setMaximum(9)
+        self.spinBox_pid_config_storage.setObjectName(_fromUtf8("spinBox_pid_config_storage"))
+        self.pid_label_config_storage = QtGui.QLabel(self.pid_tab)
+        self.pid_label_config_storage.setGeometry(QtCore.QRect(20, 530, 181, 17))
+        self.pid_label_config_storage.setObjectName(_fromUtf8("pid_label_config_storage"))
+        self.pid_lineEdit_config_storage = QtGui.QLineEdit(self.pid_tab)
+        self.pid_lineEdit_config_storage.setGeometry(QtCore.QRect(90, 560, 301, 27))
+        self.pid_lineEdit_config_storage.setObjectName(_fromUtf8("pid_lineEdit_config_storage"))
         self.right_tabs.addTab(self.pid_tab, _fromUtf8(""))
         self.horizontalLayout.addWidget(self.right_tabs)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -1559,6 +1575,9 @@ class Ui_MainWindow(object):
         self.pushButton_pid_set.setText(_translate("MainWindow", "SET", None))
         self.checkBox_pid_active.setText(_translate("MainWindow", "active", None))
         self.checkBox_pid_update.setText(_translate("MainWindow", "update", None))
+        self.pushButton_pid_config_storage_load.setText(_translate("MainWindow", "load", None))
+        self.pushButton_pid_config_storage_save.setText(_translate("MainWindow", "save", None))
+        self.pid_label_config_storage.setText(_translate("MainWindow", "pid config storage", None))
         self.right_tabs.setTabText(self.right_tabs.indexOf(self.pid_tab), _translate("MainWindow", "PID", None))
 
 from pyqtgraph import PlotWidget
