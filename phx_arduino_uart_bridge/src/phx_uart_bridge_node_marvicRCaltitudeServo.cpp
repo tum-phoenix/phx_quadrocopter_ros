@@ -453,23 +453,10 @@ void led_single_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_comma
 
 void servo_direct_callback(const phx_arduino_uart_bridge::servo::ConstPtr& servo_values) {
     std::cout << "\033[1;31m>>> servo_direct_callback\033[0m"<< std::endl;
-    serial_interface.prepare_msg_servo((uint16_t) servo_values->servo0,
-                                       (uint16_t) servo_values->servo1,
-                                       (uint16_t) servo_values->servo2,
-                                       (uint16_t) servo_values->servo3,
-                                       (uint16_t) servo_values->servo4,
-                                       (uint16_t) servo_values->servo5,
-                                       (uint16_t) servo_values->servo6,
-                                       (uint16_t) servo_values->servo7,
-                                       (uint16_t) servo_values->servo8,
-                                       (uint16_t) servo_values->servo9,
-                                       (uint16_t) servo_values->servo10,
-                                       (uint16_t) servo_values->servo11,
-                                       (uint16_t) servo_values->servo12,
-                                       (uint16_t) servo_values->servo13,
-                                       (uint16_t) servo_values->servo14,
-                                       (uint16_t) servo_values->servo15,
-                                       (uint16_t) servo_values->servo16,
-                                       (uint16_t) servo_values->servo17);
+    serial_interface.prepare_msg_servo_small((uint16_t) servo_values->servo0,
+                                             (uint16_t) servo_values->servo1,
+                                             (uint16_t) servo_values->servo2,
+                                             (uint16_t) servo_values->servo3,
+                                             PHOENIX_LED_PROTOCOL);
     serial_interface.send_from_buffer();
 }
