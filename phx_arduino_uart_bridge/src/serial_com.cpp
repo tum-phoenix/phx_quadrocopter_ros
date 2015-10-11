@@ -505,6 +505,66 @@ bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint
     write_msg_to_buffer(msg);
 }
 
+
+bool SerialCom::prepare_msg_pid(uint8_t roll_p, uint8_t roll_i, uint8_t roll_d,
+                                uint8_t pitch_p, uint8_t pitch_i, uint8_t pitch_d,
+                                uint8_t yaw_p, uint8_t yaw_i, uint8_t yaw_d,
+                                uint8_t alt_p, uint8_t alt_i, uint8_t alt_d,
+                                uint8_t vel_p, uint8_t vel_i, uint8_t vel_d,
+                                uint8_t pos_p, uint8_t pos_i, uint8_t pos_d,
+                                uint8_t posrate_p, uint8_t posrate_i, uint8_t posrate_d,
+                                uint8_t navrate_p, uint8_t navrate_i, uint8_t navrate_d,
+                                uint8_t level_p, uint8_t level_i, uint8_t level_d,
+                                uint8_t mag_p, uint8_t mag_i, uint8_t mag_d) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_pid sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = MULTIWII_PROTOCOL;
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MULTIWII_PID_SET_LENGTH;
+    msg.msg_code = MULTIWII_PID_SET;
+    msg.msg_data.multiwii_pid.p1 = roll_p;
+    msg.msg_data.multiwii_pid.p2 = pitch_p;
+    msg.msg_data.multiwii_pid.p3 = yaw_p;
+    msg.msg_data.multiwii_pid.p4 = alt_p;
+    msg.msg_data.multiwii_pid.p5 = vel_p;
+    msg.msg_data.multiwii_pid.p6 = pos_p;
+    msg.msg_data.multiwii_pid.p7 = posrate_p;
+    msg.msg_data.multiwii_pid.p8 = navrate_p;
+    msg.msg_data.multiwii_pid.p9 = level_p;
+    msg.msg_data.multiwii_pid.p10 = mag_p;
+    msg.msg_data.multiwii_pid.i1 = roll_i;
+    msg.msg_data.multiwii_pid.i2 = pitch_i;
+    msg.msg_data.multiwii_pid.i3 = yaw_i;
+    msg.msg_data.multiwii_pid.i4 = alt_i;
+    msg.msg_data.multiwii_pid.i5 = vel_i;
+    msg.msg_data.multiwii_pid.i6 = pos_i;
+    msg.msg_data.multiwii_pid.i7 = posrate_i;
+    msg.msg_data.multiwii_pid.i8 = navrate_i;
+    msg.msg_data.multiwii_pid.i9 = level_i;
+    msg.msg_data.multiwii_pid.i10 = mag_i;
+    msg.msg_data.multiwii_pid.d1 = roll_d;
+    msg.msg_data.multiwii_pid.d2 = pitch_d;
+    msg.msg_data.multiwii_pid.d3 = yaw_d;
+    msg.msg_data.multiwii_pid.d4 = alt_d;
+    msg.msg_data.multiwii_pid.d5 = vel_d;
+    msg.msg_data.multiwii_pid.d6 = pos_d;
+    msg.msg_data.multiwii_pid.d7 = posrate_d;
+    msg.msg_data.multiwii_pid.d8 = navrate_d;
+    msg.msg_data.multiwii_pid.d9 = level_d;
+    msg.msg_data.multiwii_pid.d10 = mag_d;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
 bool SerialCom::write_to_output_buffer(uint8_t byte){
     if (do_debug_printout == true) {std::cout << "SerialCom::write_to_output_buffer sending byte";
                                     printf(" %i", byte);

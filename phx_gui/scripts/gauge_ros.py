@@ -13,6 +13,8 @@ from phx_arduino_uart_bridge.msg import Servo
 from phx_arduino_uart_bridge.msg import LED
 from phx_arduino_uart_bridge.msg import LEDstrip
 from phx_arduino_uart_bridge.msg import Altitude
+from phx_arduino_uart_bridge.msg import PID
+from phx_arduino_uart_bridge.msg import PID_cleanflight
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import Image
@@ -87,10 +89,36 @@ gps_scatter_plot.setData(gps_positions.values())
 # gps_scatter_plot.setData([{'pos': (11, 42), 'symbol': 'o'}, ...])
 ui_win.graphicsView_gps.addItem(gps_scatter_plot)
 
-# img = pyqtgraph.ImageItem(np.zeros((19,19)))
-# ui_win.graphicsView_gps.addItem(img)
-# img.setZValue(-1)
-# img.setX(10); img.setY(11,5)
+gps_background_image = pyqtgraph.ImageItem()
+ui_win.graphicsView_gps.addItem(gps_background_image)
+gps_background_image.setZValue(-1)
+
+update_background_map = False
+
+# background image
+def gps_update_map(x, y, image_plot):
+    gps_map_coordinate = [x, y]
+    gps_map_zoom = 19
+    gps_map_type = 'satellite'
+    gps_map_resolution = 1200
+    gps_map = GooMPy(gps_map_resolution, gps_map_resolution, gps_map_coordinate[0], gps_map_coordinate[1], gps_map_zoom, gps_map_type)
+    gps_map_tile = gps_map.bigimage
+    gps_map_corner_upper_left = gps_map.northwest
+    gps_map_corner_lower_right = gps_map.southeast
+    gps_map_width = (gps_map_corner_lower_right[1] - gps_map_corner_upper_left[1]) * 4 / 3
+    gps_map_height = (gps_map_corner_upper_left[0] - gps_map_corner_lower_right[0]) * 4 / 3
+    gps_map_aspect_ratio = gps_map_width / gps_map_height
+    gps_map_array = np.array(gps_map_tile.resize((int(gps_map_resolution * gps_map_aspect_ratio), gps_map_resolution)))
+    gps_map_array = np.swapaxes(gps_map_array[::-1, :], 0, 1)
+    gps_map_effective_size = gps_map_height / gps_map_resolution
+    image_plot.setScale(gps_map_effective_size)
+    image_plot.setImage(gps_map_array)
+    image_plot.setX(gps_map_corner_upper_left[1] - gps_map_width / 8)
+    image_plot.setY(gps_map_corner_upper_left[0] - gps_map_height + gps_map_height / 8)
+    image_plot.update()
+
+#gps_update_map(48.2660393944, 11.6712039642, gps_background_image)
+#gps_update_map(48.2659424, 11.6711544, gps_background_image)
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
     earth_radius = 6371000                          # metre
@@ -459,7 +487,6 @@ video_qtgraph_plot.setFixedWidth(611)
 video_qtgraph_plot.setFixedHeight(421)
 video_qtgraph_plot.setImage(np.swapaxes(live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
 
-
 def update_video_mask():
     global image_mask, video_qtgraph_plot
     while len(video_qtgraph_plot.mouse_clicks) > 0:
@@ -497,6 +524,47 @@ def update_video():
         video_qtgraph_plot.update()
 
         ui_win.statusbar.showMessage(str("video playing with: " + str(video_fps) + " FPS"))
+
+
+# pid # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+def send_pid_values():
+    if ui_win.checkBox_pid_active.isChecked():
+        pid_msg = PID_cleanflight()
+        print ui_win.pid_spinBox_roll_p.value()
+        pid_msg.roll.p = ui_win.pid_spinBox_roll_p.value()
+        pid_msg.roll.i = ui_win.pid_spinBox_roll_i.value()
+        pid_msg.roll.d = ui_win.pid_spinBox_roll_d.value()
+        pid_msg.pitch.p = ui_win.pid_spinBox_pitch_p.value()
+        pid_msg.pitch.i = ui_win.pid_spinBox_pitch_i.value()
+        pid_msg.pitch.d = ui_win.pid_spinBox_pitch_d.value()
+        pid_msg.yaw.p = ui_win.pid_spinBox_yaw_p.value()
+        pid_msg.yaw.i = ui_win.pid_spinBox_yaw_i.value()
+        pid_msg.yaw.d = ui_win.pid_spinBox_yaw_d.value()
+        pid_msg.alt.p = ui_win.pid_spinBox_alt_p.value()
+        pid_msg.alt.i = ui_win.pid_spinBox_alt_i.value()
+        pid_msg.alt.d = ui_win.pid_spinBox_alt_d.value()
+        pid_msg.vel.p = ui_win.pid_spinBox_vel_p.value()
+        pid_msg.vel.i = ui_win.pid_spinBox_vel_i.value()
+        pid_msg.vel.d = ui_win.pid_spinBox_vel_d.value()
+        pid_msg.pos.p = ui_win.pid_spinBox_pos_p.value()
+        pid_msg.pos.i = ui_win.pid_spinBox_pos_i.value()
+        pid_msg.pos.d = ui_win.pid_spinBox_pos_d.value()
+        pid_msg.posrate.p = ui_win.pid_spinBox_posrate_p.value()
+        pid_msg.posrate.i = ui_win.pid_spinBox_posrate_i.value()
+        pid_msg.posrate.d = ui_win.pid_spinBox_posrate_d.value()
+        pid_msg.navrate.p = ui_win.pid_spinBox_navrate_p.value()
+        pid_msg.navrate.i = ui_win.pid_spinBox_navrate_i.value()
+        pid_msg.navrate.d = ui_win.pid_spinBox_navrate_d.value()
+        pid_msg.level.p = ui_win.pid_spinBox_level_p.value()
+        pid_msg.level.i = ui_win.pid_spinBox_level_i.value()
+        pid_msg.level.d = ui_win.pid_spinBox_level_d.value()
+        pid_msg.mag.p = ui_win.pid_spinBox_mag_p.value()
+        pid_msg.mag.i = ui_win.pid_spinBox_mag_i.value()
+        pid_msg.mag.d = ui_win.pid_spinBox_mag_d.value()
+        ros_publisher_fc_set_pid.publish(pid_msg)
+        print 'published ros_publisher_fc_set_pid'
+    else:
+        print 'not allowed'
 
 ##########################################################################################
 # init ros callback functions
@@ -640,16 +708,56 @@ def callback_image_mono(cur_image_mono):
     live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
     video_fps = 1. / (time.time() - time_of_last_image)
     time_of_last_image = time.time()
+
+
+def callback_fc_pid_cleanflight(cur_pid_settings):
+    if ui_win.checkBox_pid_update.isChecked():
+        ui_win.checkBox_pid_update.setChecked(False)
+        ui_win.pid_spinBox_roll_p.setValue(cur_pid_settings.roll.p)
+        ui_win.pid_spinBox_roll_i.setValue(cur_pid_settings.roll.i)
+        ui_win.pid_spinBox_roll_d.setValue(cur_pid_settings.roll.d)
+        ui_win.pid_spinBox_pitch_p.setValue(cur_pid_settings.pitch.p)
+        ui_win.pid_spinBox_pitch_i.setValue(cur_pid_settings.pitch.i)
+        ui_win.pid_spinBox_pitch_d.setValue(cur_pid_settings.pitch.d)
+        ui_win.pid_spinBox_yaw_p.setValue(cur_pid_settings.yaw.p)
+        ui_win.pid_spinBox_yaw_i.setValue(cur_pid_settings.yaw.i)
+        ui_win.pid_spinBox_yaw_d.setValue(cur_pid_settings.yaw.d)
+        ui_win.pid_spinBox_alt_p.setValue(cur_pid_settings.alt.p)
+        ui_win.pid_spinBox_alt_i.setValue(cur_pid_settings.alt.i)
+        ui_win.pid_spinBox_alt_d.setValue(cur_pid_settings.alt.d)
+        ui_win.pid_spinBox_alt_p.setValue(cur_pid_settings.alt.p)
+        ui_win.pid_spinBox_alt_i.setValue(cur_pid_settings.alt.i)
+        ui_win.pid_spinBox_alt_d.setValue(cur_pid_settings.alt.d)
+        ui_win.pid_spinBox_pos_p.setValue(cur_pid_settings.pos.p)
+        ui_win.pid_spinBox_pos_i.setValue(cur_pid_settings.pos.i)
+        ui_win.pid_spinBox_pos_d.setValue(cur_pid_settings.pos.d)
+        ui_win.pid_spinBox_posrate_p.setValue(cur_pid_settings.posrate.p)
+        ui_win.pid_spinBox_posrate_i.setValue(cur_pid_settings.posrate.i)
+        ui_win.pid_spinBox_posrate_d.setValue(cur_pid_settings.posrate.d)
+        ui_win.pid_spinBox_navrate_p.setValue(cur_pid_settings.navrate.p)
+        ui_win.pid_spinBox_navrate_i.setValue(cur_pid_settings.navrate.i)
+        ui_win.pid_spinBox_navrate_d.setValue(cur_pid_settings.navrate.d)
+        ui_win.pid_spinBox_level_p.setValue(cur_pid_settings.level.p)
+        ui_win.pid_spinBox_level_i.setValue(cur_pid_settings.level.i)
+        ui_win.pid_spinBox_level_d.setValue(cur_pid_settings.level.d)
+        ui_win.pid_spinBox_mag_p.setValue(cur_pid_settings.mag.p)
+        ui_win.pid_spinBox_mag_i.setValue(cur_pid_settings.mag.i)
+        ui_win.pid_spinBox_mag_d.setValue(cur_pid_settings.mag.d)
+        print 'updated all pid values in the gui from the latest incoming message'
+    else:
+        print 'update not requested'
+
 ##########################################################################################
 # init ros
 ##########################################################################################
-rospy.init_node('gauge_gui_v')
+rospy.init_node('gauge_gui')
 ros_subscribe_cur_servo_cmd = rospy.Subscriber('/crab/uart_bridge/cur_servo_cmd', Servo, callback_cur_servo_cmd)
 ros_subscribe_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, callback_gps_position)
 ros_subscribe_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, callback_gps_way_point)
 ros_subscribe_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, callback_gps_home)
 ros_subscribe_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, callback_fc_rc)
 ros_subscribe_fc_altitude = rospy.Subscriber('/phx/fc/altitude', Altitude, callback_fc_altitude)
+ros_subscribe_fc_pid_in_use = rospy.Subscriber('/phx/fc/pid_in_use', PID_cleanflight, callback_fc_pid_cleanflight)
 ros_subscribe_marvic_altitude = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, callback_marvic_altitude_fused)
 ros_subscribe_marvic_lidar = rospy.Subscriber('/phx/marvicAltitude/lidar', Altitude, callback_marvic_altitude_lidar)
 ros_subscribe_marvic_infra_red = rospy.Subscriber('/phx/marvicAltitude/infra_red', Altitude, callback_marvic_altitude_infra_red)
@@ -660,6 +768,7 @@ publish_servo = False
 publish_led = True
 ros_publisher_servo_cmd = rospy.Publisher('/crab/uart_bridge/servo_cmd', Servo, queue_size=1)
 ros_publisher_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
+ros_publisher_fc_set_pid = rospy.Publisher('/phx/fc/pid_set', PID_cleanflight, queue_size=1)
 publisher_led_strip_last_update = 0
 ros_publisher_led_strip_0_cmd = rospy.Publisher('phx/led/led_strip_0', LEDstrip, queue_size=1)
 ros_publisher_led_strip_1_cmd = rospy.Publisher('phx/led/led_strip_1', LEDstrip, queue_size=1)
@@ -671,7 +780,7 @@ def mainloop():
     #parameters = [get_parameters_slider(i) for i in range(0, 18)]
     #for i in range(0, 18):
     #    set_parameters_lcd(i, parameters[i])
-    global publish_servo, publisher_led_strip_last_update
+    global publish_servo, publisher_led_strip_last_update, update_background_map, gps_background_image
     if publish_servo:
         publish_servos()
 
@@ -682,7 +791,7 @@ def mainloop():
             publish_led_strips()
             publisher_led_strip_last_update = time.time()
 
-    print 'mainloop', win.keysPressed
+    print 'mainloop', win.keysPressed, gps_positions['phoenix']['pos'][1], gps_positions['phoenix']['pos'][0]
 
     try:
         update_video_mask()
@@ -692,6 +801,11 @@ def mainloop():
         update_altitude_plot()
     except:
         print '>>> error in main loop'
+
+    if not update_background_map and gps_positions.has_key('phoenix'):
+        print gps_positions['phoenix']['pos'][1], gps_positions['phoenix']['pos'][0]
+        gps_update_map(gps_positions['phoenix']['pos'][1], gps_positions['phoenix']['pos'][0], gps_background_image)
+        update_background_map = True
 
 #######################################################################################################################
 # gui button callbacks
@@ -736,6 +850,9 @@ def ros_subscription_update():
 
 QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), publish_led_strips)
 QtCore.QObject.connect(ui_win.checkBox_video_active, QtCore.SIGNAL('stateChanged(int)'), ros_subscription_update)
+QtCore.QObject.connect(ui_win.pushButton_pid_set, QtCore.SIGNAL('clicked()'), send_pid_values)
+
+
 ros_subscription_update()
 
 

@@ -12,6 +12,8 @@
 #include "phx_arduino_uart_bridge/Altitude.h"
 #include "phx_arduino_uart_bridge/LEDstrip.h"
 #include "phx_arduino_uart_bridge/LED.h"
+#include "phx_arduino_uart_bridge/PID_cleanflight.h"
+#include "phx_arduino_uart_bridge/PID.h"
 
 #include <chrono>
 #include <iostream>
@@ -19,6 +21,7 @@
 
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
+void set_pid_callback(const phx_arduino_uart_bridge::PID_cleanflight::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
@@ -40,6 +43,8 @@ int main(int argc, char **argv)
     joyMsg.axes = std::vector<float> (4, 0);
     joyMsg.buttons = std::vector<int> (4, 0);
     
+    phx_arduino_uart_bridge::PID_cleanflight pidMsg;
+    
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
@@ -49,19 +54,21 @@ int main(int argc, char **argv)
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps", 1);
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
     ros::Publisher gps_home_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_home", 1);
+    ros::Publisher pid_in_use = n.advertise<phx_arduino_uart_bridge::PID_cleanflight>("phx/fc/pid_in_use", 1);
 
     // ros init subscribers
     //ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
+    ros::Subscriber set_pid = n.subscribe<phx_arduino_uart_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
-    //serial_interface.set_device("/dev/ttyUSB1");                             // select the device
+    serial_interface.set_device("/dev/ttyUSB0");                             // select the device
     //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
-    serial_interface.set_device("/dev/naze");                             // select the device
+    //serial_interface.set_device("/dev/naze");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
@@ -149,10 +156,13 @@ int main(int argc, char **argv)
         }
         
         // serial com send requests
+        if (loop_counter % 50 == 0) {
+            serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
+            serial_interface.prepare_request(MULTIWII_PID);
+        }
         if (loop_counter % 5 == 0) {
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-            serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
         } else {
@@ -192,6 +202,43 @@ int main(int argc, char **argv)
                         std::cout << "-> received controller info: version " << input_msg.msg_data.identifier.version << " type " << input_msg.msg_data.identifier.type << std::endl;
                         printf("uart bridge is probably connected to wrong micro controller: type %i version %i", input_msg.msg_data.identifier.version, input_msg.msg_data.identifier.type);
                         received_status++;
+                    } else if (input_msg.msg_code == MULTIWII_PID) {
+                        //std::cout << "-> received controller pid" << std::endl;
+                        headerMsg.seq = received_rc;
+                        headerMsg.stamp = ros::Time::now();
+                        headerMsg.frame_id = "naze_fc";
+                        pidMsg.header = headerMsg;
+                        pidMsg.roll.p = input_msg.msg_data.multiwii_pid.p1;
+                        pidMsg.roll.i = input_msg.msg_data.multiwii_pid.i1;
+                        pidMsg.roll.d = input_msg.msg_data.multiwii_pid.d1;
+                        pidMsg.pitch.p = input_msg.msg_data.multiwii_pid.p2;
+                        pidMsg.pitch.i = input_msg.msg_data.multiwii_pid.i2;
+                        pidMsg.pitch.d = input_msg.msg_data.multiwii_pid.d2;
+                        pidMsg.yaw.p = input_msg.msg_data.multiwii_pid.p3;
+                        pidMsg.yaw.i = input_msg.msg_data.multiwii_pid.i3;
+                        pidMsg.yaw.d = input_msg.msg_data.multiwii_pid.d3;
+                        pidMsg.alt.p = input_msg.msg_data.multiwii_pid.p4;
+                        pidMsg.alt.i = input_msg.msg_data.multiwii_pid.i4;
+                        pidMsg.alt.d = input_msg.msg_data.multiwii_pid.d4;
+                        pidMsg.vel.p = input_msg.msg_data.multiwii_pid.p5;
+                        pidMsg.vel.i = input_msg.msg_data.multiwii_pid.i5;
+                        pidMsg.vel.d = input_msg.msg_data.multiwii_pid.d5;
+                        pidMsg.pos.p = input_msg.msg_data.multiwii_pid.p6;
+                        pidMsg.pos.i = input_msg.msg_data.multiwii_pid.i6;
+                        pidMsg.pos.d = input_msg.msg_data.multiwii_pid.d6;
+                        pidMsg.posrate.p = input_msg.msg_data.multiwii_pid.p7;
+                        pidMsg.posrate.i = input_msg.msg_data.multiwii_pid.i7;
+                        pidMsg.posrate.d = input_msg.msg_data.multiwii_pid.d7;
+                        pidMsg.navrate.p = input_msg.msg_data.multiwii_pid.p8;
+                        pidMsg.navrate.i = input_msg.msg_data.multiwii_pid.i8;
+                        pidMsg.navrate.d = input_msg.msg_data.multiwii_pid.d8;
+                        pidMsg.level.p = input_msg.msg_data.multiwii_pid.p9;
+                        pidMsg.level.i = input_msg.msg_data.multiwii_pid.i9;
+                        pidMsg.level.d = input_msg.msg_data.multiwii_pid.d9;
+                        pidMsg.mag.p = input_msg.msg_data.multiwii_pid.p10;
+                        pidMsg.mag.i = input_msg.msg_data.multiwii_pid.i10;
+                        pidMsg.mag.d = input_msg.msg_data.multiwii_pid.d10;
+                        pid_in_use.publish(pidMsg);
                     } else if (input_msg.msg_code == MULTIWII_RC) {
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
@@ -252,7 +299,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
                         if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 16) {
-                            std::cout << " publishing way point" << std::endl;
+                            //std::cout << " publishing way point" << std::endl;
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
@@ -267,7 +314,7 @@ int main(int argc, char **argv)
                             prevALT = gpsMsg.altitude;
                             
                         } else if (input_msg.msg_data.multiwii_gps_way_point.wp_number == 0) {
-                            std::cout << " publishing home point" << std::endl;
+                            //std::cout << " publishing home point" << std::endl;
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
@@ -362,5 +409,40 @@ void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr& set_gps_way_
                                                    (uint16_t) 0,
                                                    (uint16_t) 0,
                                                    (uint8_t) 0);
+    serial_interface.send_from_buffer();
+}
+
+void set_pid_callback(const phx_arduino_uart_bridge::PID_cleanflight::ConstPtr& set_pid) {
+    std::cout << "\033[1;31m>>> set_pid_callback  not implemented jet\033[0m"<< std::endl;
+    serial_interface.prepare_msg_pid((uint8_t) (set_pid->roll.p),
+                                     (uint8_t) (set_pid->roll.i),
+                                     (uint8_t) (set_pid->roll.d),
+                                     (uint8_t) (set_pid->pitch.p),
+                                     (uint8_t) (set_pid->pitch.i),
+                                     (uint8_t) (set_pid->pitch.d),
+                                     (uint8_t) (set_pid->yaw.p),
+                                     (uint8_t) (set_pid->yaw.i),
+                                     (uint8_t) (set_pid->yaw.d),
+                                     (uint8_t) (set_pid->alt.p),
+                                     (uint8_t) (set_pid->alt.i),
+                                     (uint8_t) (set_pid->alt.d),
+                                     (uint8_t) (set_pid->vel.p),
+                                     (uint8_t) (set_pid->vel.i),
+                                     (uint8_t) (set_pid->vel.d),
+                                     (uint8_t) (set_pid->pos.p),
+                                     (uint8_t) (set_pid->pos.i),
+                                     (uint8_t) (set_pid->pos.d),
+                                     (uint8_t) (set_pid->posrate.p),
+                                     (uint8_t) (set_pid->posrate.i),
+                                     (uint8_t) (set_pid->posrate.d),
+                                     (uint8_t) (set_pid->navrate.p),
+                                     (uint8_t) (set_pid->navrate.i),
+                                     (uint8_t) (set_pid->navrate.d),
+                                     (uint8_t) (set_pid->level.p),
+                                     (uint8_t) (set_pid->level.i),
+                                     (uint8_t) (set_pid->level.d),
+                                     (uint8_t) (set_pid->mag.p),
+                                     (uint8_t) (set_pid->mag.i),
+                                     (uint8_t) (set_pid->mag.d));
     serial_interface.send_from_buffer();
 }

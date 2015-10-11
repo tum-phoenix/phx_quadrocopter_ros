@@ -38,7 +38,7 @@ enum MessageCode : uint8_t {
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
     MULTIWII_SET_RAW_GPS = 201,
-//    MULTIWII_PID_SET = 202,
+    MULTIWII_PID_SET = 202,
     MULTIWII_GPS_WP_SET = 209           // setting gps way point
 };
 
@@ -66,25 +66,23 @@ enum MessageLength : uint8_t {
     MULTIWII_ALTITUDE_LENGTH = 6,
     MULTIWII_MOTOR_SET_LENGTH = 16,
     MULTIWII_RC_SET_LENGTH = 16,
+    MULTIWII_PID_SET_LENGTH = 30,
     MULTIWII_GPS_WP_SET_LENGTH = 18
 };
 
 struct Payload {
     union {
         struct {
-            uint8_t p1;     uint8_t i1;     uint8_t d1;
-            uint8_t p2;     uint8_t i2;     uint8_t d2;
-            uint8_t p3;     uint8_t i3;     uint8_t d3;
-            uint8_t p4;     uint8_t i4;     uint8_t d4;
-            uint8_t p5;     uint8_t i5;     uint8_t d5;
-            uint8_t p6;     uint8_t i6;     uint8_t d6;
-            uint8_t p7;     uint8_t i7;     uint8_t d7;
-            uint8_t p8;     uint8_t i8;     uint8_t d8;
-            uint8_t p9;     uint8_t i9;     uint8_t d9;
-            uint8_t p10;    uint8_t i10;    uint8_t d10;
-            uint8_t p11;    uint8_t i11;    uint8_t d11;
-            uint8_t p12;    uint8_t i12;    uint8_t d12;
-            uint8_t p13;    uint8_t i13;    uint8_t d13;
+            uint8_t p1;     uint8_t i1;     uint8_t d1;     // roll
+            uint8_t p2;     uint8_t i2;     uint8_t d2;     // pitch
+            uint8_t p3;     uint8_t i3;     uint8_t d3;     // yaw
+            uint8_t p4;     uint8_t i4;     uint8_t d4;     // alt
+            uint8_t p5;     uint8_t i5;     uint8_t d5;     // vel
+            uint8_t p6;     uint8_t i6;     uint8_t d6;     // pos
+            uint8_t p7;     uint8_t i7;     uint8_t d7;     // posrate
+            uint8_t p8;     uint8_t i8;     uint8_t d8;     // navrate
+            uint8_t p9;     uint8_t i9;     uint8_t d9;     // level
+            uint8_t p10;    uint8_t i10;    uint8_t d10;    // mag
         } multiwii_pid;
 
         struct {

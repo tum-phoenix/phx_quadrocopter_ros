@@ -79,6 +79,9 @@ public:
     bool prepare_msg_single_led(uint8_t, uint8_t, uint8_t=200, uint8_t=200, uint8_t=200);
     bool prepare_msg_gps_get_way_point(uint8_t);
     bool prepare_msg_gps_set_way_point(uint8_t, uint32_t, uint32_t, uint32_t, uint16_t, uint16_t, uint8_t);
+    bool prepare_msg_pid(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
+                         uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
+                         uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
     bool prepare_request(MessageCode, MessageProtocol=MULTIWII_PROTOCOL);                 // sends a request via multiwii protocol, basically it creates a request message and uses write_msg_to_buffer(Message)
 
     // adding message to the output buffer -> afterwards send_from_buffer() can be used to send the message to the serial port
