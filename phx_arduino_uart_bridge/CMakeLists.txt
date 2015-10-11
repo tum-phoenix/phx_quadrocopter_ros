@@ -62,6 +62,8 @@ find_package(catkin REQUIRED COMPONENTS
    Autonomous.msg
    LEDstrip.msg
    LED.msg
+   PID.msg
+   PID_cleanflight.msg
  )
 
 ## Generate services in the 'srv' folder
