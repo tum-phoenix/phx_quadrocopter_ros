@@ -5,6 +5,7 @@ from PyQt4 import uic, QtCore, QtGui
 import pyqtgraph
 import time
 import numpy as np
+from goompy import GooMPy
 
 # import ROS
 import rospy
@@ -73,6 +74,7 @@ ui_win.textBrowser.setText('test text')
 gps_data = [[], []]  # [[lon], [lat]]
 gps_geo_cycle_data = None
 gps_positions = {}
+gps_altitudes = {}
 
 ui_win.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
 gps_qtgraph_plot = ui_win.graphicsView_gps.plotItem.plot()
@@ -146,6 +148,15 @@ def update_gps_plot(path=True, points=True):
                 ui_win.graphicsView_gps.addItem(text_item)
                 gps_position_labels[label] = text_item
             gps_position_labels[label].setPos(gps_positions[label]['pos'][0], gps_positions[label]['pos'][1])
+            text_output = str('lon: %02.6f'% gps_positions[label]['pos'][0])
+            text_output += str('\nlat: %02.6f'% gps_positions[label]['pos'][1])
+            text_output += str('\nalt: %02.6f'% gps_altitudes[label])
+            if label == 'home':
+                ui_win.gps_position_home_TextBrowser.setText(text_output)
+            elif label == 'way_point':
+                ui_win.gps_position_way_point_TextBrowser.setText(text_output)
+            elif label == 'phoenix':
+                ui_win.gps_position_current_TextBrowser.setText(text_output)
         # remove unused labels
         for label in gps_position_labels.keys():
             if label not in gps_positions.keys():
@@ -407,7 +418,7 @@ def update_fc_remote_control():
 
 
 # altitude # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-record_altitude = 600
+record_altitude = 5000
 altitude_dataset_index = {'fc_barometer': 0, 'fc_gps': 1, 'marvic_ir': 2, 'marvic_lidar': 3, 'marvic_baro': 4, 'marvic_sonar': 5, 'marvic_fused': 6}
 altitude_dataset = np.zeros((record_altitude, len(altitude_dataset_index), 2)) #, dtype=np.uint16)
 altitude_qtgraph_plot_fc_barometer = ui_win.graphicsView_altitude.plotItem.plot()
@@ -420,12 +431,12 @@ altitude_qtgraph_plot_marvic_infra_red = ui_win.graphicsView_altitude.plotItem.p
 altitude_qtgraph_plot_marvic_infra_red.setPen(pyqtgraph.mkPen(color=(0, 200, 0)))
 altitude_qtgraph_plot_marvic_fused = ui_win.graphicsView_altitude.plotItem.plot()
 altitude_qtgraph_plot_marvic_fused.setPen(pyqtgraph.mkPen(color=(100, 100, 100)))
-
 # naze baro - lila
 # naze gps - red
 # lidar - blue
 # ir - green
 # fused - grey
+
 
 def update_altitude_plot():
     cur_time = altitude_dataset[:, :, 1].max()
@@ -491,28 +502,30 @@ def update_video():
 # init ros callback functions
 ##########################################################################################
 def callback_gps_home(cur_gps_input):
-    print 'home', cur_gps_input.altitude
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'home' in gps_positions.keys():
         if gps_pos != gps_positions['home']['pos']:
             gps_positions['home']['pos'] = gps_pos
+            gps_altitudes['home'] = cur_gps_input.altitude
     else:
         gps_positions['home'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(255, 255, 0))}
+        gps_altitudes['home'] = cur_gps_input.altitude
 
 
 def callback_gps_way_point(cur_gps_input):
-    print cur_gps_input.altitude
     gps_pos = (cur_gps_input.longitude, cur_gps_input.latitude)
     if 'way_point' in gps_positions.keys():
         if gps_pos != gps_positions['way_point']['pos']:
             gps_positions['way_point']['pos'] = gps_pos
+            gps_altitudes['way_point'] = cur_gps_input.altitude
     else:
         gps_positions['way_point'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(0, 255, 0))}
+        gps_altitudes['way_point'] = cur_gps_input.altitude
 
 
 def callback_gps_position(cur_gps_input):
     global gps_geo_cycle_data, gps_data, gps_positions, altitude_dataset_index
-    time_stamp = cur_gps_input.header.stamp.to_nsec() / 1e6
+    time_stamp = cur_gps_input.header.stamp.to_nsec() / 1e9
     if len(gps_data[0]) == 0:
         gps_geo_cycle_data = generate_geo_circle(cur_gps_input.longitude, cur_gps_input.latitude, 5)
         gps_data[0].append(cur_gps_input.longitude)
@@ -526,6 +539,9 @@ def callback_gps_position(cur_gps_input):
 
     if altitude_dataset_index and 'fc_gps' in altitude_dataset_index.keys():
         index = altitude_dataset_index['fc_gps']
+        if np.sum(altitude_dataset[:, index, 1]) == 0:
+            altitude_dataset[:, index, 1] = time_stamp
+            print 'applying: ', np.mean(altitude_dataset[:, index, 1]), time_stamp
         altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
         altitude_dataset[-1, index, 0] = cur_gps_input.altitude
         altitude_dataset[-1, index, 1] = time_stamp
@@ -534,8 +550,10 @@ def callback_gps_position(cur_gps_input):
     if 'phoenix' in gps_positions.keys():
         if gps_pos != gps_positions['phoenix']['pos']:
             gps_positions['phoenix']['pos'] = gps_pos
+            gps_altitudes['phoenix'] = cur_gps_input.altitude
     else:
         gps_positions['phoenix'] = {'pos': gps_pos, 'symbol': 'o', 'brush': pyqtgraph.mkBrush(color=(0, 0, 255))}
+        gps_altitudes['phoenix'] = cur_gps_input.altitude
 
 
 def callback_cur_servo_cmd(cur_servo_cmd):
@@ -574,32 +592,44 @@ def callback_fc_rc(cur_joy_cmd):
 
 
 def callback_fc_altitude(cur_altitude):
-    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e9
     index = altitude_dataset_index['fc_barometer']
+    if np.sum(altitude_dataset[:, index, 1]) == 0:
+        altitude_dataset[:, index, 1] = time_stamp
+        print 'applying: ', np.mean(altitude_dataset[:, index, 1]), time_stamp
     altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
     altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
     altitude_dataset[-1, index, 1] = time_stamp
 
 
 def callback_marvic_altitude_fused(cur_altitude):
-    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e9
     index = altitude_dataset_index['marvic_fused']
+    if np.sum(altitude_dataset[:, index, 1]) == 0:
+        altitude_dataset[:, index, 1] = time_stamp
+        print 'applying: ', np.mean(altitude_dataset[:, index, 1]), time_stamp
     altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
     altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
     altitude_dataset[-1, index, 1] = time_stamp
 
 
 def callback_marvic_altitude_lidar(cur_altitude):
-    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e9
     index = altitude_dataset_index['marvic_lidar']
+    if np.sum(altitude_dataset[:, index, 1]) == 0:
+        altitude_dataset[:, index, 1] = time_stamp
+        print 'applying: ', np.mean(altitude_dataset[:, index, 1]), time_stamp
     altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
     altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
     altitude_dataset[-1, index, 1] = time_stamp
 
 
 def callback_marvic_altitude_infra_red(cur_altitude):
-    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e6
+    time_stamp = cur_altitude.header.stamp.to_nsec() / 1e9
     index = altitude_dataset_index['marvic_ir']
+    if np.sum(altitude_dataset[:, index, 1]) == 0:
+        altitude_dataset[:, index, 1] = time_stamp
+        print 'applying: ', np.mean(altitude_dataset[:, index, 1]), time_stamp
     altitude_dataset[:-1, index, :] = altitude_dataset[1:, index, :]
     altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
     altitude_dataset[-1, index, 1] = time_stamp
