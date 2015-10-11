@@ -126,7 +126,8 @@ include_directories(
 add_executable(phx_uart_bridge_node_naze src/phx_uart_bridge_node_naze.cpp)
 #add_executable(phx_uart_bridge_node_marvicRC src/phx_uart_bridge_node_marvicRC.cpp)
 #add_executable(phx_uart_bridge_node_marvicAltitude src/phx_uart_bridge_node_marvicAltitude.cpp)
-add_executable(phx_uart_bridge_node_marvicRCaltitude src/phx_uart_bridge_node_marvicRCaltitude.cpp)
+#add_executable(phx_uart_bridge_node_marvicRCaltitude src/phx_uart_bridge_node_marvicRCaltitude.cpp)
+add_executable(phx_uart_bridge_node_marvicRCaltitudeServo src/phx_uart_bridge_node_marvicRCaltitudeServo.cpp)
 #add_executable(phx_uart_bridge_node_crab src/phx_uart_bridge_node_crab.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -159,7 +160,12 @@ target_link_libraries(phx_uart_bridge_node_naze
 #   phx_serial_com
 #)
 
-target_link_libraries(phx_uart_bridge_node_marvicRCaltitude
+#target_link_libraries(phx_uart_bridge_node_marvicRCaltitude
+#   ${catkin_LIBRARIES}
+#   phx_serial_com
+#)
+
+target_link_libraries(phx_uart_bridge_node_marvicRCaltitudeServo
    ${catkin_LIBRARIES}
    phx_serial_com
 )

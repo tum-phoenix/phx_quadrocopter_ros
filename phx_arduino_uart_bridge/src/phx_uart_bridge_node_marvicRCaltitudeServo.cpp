@@ -24,7 +24,7 @@ void led_strip_1_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
 void led_strip_2_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
 void led_strip_3_callback(const phx_arduino_uart_bridge::LEDstrip::ConstPtr&);
 void led_single_callback(const phx_arduino_uart_bridge::LED::ConstPtr&);
-void servo_direct_callback(const phx_arduino_uart_bridge::servo::ConstPtr&);
+void servo_callback(const phx_arduino_uart_bridge::Servo::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     ros::Subscriber led_strip_2_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_2", 1, led_strip_2_callback);
     ros::Subscriber led_strip_3_sub = n.subscribe<phx_arduino_uart_bridge::LEDstrip>("phx/led/led_strip_3", 1, led_strip_3_callback);
     ros::Subscriber led_single_sub = n.subscribe<phx_arduino_uart_bridge::LED>("phx/led/led_single", 1, led_single_callback);
-    ros::Subscriber servo_sub = n.subscribe<phx_arduino_uart_bridge::Servo>("phx/servo/servo_cmd", 1, servo_direct_callback);
+    ros::Subscriber servo_sub = n.subscribe<phx_arduino_uart_bridge::Servo>("phx/servo/servo_cmd", 1, servo_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -451,7 +451,7 @@ void led_single_callback(const phx_arduino_uart_bridge::LED::ConstPtr& led_comma
     serial_interface.send_from_buffer();
 }
 
-void servo_direct_callback(const phx_arduino_uart_bridge::servo::ConstPtr& servo_values) {
+void servo_callback(const phx_arduino_uart_bridge::Servo::ConstPtr& servo_values) {
     std::cout << "\033[1;31m>>> servo_direct_callback\033[0m"<< std::endl;
     serial_interface.prepare_msg_servo_small((uint16_t) servo_values->servo0,
                                              (uint16_t) servo_values->servo1,
