@@ -354,32 +354,56 @@ bool SerialCom::prepare_msg_motor(uint16_t motor0, uint16_t motor1, uint16_t mot
     write_msg_to_buffer(msg);
 }
 
-bool SerialCom::prepare_msg_servo(uint16_t servo0, uint16_t servo1, uint16_t servo2, uint16_t servo3, uint16_t servo4, uint16_t servo5, uint16_t servo6, uint16_t servo7, uint16_t servo8, uint16_t servo9, uint16_t servo10, uint16_t servo11, uint16_t servo12, uint16_t servo13, uint16_t servo14, uint16_t servo15, uint16_t servo16, uint16_t servo17, MessageProtocol msg_protocol) {
+bool SerialCom::prepare_msg_servo_big(uint16_t servo0, uint16_t servo1, uint16_t servo2, uint16_t servo3, uint16_t servo4, uint16_t servo5, uint16_t servo6, uint16_t servo7, uint16_t servo8, uint16_t servo9, uint16_t servo10, uint16_t servo11, uint16_t servo12, uint16_t servo13, uint16_t servo14, uint16_t servo15, uint16_t servo16, uint16_t servo17, MessageProtocol msg_protocol) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_servo sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
     msg.msg_protocol = msg_protocol;
     msg.msg_direction = COM_TO_MULTIWII;
-    msg.msg_length = MULTIWII_SERVO_SET_LENGTH;
-    msg.msg_code = MULTIWII_SERVO_SET;
-    msg.msg_data.multiwii_servo.servo0 = servo0;
-    msg.msg_data.multiwii_servo.servo1 = servo1;
-    msg.msg_data.multiwii_servo.servo2 = servo2;
-    msg.msg_data.multiwii_servo.servo3 = servo3;
-    msg.msg_data.multiwii_servo.servo4 = servo4;
-    msg.msg_data.multiwii_servo.servo5 = servo5;
-    msg.msg_data.multiwii_servo.servo6 = servo6;
-    msg.msg_data.multiwii_servo.servo7 = servo7;
-    msg.msg_data.multiwii_servo.servo8 = servo8;
-    msg.msg_data.multiwii_servo.servo9 = servo9;
-    msg.msg_data.multiwii_servo.servo10 = servo10;
-    msg.msg_data.multiwii_servo.servo11 = servo11;
-    msg.msg_data.multiwii_servo.servo12 = servo12;
-    msg.msg_data.multiwii_servo.servo13 = servo13;
-    msg.msg_data.multiwii_servo.servo14 = servo14;
-    msg.msg_data.multiwii_servo.servo15 = servo15;
-    msg.msg_data.multiwii_servo.servo16 = servo16;
-    msg.msg_data.multiwii_servo.servo17 = servo17;
+    msg.msg_length = MARVIC_SERVO_BIG_LENGTH;
+    msg.msg_code = MARVIC_SERVO_BIG;
+    msg.msg_data.marvic_servo.servo0 = servo0;
+    msg.msg_data.marvic_servo.servo1 = servo1;
+    msg.msg_data.marvic_servo.servo2 = servo2;
+    msg.msg_data.marvic_servo.servo3 = servo3;
+    msg.msg_data.marvic_servo.servo4 = servo4;
+    msg.msg_data.marvic_servo.servo5 = servo5;
+    msg.msg_data.marvic_servo.servo6 = servo6;
+    msg.msg_data.marvic_servo.servo7 = servo7;
+    msg.msg_data.marvic_servo.servo8 = servo8;
+    msg.msg_data.marvic_servo.servo9 = servo9;
+    msg.msg_data.marvic_servo.servo10 = servo10;
+    msg.msg_data.marvic_servo.servo11 = servo11;
+    msg.msg_data.marvic_servo.servo12 = servo12;
+    msg.msg_data.marvic_servo.servo13 = servo13;
+    msg.msg_data.marvic_servo.servo14 = servo14;
+    msg.msg_data.marvic_servo.servo15 = servo15;
+    msg.msg_data.marvic_servo.servo16 = servo16;
+    msg.msg_data.marvic_servo.servo17 = servo17;
+
+    uint8_t msg_data_bytes[sizeof(msg.msg_data)];
+    memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));
+    uint8_t checksum = msg.msg_length ^ msg.msg_code;
+    for (uint16_t index=0; index < msg.msg_length; index++) {
+        checksum = checksum ^ msg_data_bytes[index];
+    }
+    msg.checksum = checksum;
+
+    write_msg_to_buffer(msg);
+}
+
+bool SerialCom::prepare_msg_servo_small(uint16_t servo0, uint16_t servo1, uint16_t servo2, uint16_t servo3, MessageProtocol msg_protocol) {
+    if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_servo_small sending" << std::endl;
+    Message msg;
+    msg.msg_preamble = '$';
+    msg.msg_protocol = msg_protocol;
+    msg.msg_direction = COM_TO_MULTIWII;
+    msg.msg_length = MARVIC_SERVO_SMALL_LENGTH;
+    msg.msg_code = MARVIC_SERVO_SMALL;
+    msg.msg_data.marvic_servo_small.servo0 = servo0;
+    msg.msg_data.marvic_servo_small.servo1 = servo1;
+    msg.msg_data.marvic_servo_small.servo2 = servo2;
+    msg.msg_data.marvic_servo_small.servo3 = servo3;
 
     uint8_t msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));

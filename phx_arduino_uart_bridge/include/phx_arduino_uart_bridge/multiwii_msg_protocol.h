@@ -22,6 +22,8 @@ enum MessageCode : uint8_t {
     MARVIC_INFRA_RED = 69,
     MARVIC_LIDAR = 70,
     MARVIC_BAROMETER = 71,
+    MARVIC_SERVO_SMALL = 90,
+    MARVIC_SERVO_BIG = 91,
     MARVIC_IDENTIFIER = 100,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
@@ -33,7 +35,6 @@ enum MessageCode : uint8_t {
     MULTIWII_GPS_WP = 118,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
-    MULTIWII_SERVO_SET = 213,           // setting servos
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
     MULTIWII_SET_RAW_GPS = 201,
@@ -50,6 +51,8 @@ enum MessageLength : uint8_t {
     MARVIC_BAROMETER_LENGTH = 6,
     MARVIC_STRIP_LED_LENGTH = 30,
     MARVIC_SINGLE_LED_LENGTH = 5,
+    MARVIC_SERVO_SMALL_LENGTH = 8,
+    MARVIC_SERVO_BIG_LENGTH = 36,
     MARVIC_IDENTIFIER_LENGTH = 4,
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
@@ -61,7 +64,6 @@ enum MessageLength : uint8_t {
     MULTIWII_GPS_WP_LENGTH = 18,
     MULTIWII_ATTITUDE_LENGTH = 6,
     MULTIWII_ALTITUDE_LENGTH = 6,
-    MULTIWII_SERVO_SET_LENGTH = 36,
     MULTIWII_MOTOR_SET_LENGTH = 16,
     MULTIWII_RC_SET_LENGTH = 16,
     MULTIWII_GPS_WP_SET_LENGTH = 18
@@ -152,7 +154,11 @@ struct Payload {
             uint16_t servo8;    uint16_t servo9;    uint16_t servo10;   uint16_t servo11;
             uint16_t servo12;   uint16_t servo13;   uint16_t servo14;   uint16_t servo15;
             uint16_t servo16;    uint16_t servo17;
-        } multiwii_servo;
+        } marvic_servo;
+
+        struct {
+            uint16_t servo0;    uint16_t servo1;    uint16_t servo2;    uint16_t servo3;
+        } marvic_servo_small;
 
         struct {
             uint16_t motor0;    uint16_t motor1;
