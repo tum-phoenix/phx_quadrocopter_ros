@@ -22,6 +22,8 @@ enum MessageCode : uint8_t {
     MARVIC_INFRA_RED = 69,
     MARVIC_LIDAR = 70,
     MARVIC_BAROMETER = 71,
+    MARVIC_SERVO_SMALL = 90,
+    MARVIC_SERVO_BIG = 91,
     MARVIC_IDENTIFIER = 100,
     MULTIWII_STATUS = 101,
     MULTIWII_IMU = 102,
@@ -29,11 +31,10 @@ enum MessageCode : uint8_t {
     MULTIWII_MOTOR = 104,
     MULTIWII_RC = 105,
     MULTIWII_GPS = 106,
-//    MULTIWII_PID = 112,
+    MULTIWII_PID = 112,
     MULTIWII_GPS_WP = 118,
     MULTIWII_ATTITUDE = 108,
     MULTIWII_ALTITUDE = 109,
-    MULTIWII_SERVO_SET = 213,           // setting servos
     MULTIWII_MOTOR_SET = 214,           // setting motor
     MULTIWII_RC_SET = 200,              // setting rc
     MULTIWII_SET_RAW_GPS = 201,
@@ -50,6 +51,8 @@ enum MessageLength : uint8_t {
     MARVIC_BAROMETER_LENGTH = 6,
     MARVIC_STRIP_LED_LENGTH = 30,
     MARVIC_SINGLE_LED_LENGTH = 5,
+    MARVIC_SERVO_SMALL_LENGTH = 8,
+    MARVIC_SERVO_BIG_LENGTH = 36,
     MARVIC_IDENTIFIER_LENGTH = 4,
     MULTIWII_STATUS_LENGTH = 11,
     MULTIWII_IMU_LENGTH = 18,
@@ -61,7 +64,6 @@ enum MessageLength : uint8_t {
     MULTIWII_GPS_WP_LENGTH = 18,
     MULTIWII_ATTITUDE_LENGTH = 6,
     MULTIWII_ALTITUDE_LENGTH = 6,
-    MULTIWII_SERVO_SET_LENGTH = 36,
     MULTIWII_MOTOR_SET_LENGTH = 16,
     MULTIWII_RC_SET_LENGTH = 16,
     MULTIWII_GPS_WP_SET_LENGTH = 18
@@ -70,44 +72,38 @@ enum MessageLength : uint8_t {
 struct Payload {
     union {
         struct {
-            uint8_t led_0_r;
-            uint8_t led_0_g;
-            uint8_t led_0_b;
-            uint8_t led_1_r;
-            uint8_t led_1_g;
-            uint8_t led_1_b;
-            uint8_t led_2_r;
-            uint8_t led_2_g;
-            uint8_t led_2_b;
-            uint8_t led_3_r;
-            uint8_t led_3_g;
-            uint8_t led_3_b;
-            uint8_t led_4_r;
-            uint8_t led_4_g;
-            uint8_t led_4_b;
-            uint8_t led_5_r;
-            uint8_t led_5_g;
-            uint8_t led_5_b;
-            uint8_t led_6_r;
-            uint8_t led_6_g;
-            uint8_t led_6_b;
-            uint8_t led_7_r;
-            uint8_t led_7_g;
-            uint8_t led_7_b;
-            uint8_t led_8_r;
-            uint8_t led_8_g;
-            uint8_t led_8_b;
-            uint8_t led_9_r;
-            uint8_t led_9_g;
-            uint8_t led_9_b;
+            uint8_t p1;     uint8_t i1;     uint8_t d1;
+            uint8_t p2;     uint8_t i2;     uint8_t d2;
+            uint8_t p3;     uint8_t i3;     uint8_t d3;
+            uint8_t p4;     uint8_t i4;     uint8_t d4;
+            uint8_t p5;     uint8_t i5;     uint8_t d5;
+            uint8_t p6;     uint8_t i6;     uint8_t d6;
+            uint8_t p7;     uint8_t i7;     uint8_t d7;
+            uint8_t p8;     uint8_t i8;     uint8_t d8;
+            uint8_t p9;     uint8_t i9;     uint8_t d9;
+            uint8_t p10;    uint8_t i10;    uint8_t d10;
+            uint8_t p11;    uint8_t i11;    uint8_t d11;
+            uint8_t p12;    uint8_t i12;    uint8_t d12;
+            uint8_t p13;    uint8_t i13;    uint8_t d13;
+        } multiwii_pid;
+
+        struct {
+            uint8_t led_0_r;    uint8_t led_0_g;    uint8_t led_0_b;
+            uint8_t led_1_r;    uint8_t led_1_g;    uint8_t led_1_b;
+            uint8_t led_2_r;    uint8_t led_2_g;    uint8_t led_2_b;
+            uint8_t led_3_r;    uint8_t led_3_g;    uint8_t led_3_b;
+            uint8_t led_4_r;    uint8_t led_4_g;    uint8_t led_4_b;
+            uint8_t led_5_r;    uint8_t led_5_g;    uint8_t led_5_b;
+            uint8_t led_6_r;    uint8_t led_6_g;    uint8_t led_6_b;
+            uint8_t led_7_r;    uint8_t led_7_g;    uint8_t led_7_b;
+            uint8_t led_8_r;    uint8_t led_8_g;    uint8_t led_8_b;
+            uint8_t led_9_r;    uint8_t led_9_g;    uint8_t led_9_b;
         } marvic_led_strip;                 // MARVIC_LED_0 = 50, MARVIC_LED_1 = 51, MARVIC_LED_2 = 52, MARVIC_LED_3 = 53
 
         struct {
             uint8_t led_id;
             uint8_t strip_index;
-            uint8_t led_r;
-            uint8_t led_g;
-            uint8_t led_b;
+            uint8_t led_r;  uint8_t led_g;  uint8_t led_b;
         } marvic_led_single;                // MARVIC_SINGLE_LED = 54
 
         struct {
@@ -147,58 +143,35 @@ struct Payload {
         } identifier;
 
         struct {
-            int16_t accx;
-            int16_t accy;
-            int16_t accz;
-            int16_t gyrx;
-            int16_t gyry;
-            int16_t gyrz;
-            int16_t magx;
-            int16_t magy;
-            int16_t magz;
+            int16_t accx;   int16_t accy;   int16_t accz;
+            int16_t gyrx;   int16_t gyry;   int16_t gyrz;
+            int16_t magx;   int16_t magy;   int16_t magz;
         } multiwii_raw_imu;
 
         struct {
-            uint16_t servo0;
-            uint16_t servo1;
-            uint16_t servo2;
-            uint16_t servo3;
-            uint16_t servo4;
-            uint16_t servo5;
-            uint16_t servo6;
-            uint16_t servo7;
-            uint16_t servo8;
-            uint16_t servo9;
-            uint16_t servo10;
-            uint16_t servo11;
-            uint16_t servo12;
-            uint16_t servo13;
-            uint16_t servo14;
-            uint16_t servo15;
-            uint16_t servo16;
-            uint16_t servo17;
-        } multiwii_servo;
+            uint16_t servo0;    uint16_t servo1;    uint16_t servo2;    uint16_t servo3;
+            uint16_t servo4;    uint16_t servo5;    uint16_t servo6;    uint16_t servo7;
+            uint16_t servo8;    uint16_t servo9;    uint16_t servo10;   uint16_t servo11;
+            uint16_t servo12;   uint16_t servo13;   uint16_t servo14;   uint16_t servo15;
+            uint16_t servo16;    uint16_t servo17;
+        } marvic_servo;
 
         struct {
-            uint16_t motor0;
-            uint16_t motor1;
-            uint16_t motor2;
-            uint16_t motor3;
-            uint16_t motor4;
-            uint16_t motor5;
-            uint16_t motor6;
-            uint16_t motor7;
+            uint16_t servo0;    uint16_t servo1;    uint16_t servo2;    uint16_t servo3;
+        } marvic_servo_small;
+
+        struct {
+            uint16_t motor0;    uint16_t motor1;
+            uint16_t motor2;    uint16_t motor3;
+            uint16_t motor4;    uint16_t motor5;
+            uint16_t motor6;    uint16_t motor7;
         } multiwii_motor;
 
         struct {
-            uint16_t motor0;
-            uint16_t motor1;
-            uint16_t motor2;
-            uint16_t motor3;
-            uint16_t motor4;
-            uint16_t motor5;
-            uint16_t motor6;
-            uint16_t motor7;
+            uint16_t motor0;    uint16_t motor1;
+            uint16_t motor2;    uint16_t motor3;
+            uint16_t motor4;    uint16_t motor5;
+            uint16_t motor6;    uint16_t motor7;
         } multiwii_motor_set;
 
         struct {
@@ -206,14 +179,8 @@ struct Payload {
             uint16_t pitch;
             uint16_t yaw;
             uint16_t throttle;
-            uint16_t aux1;
-            uint16_t aux2;
-            uint16_t aux3;
-            uint16_t aux4;
-            uint16_t aux5;
-            uint16_t aux6;
-            uint16_t aux7;
-            uint16_t aux8;
+            uint16_t aux1;  uint16_t aux2;  uint16_t aux3;  uint16_t aux4;
+            uint16_t aux5;  uint16_t aux6;  uint16_t aux7;  uint16_t aux8;
         } multiwii_rc;
 
         struct {
@@ -221,23 +188,14 @@ struct Payload {
             uint16_t pitch;
             uint16_t yaw;
             uint16_t throttle;
-            uint16_t aux1;
-            uint16_t aux2;
-            uint16_t aux3;
-            uint16_t aux4;
+            uint16_t aux1;  uint16_t aux2;  uint16_t aux3;  uint16_t aux4;
         } multiwii_rc_set;
 
         struct {
             uint8_t fix;
             uint8_t numSat;
-            uint8_t coordLAT;
-            uint8_t coordLAT1;
-            uint8_t coordLAT2;
-            uint8_t coordLAT3;
-            uint8_t coordLON;
-            uint8_t coordLON1;
-            uint8_t coordLON2;
-            uint8_t coordLON3;
+            uint8_t coordLAT;   uint8_t coordLAT1;  uint8_t coordLAT2;  uint8_t coordLAT3;
+            uint8_t coordLON;   uint8_t coordLON1;  uint8_t coordLON2;  uint8_t coordLON3;
             uint16_t altitude;
             uint16_t speed;
             uint16_t ground_course;
@@ -245,18 +203,9 @@ struct Payload {
 
         struct {
             uint8_t wp_number;
-            uint8_t coordLAT;
-            uint8_t coordLAT1;
-            uint8_t coordLAT2;
-            uint8_t coordLAT3;
-            uint8_t coordLON;
-            uint8_t coordLON1;
-            uint8_t coordLON2;
-            uint8_t coordLON3;
-            uint8_t altitude;
-            uint8_t altitude1;
-            uint8_t altitude2;
-            uint8_t altitude3;
+            uint8_t coordLAT;   uint8_t coordLAT1;  uint8_t coordLAT2;  uint8_t coordLAT3;
+            uint8_t coordLON;   uint8_t coordLON1;  uint8_t coordLON2;  uint8_t coordLON3;
+            uint8_t altitude;   uint8_t altitude1;  uint8_t altitude2;  uint8_t altitude3;
             uint16_t heading;
             uint16_t stay_time;
             uint8_t nav_flag;
@@ -275,18 +224,9 @@ struct Payload {
 
         struct {
             uint8_t wp_number;
-            uint8_t coordLAT;
-            uint8_t coordLAT1;
-            uint8_t coordLAT2;
-            uint8_t coordLAT3;
-            uint8_t coordLON;
-            uint8_t coordLON1;
-            uint8_t coordLON2;
-            uint8_t coordLON3;
-            uint8_t altitude;
-            uint8_t altitude1;
-            uint8_t altitude2;
-            uint8_t altitude3;
+            uint8_t coordLAT;   uint8_t coordLAT1;  uint8_t coordLAT2;  uint8_t coordLAT3;
+            uint8_t coordLON;   uint8_t coordLON1;  uint8_t coordLON2;  uint8_t coordLON3;
+            uint8_t altitude;   uint8_t altitude1;  uint8_t altitude2;  uint8_t altitude3;
             uint16_t heading;
             uint16_t stay_time;
             uint8_t nav_flag;
