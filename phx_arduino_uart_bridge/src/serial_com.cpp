@@ -309,9 +309,9 @@ bool SerialCom::prepare_msg_gps_set_way_point(uint8_t wp_no, uint32_t lat, uint3
     uint8_t temp_alt[4];
     memcpy(temp_alt, &alt, 4);
     msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[0];
-    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[1];
-    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[2];
-    msg.msg_data.multiwii_gps_set_way_point.altitude = temp_alt[3];
+    msg.msg_data.multiwii_gps_set_way_point.altitude1 = temp_alt[1];
+    msg.msg_data.multiwii_gps_set_way_point.altitude2 = temp_alt[2];
+    msg.msg_data.multiwii_gps_set_way_point.altitude3 = temp_alt[3];
     msg.msg_data.multiwii_gps_set_way_point.heading = heading;
     msg.msg_data.multiwii_gps_set_way_point.stay_time = stay_time;
     msg.msg_data.multiwii_gps_set_way_point.nav_flag = nav_flag;
