@@ -303,12 +303,11 @@ int main(int argc, char **argv)
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
-                            gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
-                            
+                            gpsMsg.altitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.altitude));
+                            // prevent republishing of an old way point
                             if ((gpsMsg.latitude != prevLAT ) || ( gpsMsg.longitude !=  prevLON) || ( gpsMsg.altitude != prevALT)) {
                                 gps_wp_pub.publish(gpsMsg);
                             }
-                            
                             prevLAT = gpsMsg.latitude;
                             prevLON = gpsMsg.longitude;
                             prevALT = gpsMsg.altitude;
@@ -318,7 +317,7 @@ int main(int argc, char **argv)
                             gpsMsg.header = headerMsg;
                             gpsMsg.latitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLAT)) / 10000000.0;
                             gpsMsg.longitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.coordLON)) / 10000000.0;
-                            gpsMsg.altitude = input_msg.msg_data.multiwii_gps_way_point.altitude;
+                            gpsMsg.altitude = ((float) fix_int32(&input_msg.msg_data.multiwii_gps_way_point.altitude));
                             gps_home_pub.publish(gpsMsg);
                         }
                         received_gps_way_point++;
