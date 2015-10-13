@@ -9,8 +9,8 @@ class PIDtab:
     def __init__(self, pid_config_storage_path, ui_win, ros_publish_function=None):
         self.ui_win = ui_win
         self.ros_publish_function = ros_publish_function
-        self.pid_config_storage_comments_file = pid_config_storage_path + 'self.pid_config_storage_comments.txt'
-        self.pid_config_storage_file = pid_config_storage_path + 'self.pid_config_storage.txt'
+        self.pid_config_storage_comments_file = pid_config_storage_path + 'pid_config_storage_comments.txt'
+        self.pid_config_storage_file = pid_config_storage_path + 'pid_config_storage.txt'
 
         # load from file if there is any file!
         if os.path.isfile(self.pid_config_storage_comments_file):

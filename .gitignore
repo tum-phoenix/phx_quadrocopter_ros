@@ -1,3 +1,5 @@
+/phx_gui/scripts/goompy/key.py
+/phx_gui/scripts/gauge/goompy/key.py
 *.pyc
 .AppleDouble
 .DS_Store
