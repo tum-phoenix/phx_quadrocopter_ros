@@ -151,7 +151,7 @@ struct Payload {
             uint16_t servo4;    uint16_t servo5;    uint16_t servo6;    uint16_t servo7;
             uint16_t servo8;    uint16_t servo9;    uint16_t servo10;   uint16_t servo11;
             uint16_t servo12;   uint16_t servo13;   uint16_t servo14;   uint16_t servo15;
-            uint16_t servo16;    uint16_t servo17;
+            uint16_t servo16;   uint16_t servo17;
         } marvic_servo;
 
         struct {
