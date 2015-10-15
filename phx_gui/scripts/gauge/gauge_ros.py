@@ -299,4 +299,4 @@ class ROSgauge:
             self.ros_pub_servo_cmd.publish(send_servos_msg)
 
     def publish_pid(self, pid_msg):
-        self.ros_pub_fc_set_pid(pid_msg)
+        self.ros_pub_fc_set_pid.publish(pid_msg)
