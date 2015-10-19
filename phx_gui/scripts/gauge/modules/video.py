@@ -54,7 +54,6 @@ class VIDEOtab:
             if self.time_of_last_image != self.time_of_last_image_swapped:
                 self.live_image_swapped = np.swapaxes(self.live_image + self.image_mask, 0, 1)
                 self.time_of_last_image_swapped = self.time_of_last_image
-                print 'video updated', self.live_image_swapped.shape
             if self.video_reset():
                 self.video_item.setImage(self.live_image_swapped, levels=(0, 255), autoHistogramRange=False)
             else:
