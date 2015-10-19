@@ -1,6 +1,7 @@
 import rospy
 
 from phx_arduino_uart_bridge.msg import WayPoints
+from phx_arduino_uart_bridge.msg import Management
 from sensor_msgs.msg import NavSatFix
 
 import numpy as np
@@ -23,6 +24,8 @@ class ControllerWayPoint:
         # init ros
         rospy.init_node('way_point_controller')
 
+        self.ros_sub_management = rospy.Subscriber('/phx/management', Management, self.callback_management)
+
         self.ros_sub_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, self.callback_gps_position)
         self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
 
@@ -38,6 +41,12 @@ class ControllerWayPoint:
         self.rate_timer = rospy.Rate(self.frequency)
         self.loop_counter = 0
 
+    def callback_management(self, management_input=Management()):
+        if management_input.gps_way_point_controller == 0:
+            self.active = False
+        else:
+            self.active = True
+
     def callback_gps_position(self, gps_input=NavSatFix()):
         lon = gps_input.longitude
         lat = gps_input.latitude
@@ -48,7 +57,7 @@ class ControllerWayPoint:
                                  lon1=self.current_way_points[0][0],
                                  lat1=self.current_way_points[0][1]) <= self.target_reached_radius:
                 # Target position reached
-                print 'reached target zone'
+                print 'ControllerWayPoint -> reached target zone'
                 self.current_way_points.pop(0)
                 self.publish_current_way_points()
 
@@ -111,3 +120,9 @@ class ControllerWayPoint:
             if self.loop_counter % 20 == 0:
                 print 'way points:', self.current_way_points
             self.loop_counter += 1
+
+
+if __name__ == '__main__':
+    controller = ControllerWayPoint()
+
+    controller.run()
