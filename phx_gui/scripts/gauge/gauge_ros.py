@@ -237,7 +237,6 @@ class ROSgauge:
     def callback_image_mono(self, cur_image_mono):
         if self.video_tab:
             if time.time() - self.video_tab.time_of_last_image > 0.05 or not self.video_tab.time_of_last_image:
-                print 'updating image via ros'
                 self.video_tab.live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
                 self.video_tab.time_of_last_image = time.time()
 
