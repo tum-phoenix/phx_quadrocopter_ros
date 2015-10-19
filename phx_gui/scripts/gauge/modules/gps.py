@@ -47,6 +47,13 @@ class GPStab:
         self.gps_positions = {}
         self.gps_altitudes = {}
 
+        self.way_point_path = []
+        self.gps_path_scatter_plot = pyqtgraph.ScatterPlotItem()
+        self.gps_path_scatter_points = {}
+        self.gps_path_scatter_labels = {}
+        self.graphicsView_gps.addItem(self.gps_path_scatter_plot)
+        self.gps_path_line_plot = self.graphicsView_gps.plotItem.plot()
+
         # setup graph
         self.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
         
@@ -79,6 +86,36 @@ class GPStab:
     def init_geo_circle(self, lon, lat, diameter):
         self.gps_geo_cycle_data = generate_geo_circle(lon, lat, diameter)
 
+    def update_gps_way_point_path(self):
+        for i in range(0, len(self.way_point_path)):
+            if i in self.gps_path_scatter_points.keys():
+                self.gps_path_scatter_points[i]['pos'] = (self.way_point_path[i].longitude,
+                                                          self.way_point_path[i].latitude)
+            else:
+                self.gps_path_scatter_points[i] = {'pos': (self.way_point_path[i].longitude,
+                                                           self.way_point_path[i].latitude),
+                                                   'symbol': 'o',
+                                                   'pen': pyqtgraph.mkPen(color=(10, 10, 10))}
+            if i in self.gps_path_scatter_labels.keys():
+                self.gps_path_scatter_labels[i].setPos(self.way_point_path[i].longitude,
+                                                       self.way_point_path[i].latitude)
+            else:
+                text_item = pyqtgraph.TextItem(text=str('WP%i' % i), color=(10, 10, 10))
+                self.graphicsView_gps.addItem(text_item)
+                self.gps_path_scatter_labels[i] = text_item
+
+        self.gps_path_scatter_plot.setData(self.gps_path_scatter_points.values())
+
+        # delete unused scatter points
+        if len(self.gps_path_scatter_points.keys()) > len(self.way_point_path):
+            for i in range(len(self.way_point_path), len(self.gps_path_scatter_points.keys())):
+                del self.gps_path_scatter_points[i]
+
+        # delete unused scatter labels
+        if len(self.gps_path_scatter_labels.keys()) > len(self.way_point_path):
+            for i in range(len(self.way_point_path), len(self.gps_path_scatter_labels.keys())):
+                del self.gps_path_scatter_labels[i]
+
     def update_gps_plot(self, path=True, points=True):
         # update gps path
         if path:
@@ -93,6 +130,8 @@ class GPStab:
 
         # update points of interest
         if points:
+            self.update_gps_way_point_path()
+
             # update scatter plot
             self.gps_scatter_plot.setData(self.gps_positions.values())
 
@@ -139,10 +178,17 @@ class GPStab:
             button = event.button()         # 1: left   2:right
             x_val = mouse_position.x()
             y_val = mouse_position.y()
-            # print 'gps_plot_mouse_clicked', x_val, y_val, button
+            print 'gps_plot_mouse_clicked', x_val, y_val, button
 
             if self.mouse_click_callback:
-                self.mouse_click_callback(x_val, y_val)
+                if type(self.mouse_click_callback) == list:
+                    if len(self.mouse_click_callback) > button:
+                        if self.mouse_click_callback[button] != None:
+                            self.mouse_click_callback[button](x_val, y_val)
+                    else:
+                        print 'for the clicked button', button, 'no function is defined'
+                else:
+                    self.mouse_click_callback(x_val, y_val)
     
     def gps_plot_mouse_moved(self, event):
         if self.graphicsView_gps.plotItem.sceneBoundingRect().contains(event):

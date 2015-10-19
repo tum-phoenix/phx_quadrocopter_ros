@@ -103,7 +103,8 @@ ros_node = gauge_ros.ROSgauge(gps_tab=gps_tab,
                               rc_marvic_tab=rc_marvic_tab,
                               parameter_tab=parameter_tab
                               )
-gps_tab.mouse_click_callback = ros_node.publish_gps_way_point
+gps_tab.mouse_click_callback = [None, ros_node.publish_gps_way_point, ros_node.
+    publish_gps_add_way_point]
 led_tab.ros_publish_function = ros_node.publish_led_strip
 pid_tab.ros_publish_function = ros_node.publish_pid
 

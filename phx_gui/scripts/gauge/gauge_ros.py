@@ -5,6 +5,7 @@ from phx_arduino_uart_bridge.msg import LEDstrip
 from phx_arduino_uart_bridge.msg import Altitude
 from phx_arduino_uart_bridge.msg import PID
 from phx_arduino_uart_bridge.msg import PID_cleanflight
+from phx_arduino_uart_bridge.msg import WayPoints
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import Image
@@ -51,6 +52,7 @@ class ROSgauge:
             self.ros_sub_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, self.callback_gps_position)
             self.ros_sub_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, self.callback_gps_way_point)
             self.ros_sub_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, self.callback_gps_home)
+            self.ros_sub_gps_path_way_points = rospy.Subscriber('/phx/way_points/path', WayPoints, self.callback_gps_way_point_path)
         if self.rc_fc_tab:
             self.ros_sub_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, self.callback_fc_rc)
         if self.altitude_tab:
@@ -70,6 +72,7 @@ class ROSgauge:
             self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
         if self.gps_tab:
             self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
+            self.ros_pub_path_way_point = rospy.Publisher('/phx/way_points/add', NavSatFix, queue_size=1)
         if self.pid_tab:
             self.ros_pub_fc_set_pid = rospy.Publisher('/phx/fc/pid_set', PID_cleanflight, queue_size=1)
         if self.led_tab:
@@ -136,6 +139,9 @@ class ROSgauge:
                                                        'symbol': 'o',
                                                        'brush': pyqtgraph.mkBrush(color=(0, 255, 0))}
             self.gps_tab.gps_altitudes['way_point'] = cur_gps_input.altitude
+
+    def callback_gps_way_point_path(self, cur_gps_input=WayPoints):
+        self.gps_tab.way_point_path = cur_gps_input.way_points
 
     def callback_gps_position(self, cur_gps_input):
         time_stamp = cur_gps_input.header.stamp.to_nsec() / 1e9
@@ -277,7 +283,14 @@ class ROSgauge:
         way_point_msg.latitude = lat
         way_point_msg.altitude = 0              # need to fix this!
         self.ros_pub_gps_way_point.publish(way_point_msg)
-    
+
+    def publish_gps_add_way_point(self, lon, lat):
+        way_point_msg = NavSatFix()
+        way_point_msg.longitude = lon
+        way_point_msg.latitude = lat
+        way_point_msg.altitude = 0              # need to fix this!
+        self.ros_pub_path_way_point.publish(way_point_msg)
+
     def publish_servos(self):
         if self.parameter_tab:
             send_servos_msg = Servo()
