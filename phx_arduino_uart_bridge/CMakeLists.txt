@@ -64,6 +64,7 @@ find_package(catkin REQUIRED COMPONENTS
    LED.msg
    PID.msg
    PID_cleanflight.msg
+   WayPoints.msg
  )
 
 ## Generate services in the 'srv' folder
