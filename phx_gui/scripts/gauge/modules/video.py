@@ -1,14 +1,14 @@
 import pyqtgraph
 import numpy as np
-from PyQt4 import QtGui
-import matplotlib.pyplot as plt
-from goompy import GooMPy
+import time
 
 
 class VIDEOtab:
     def __init__(self, graphicsView_video, video_active=lambda: False, video_reset=lambda: False):
         self.live_image = np.zeros((480, 640), dtype=np.uint8)
         self.time_of_last_image = 0
+        self.live_image_swapped = None
+        self.time_of_last_image_swapped = 0
         self.video_fps = 0
         self.image_mask = np.zeros((480, 640), dtype=np.uint8)
 
@@ -23,6 +23,7 @@ class VIDEOtab:
 
         self.video_active = video_active
         self.video_reset = video_reset
+        self.video_apply_mask = lambda: False
 
     def update_video_click(self):
         while len(self.video_item.mouse_clicks) > 0:
@@ -49,9 +50,13 @@ class VIDEOtab:
                     self.image_mask[x + 1, y + dy] = 100
 
     def update_video(self):
-        if self.video_active():
+        if self.video_active() and self.time_of_last_image:
+            if self.time_of_last_image != self.time_of_last_image_swapped:
+                self.live_image_swapped = np.swapaxes(self.live_image + self.image_mask, 0, 1)
+                self.time_of_last_image_swapped = self.time_of_last_image
+                print 'video updated', self.live_image_swapped.shape
             if self.video_reset():
-                self.video_item.setImage(np.swapaxes(self.live_image + self.image_mask, 0, 1), levels=(0, 255), autoHistogramRange=False)
+                self.video_item.setImage(self.live_image_swapped, levels=(0, 255), autoHistogramRange=False)
             else:
-                self.video_item.setImage(np.swapaxes(self.live_image + self.image_mask, 0, 1), autoLevels=self.video_auto_range, autoRange=self.video_auto_range, autoHistogramRange=self.video_auto_histogram_range)
+                self.video_item.setImage(self.live_image_swapped, autoLevels=self.video_auto_range, autoRange=self.video_auto_range, autoHistogramRange=self.video_auto_histogram_range)
             self.video_item.update()

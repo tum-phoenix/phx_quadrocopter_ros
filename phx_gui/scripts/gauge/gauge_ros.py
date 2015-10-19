@@ -11,6 +11,7 @@ from sensor_msgs.msg import Image
 
 import pyqtgraph
 import numpy as np
+import time
 
 
 def generate_led_strip_msg(color_r, color_g, color_b):
@@ -235,7 +236,10 @@ class ROSgauge:
 
     def callback_image_mono(self, cur_image_mono):
         if self.video_tab:
-            self.video_tab.live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
+            if time.time() - self.video_tab.time_of_last_image > 0.05 or not self.video_tab.time_of_last_image:
+                print 'updating image via ros'
+                self.video_tab.live_image = np.reshape(np.fromstring(cur_image_mono.data, np.uint8), (cur_image_mono.height, cur_image_mono.step))
+                self.video_tab.time_of_last_image = time.time()
 
     def callback_cur_servo(self, cur_servo_cmd):
         if self.parameter_tab:
