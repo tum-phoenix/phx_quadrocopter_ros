@@ -30,7 +30,7 @@
      <item>
       <widget class="QTabWidget" name="left_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="InfoPage">
         <attribute name="title">
@@ -541,7 +541,7 @@
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
@@ -1836,6 +1836,25 @@
           <number>4</number>
          </property>
         </widget>
+        <widget class="QCheckBox" name="remote_checkBox_rc_fc_plot">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>20</y>
+           <width>101</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>update plot</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="rc_marvic">
         <attribute name="title">
@@ -2434,6 +2453,22 @@
            <width>621</width>
            <height>361</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="remote_checkBox_rc_marvic_plot">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>20</y>
+           <width>101</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>update plot</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </widget>
@@ -3905,6 +3940,70 @@
     <hint type="destinationlabel">
      <x>1014</x>
      <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_throttle</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_throttle</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>769</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_yaw</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_yaw</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>768</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_pitch</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_pitch</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>969</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1027</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_roll</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_roll</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1027</x>
+     <y>249</y>
     </hint>
    </hints>
   </connection>
