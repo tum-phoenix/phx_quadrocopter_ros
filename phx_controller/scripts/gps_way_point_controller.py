@@ -35,7 +35,7 @@ class ControllerWayPoint:
         self.current_way_points = []
 
         self.target_reached_radius = 5
-        self.active = False
+        self.active = True
         self.frequency = 10                 # Hz
 
         self.rate_timer = rospy.Rate(self.frequency)
@@ -117,6 +117,7 @@ class ControllerWayPoint:
             self.rate_timer.sleep()
             if self.loop_counter % 5 == 0:
                 self.publish_current_way_points()
+                self.publish_active_way_point()
             if self.loop_counter % 20 == 0:
                 print 'way points:', self.current_way_points
             self.loop_counter += 1
