@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import rospy
 
 from phx_arduino_uart_bridge.msg import WayPoints
