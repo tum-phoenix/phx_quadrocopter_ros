@@ -5,7 +5,7 @@ from phx_arduino_uart_bridge.msg import WayPoints
 from sensor_msgs.msg import NavSatFix
 
 import numpy as np
-
+import time
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
     earth_radius = 6371000                          # meter
@@ -33,6 +33,7 @@ class ControllerWayPoint:
         self.current_way_points = []
 
         self.target_reached_radius = 5
+        self.target_reached_time = None
         self.active = False
         self.frequency = 10                 # Hz
 
@@ -43,6 +44,7 @@ class ControllerWayPoint:
         lon = gps_input.longitude
         lat = gps_input.latitude
         alt = gps_input.altitude
+        stay_time = gps_input.stayTime
         if len(self.current_way_points) > 0:
             if calc_geo_distance(lon0=lon,
                                  lat0=lat,
@@ -50,8 +52,12 @@ class ControllerWayPoint:
                                  lat1=self.current_way_points[0][1]) <= self.target_reached_radius:
                 # Target position reached
                 print 'reached target zone'
-                self.current_way_points.pop(0)
-                self.publish_current_way_points()
+                if not self.target_reached_time:
+                    self.target_reached_time = time.time()
+                if time.time() - self.target_reached_time >= stay_time:
+                    self.target_reached_time = None
+                    self.current_way_points.pop(0)
+                    self.publish_current_way_points()
 
     def callback_add_way_point(self, gps_input=NavSatFix()):
         lon = gps_input.longitude
