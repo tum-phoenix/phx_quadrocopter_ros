@@ -53,6 +53,7 @@ class GPStab:
         self.gps_path_scatter_labels = {}
         self.graphicsView_gps.addItem(self.gps_path_scatter_plot)
         self.gps_path_line_plot = self.graphicsView_gps.plotItem.plot()
+        self.gps_path_line_plot.setPen(pyqtgraph.mkPen(color=(100, 0, 0)))
 
         # setup graph
         self.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
@@ -90,18 +91,18 @@ class GPStab:
     def update_gps_way_point_path(self):
         for i in range(0, len(self.way_point_path)):
             if i in self.gps_path_scatter_points.keys():
-                self.gps_path_scatter_points[i]['pos'] = (self.way_point_path[i].longitude,
-                                                          self.way_point_path[i].latitude)
+                self.gps_path_scatter_points[i]['pos'] = (self.way_point_path[i].position.longitude,
+                                                          self.way_point_path[i].position.latitude)
             else:
-                self.gps_path_scatter_points[i] = {'pos': (self.way_point_path[i].longitude,
-                                                           self.way_point_path[i].latitude),
+                self.gps_path_scatter_points[i] = {'pos': (self.way_point_path[i].position.longitude,
+                                                           self.way_point_path[i].position.latitude),
                                                    'symbol': 'o',
-                                                   'pen': pyqtgraph.mkPen(color=(10, 10, 10))}
+                                                   'pen': pyqtgraph.mkPen(color=(200, 10, 10))}
             if i in self.gps_path_scatter_labels.keys():
-                self.gps_path_scatter_labels[i].setPos(self.way_point_path[i].longitude,
-                                                       self.way_point_path[i].latitude)
+                self.gps_path_scatter_labels[i].setPos(self.way_point_path[i].position.longitude,
+                                                       self.way_point_path[i].position.latitude)
             else:
-                text_item = pyqtgraph.TextItem(text=str('WP%i' % i), color=(10, 10, 10))
+                text_item = pyqtgraph.TextItem(text=str('WP%i' % self.way_point_path[i].wp_number), color=(200, 10, 10))
                 self.graphicsView_gps.addItem(text_item)
                 self.gps_path_scatter_labels[i] = text_item
 
@@ -115,15 +116,17 @@ class GPStab:
         # delete unused scatter labels
         if len(self.gps_path_scatter_labels.keys()) > len(self.way_point_path):
             for i in range(len(self.way_point_path), len(self.gps_path_scatter_labels.keys())):
+                text_item = self.gps_path_scatter_labels[i]
+                self.graphicsView_gps.removeItem(text_item)
                 del self.gps_path_scatter_labels[i]
 
         # generate lines
         line_data_x = []
         line_data_y = []
         for point in self.way_point_path:
-            line_data_x.append(point.longitude)
-            line_data_y.append(point.latitude)
-        self.gps_path_line_plot.set_data(line_data_x, line_data_y)
+            line_data_x.append(point.position.longitude)
+            line_data_y.append(point.position.latitude)
+        self.gps_path_line_plot.setData(line_data_x, line_data_y)
 
     def update_gps_plot(self, path=True, points=True):
         # update gps path

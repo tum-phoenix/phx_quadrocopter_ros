@@ -64,6 +64,7 @@ find_package(catkin REQUIRED COMPONENTS
    LED.msg
    PID.msg
    PID_cleanflight.msg
+   WayPoint.msg
    WayPoints.msg
    Management.msg
  )

@@ -5,6 +5,7 @@ from phx_arduino_uart_bridge.msg import LEDstrip
 from phx_arduino_uart_bridge.msg import Altitude
 from phx_arduino_uart_bridge.msg import PID
 from phx_arduino_uart_bridge.msg import PID_cleanflight
+from phx_arduino_uart_bridge.msg import WayPoint
 from phx_arduino_uart_bridge.msg import WayPoints
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
@@ -72,7 +73,7 @@ class ROSgauge:
             self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
         if self.gps_tab:
             self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
-            self.ros_pub_path_way_point = rospy.Publisher('/phx/way_points/add', NavSatFix, queue_size=1)
+            self.ros_pub_path_way_point = rospy.Publisher('/phx/way_points/add', WayPoint, queue_size=1)
         if self.pid_tab:
             self.ros_pub_fc_set_pid = rospy.Publisher('/phx/fc/pid_set', PID_cleanflight, queue_size=1)
         if self.led_tab:
@@ -277,18 +278,20 @@ class ROSgauge:
         if strip_index == 3:
             self.ros_pub_led_strip_3_cmd.publish(generate_led_strip_msg(color_r, color_g, color_b))
 
-    def publish_gps_way_point(self, lon, lat):
+    def publish_gps_way_point(self, lon, lat, altitude=0):
         way_point_msg = NavSatFix()
         way_point_msg.longitude = lon
         way_point_msg.latitude = lat
-        way_point_msg.altitude = 0              # need to fix this!
+        way_point_msg.altitude = altitude
         self.ros_pub_gps_way_point.publish(way_point_msg)
 
-    def publish_gps_add_way_point(self, lon, lat):
-        way_point_msg = NavSatFix()
-        way_point_msg.longitude = lon
-        way_point_msg.latitude = lat
-        way_point_msg.altitude = 0              # need to fix this!
+    def publish_gps_add_way_point(self, lon, lat, altitude=0, stay_time=10, wp_number=0):
+        way_point_msg = WayPoint()
+        way_point_msg.position.longitude = lon
+        way_point_msg.position.latitude = lat
+        way_point_msg.position.altitude = altitude
+        way_point_msg.stay_time = stay_time
+        way_point_msg.wp_number = wp_number
         self.ros_pub_path_way_point.publish(way_point_msg)
 
     def publish_servos(self):

@@ -27,7 +27,7 @@ gps_tab = modules.gps.GPStab(graphicsView_gps=ui_win.graphicsView_gps,
                                          ui_win.gps_position_current_TextBrowser),
                              mouse_click_callback=None,
                              mouse_move_callback=ui_win.statusbar)
-gps_tab.update_gps_map(use_map='/home/satellite/ros_catkin_ws/src/phx_quadrocopter_ros/phx_gui/scripts/maps/map5.npz')
+gps_tab.update_gps_map(use_map='/home/satellite/ros_catkin_ws/src/phx_quadrocopter_ros/phx_gui/scripts/maps/map3.npz')
 
 # init led tab
 led_tab = modules.led.LEDtab(strip0=(ui_win.horizontalSlider_led_0_r,
@@ -103,8 +103,9 @@ ros_node = gauge_ros.ROSgauge(gps_tab=gps_tab,
                               rc_marvic_tab=rc_marvic_tab,
                               parameter_tab=parameter_tab
                               )
-gps_tab.mouse_click_callback = [None, ros_node.publish_gps_way_point, ros_node.
-    publish_gps_add_way_point]
+gps_tab.mouse_click_callback = [None,
+                                ros_node.publish_gps_add_way_point,
+                                ros_node.publish_gps_way_point]
 led_tab.ros_publish_function = ros_node.publish_led_strip
 pid_tab.ros_publish_function = ros_node.publish_pid
 

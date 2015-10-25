@@ -1,3 +1,2 @@
 Header header
-sensor_msgs/NavSatFix[] way_points
-int16 stayTime
+phx_arduino_uart_bridge/WayPoint[] way_points
