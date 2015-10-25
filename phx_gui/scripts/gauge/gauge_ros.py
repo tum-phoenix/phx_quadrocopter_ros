@@ -7,6 +7,7 @@ from phx_arduino_uart_bridge.msg import PID
 from phx_arduino_uart_bridge.msg import PID_cleanflight
 from phx_arduino_uart_bridge.msg import WayPoint
 from phx_arduino_uart_bridge.msg import WayPoints
+from phx_arduino_uart_bridge.msg import Management
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import Image
@@ -69,6 +70,7 @@ class ROSgauge:
             self.ros_sub_image_mono = rospy.Subscriber('/image_mono', Image, self.callback_image_mono)
 
         # setup publishers and their callbacks
+        self.ros_pub_management = rospy.Publisher('/phx/management', Management, queue_size=1)
         if self.parameter_tab:
             self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
         if self.gps_tab:
@@ -293,6 +295,12 @@ class ROSgauge:
         way_point_msg.stay_time = stay_time
         way_point_msg.wp_number = wp_number
         self.ros_pub_path_way_point.publish(way_point_msg)
+
+    def publish_management_gps_way_point_controller(self, state=0):
+        print 'publish_management_gps_way_point_controller', state
+        manage_msg = Management()
+        manage_msg.gps_way_point_controller = state
+        self.ros_pub_management.publish(manage_msg)
 
     def publish_servos(self):
         if self.parameter_tab:

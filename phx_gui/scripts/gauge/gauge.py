@@ -110,6 +110,7 @@ led_tab.ros_publish_function = ros_node.publish_led_strip
 pid_tab.ros_publish_function = ros_node.publish_pid
 
 QtCore.QObject.connect(ui_win.pushButton_parameters_update, QtCore.SIGNAL('clicked()'), ros_node.publish_servos)
+QtCore.QObject.connect(ui_win.gps_comboBox_wp_controller, QtCore.SIGNAL('activated(int)'), ros_node.publish_management_gps_way_point_controller)
 
 # main loop
 def mainloop():
@@ -125,8 +126,8 @@ def mainloop():
         led_tab.send_all_strips()
 
     # rc
-    rc_fc_tab.update_rc()
-    rc_marvic_tab.update_rc()
+    rc_fc_tab.update_rc(ui_win.remote_checkBox_rc_fc_plot.isChecked())
+    rc_marvic_tab.update_rc(ui_win.remote_checkBox_rc_marvic_plot.isChecked())
 
     # altitude
     altitude_tab.update_altitude_plot()
