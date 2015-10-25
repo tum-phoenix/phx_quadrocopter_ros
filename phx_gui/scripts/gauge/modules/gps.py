@@ -59,6 +59,7 @@ class GPStab:
         
         # create plot for gps path
         self.gps_qtgraph_plot = self.graphicsView_gps.plotItem.plot()
+        self.gps_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0, 0, 100)))
         
         # create plot for geo circle
         self.gps_geo_cicle_qtgraph_plot = self.graphicsView_gps.plotItem.plot()
@@ -115,6 +116,14 @@ class GPStab:
         if len(self.gps_path_scatter_labels.keys()) > len(self.way_point_path):
             for i in range(len(self.way_point_path), len(self.gps_path_scatter_labels.keys())):
                 del self.gps_path_scatter_labels[i]
+
+        # generate lines
+        line_data_x = []
+        line_data_y = []
+        for point in self.way_point_path:
+            line_data_x.append(point.longitude)
+            line_data_y.append(point.latitude)
+        self.gps_path_line_plot.set_data(line_data_x, line_data_y)
 
     def update_gps_plot(self, path=True, points=True):
         # update gps path

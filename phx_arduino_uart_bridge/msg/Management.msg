@@ -1,0 +1,4 @@
+Header header
+uint8 gps_way_point_controller
+uint8 altitude_controller
+uint8 manual_control

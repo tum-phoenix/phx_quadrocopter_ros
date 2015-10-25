@@ -49,10 +49,10 @@
         <widget class="PlotWidget" name="graphicsView_gps">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>20</y>
-           <width>591</width>
-           <height>491</height>
+           <x>0</x>
+           <y>0</y>
+           <width>621</width>
+           <height>511</height>
           </rect>
          </property>
         </widget>
@@ -62,7 +62,7 @@
            <x>550</x>
            <y>520</y>
            <width>71</width>
-           <height>20</height>
+           <height>21</height>
           </rect>
          </property>
          <property name="text">
@@ -73,8 +73,8 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>550</y>
-           <width>181</width>
+           <y>560</y>
+           <width>161</width>
            <height>61</height>
           </rect>
          </property>
@@ -82,9 +82,9 @@
         <widget class="QTextBrowser" name="gps_position_way_point_TextBrowser">
          <property name="geometry">
           <rect>
-           <x>210</x>
-           <y>550</y>
-           <width>181</width>
+           <x>190</x>
+           <y>560</y>
+           <width>161</width>
            <height>61</height>
           </rect>
          </property>
@@ -93,7 +93,7 @@
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>530</y>
+           <y>540</y>
            <width>131</width>
            <height>17</height>
           </rect>
@@ -105,8 +105,8 @@
         <widget class="QLabel" name="gps_position_way_point_label">
          <property name="geometry">
           <rect>
-           <x>220</x>
-           <y>530</y>
+           <x>200</x>
+           <y>540</y>
            <width>141</width>
            <height>17</height>
           </rect>
@@ -118,9 +118,9 @@
         <widget class="QTextBrowser" name="gps_position_current_TextBrowser">
          <property name="geometry">
           <rect>
-           <x>400</x>
-           <y>550</y>
-           <width>181</width>
+           <x>360</x>
+           <y>560</y>
+           <width>161</width>
            <height>61</height>
           </rect>
          </property>
@@ -128,8 +128,8 @@
         <widget class="QLabel" name="gps_position_current_label">
          <property name="geometry">
           <rect>
-           <x>410</x>
-           <y>530</y>
+           <x>370</x>
+           <y>540</y>
            <width>141</width>
            <height>17</height>
           </rect>
@@ -138,17 +138,19 @@
           <string>current position</string>
          </property>
         </widget>
-        <zorder>graphicsView_gps</zorder>
-        <zorder>gps_label_reference_radius</zorder>
-        <zorder>gps_position_home_TextBrowser</zorder>
-        <zorder>gps_position_way_point_TextBrowser</zorder>
-        <zorder>gps_position_home_label</zorder>
-        <zorder>gps_position_way_point_label</zorder>
-        <zorder>gps_position_current_TextBrowser</zorder>
-        <zorder>gps_position_current_label</zorder>
-        <zorder>right_tabs</zorder>
-        <zorder>right_tabs</zorder>
-        <zorder>right_tabs</zorder>
+        <widget class="QCheckBox" name="checkBox">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>520</y>
+           <width>141</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>WayPointController</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="ledPage">
         <attribute name="title">
@@ -158,7 +160,7 @@
          <property name="geometry">
           <rect>
            <x>70</x>
-           <y>60</y>
+           <y>70</y>
            <width>251</width>
            <height>101</height>
           </rect>
@@ -221,7 +223,7 @@
          <property name="geometry">
           <rect>
            <x>80</x>
-           <y>40</y>
+           <y>50</y>
            <width>91</width>
            <height>17</height>
           </rect>
@@ -234,7 +236,7 @@
          <property name="geometry">
           <rect>
            <x>350</x>
-           <y>60</y>
+           <y>70</y>
            <width>251</width>
            <height>101</height>
           </rect>
@@ -297,7 +299,7 @@
          <property name="geometry">
           <rect>
            <x>360</x>
-           <y>40</y>
+           <y>50</y>
            <width>91</width>
            <height>17</height>
           </rect>
@@ -310,7 +312,7 @@
          <property name="geometry">
           <rect>
            <x>70</x>
-           <y>200</y>
+           <y>210</y>
            <width>251</width>
            <height>101</height>
           </rect>
@@ -373,7 +375,7 @@
          <property name="geometry">
           <rect>
            <x>80</x>
-           <y>180</y>
+           <y>190</y>
            <width>91</width>
            <height>17</height>
           </rect>
@@ -386,7 +388,7 @@
          <property name="geometry">
           <rect>
            <x>360</x>
-           <y>180</y>
+           <y>190</y>
            <width>91</width>
            <height>17</height>
           </rect>
@@ -399,7 +401,7 @@
          <property name="geometry">
           <rect>
            <x>350</x>
-           <y>200</y>
+           <y>210</y>
            <width>251</width>
            <height>101</height>
           </rect>
@@ -462,7 +464,7 @@
          <property name="geometry">
           <rect>
            <x>470</x>
-           <y>320</y>
+           <y>330</y>
            <width>131</width>
            <height>27</height>
           </rect>
@@ -475,7 +477,7 @@
          <property name="geometry">
           <rect>
            <x>320</x>
-           <y>320</y>
+           <y>330</y>
            <width>131</width>
            <height>31</height>
           </rect>
@@ -484,13 +486,62 @@
           <string>continuous</string>
          </property>
         </widget>
+        <widget class="QComboBox" name="led_comboBox_mode_selection">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>404</y>
+           <width>241</width>
+           <height>31</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="led_label_info1">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>16</y>
+           <width>191</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>manual position light control</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="led_label_info2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>374</y>
+           <width>191</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>position light control</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_led_mode_update">
+         <property name="geometry">
+          <rect>
+           <x>330</x>
+           <y>400</y>
+           <width>131</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>update LED strips</string>
+         </property>
+        </widget>
        </widget>
       </widget>
      </item>
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>5</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
@@ -500,9 +551,9 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>10</y>
+           <y>0</y>
            <width>611</width>
-           <height>566</height>
+           <height>611</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_parameters">
@@ -1163,7 +1214,7 @@
          <property name="geometry">
           <rect>
            <x>300</x>
-           <y>590</y>
+           <y>610</y>
            <width>131</width>
            <height>22</height>
           </rect>
@@ -1176,7 +1227,7 @@
          <property name="geometry">
           <rect>
            <x>480</x>
-           <y>590</y>
+           <y>610</y>
            <width>131</width>
            <height>27</height>
           </rect>
@@ -1320,9 +1371,9 @@
         <widget class="PlotWidget" name="graphicsView_rc_fc">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>0</x>
            <y>260</y>
-           <width>601</width>
+           <width>621</width>
            <height>361</height>
           </rect>
          </property>
@@ -1783,6 +1834,25 @@
          </property>
          <property name="numDigits">
           <number>4</number>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="remote_checkBox_rc_fc_plot">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>20</y>
+           <width>101</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>update plot</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </widget>
@@ -2378,11 +2448,27 @@
         <widget class="PlotWidget" name="graphicsView_rc_marvic">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>0</x>
            <y>260</y>
-           <width>601</width>
+           <width>621</width>
            <height>361</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="remote_checkBox_rc_marvic_plot">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>20</y>
+           <width>101</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>update plot</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </widget>
@@ -2393,24 +2479,11 @@
         <widget class="PlotWidget" name="graphicsView_altitude">
          <property name="geometry">
           <rect>
-           <x>20</x>
+           <x>0</x>
            <y>10</y>
-           <width>571</width>
+           <width>621</width>
            <height>481</height>
           </rect>
-         </property>
-        </widget>
-        <widget class="QSlider" name="slider_altitude">
-         <property name="geometry">
-          <rect>
-           <x>600</x>
-           <y>10</y>
-           <width>22</width>
-           <height>371</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
          </property>
         </widget>
         <widget class="QLabel" name="rc_fc_label_throttle_2">
@@ -2547,10 +2620,10 @@
         <widget class="QGraphicsView" name="graphicsView_video">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>70</y>
-           <width>611</width>
-           <height>421</height>
+           <x>0</x>
+           <y>60</y>
+           <width>621</width>
+           <height>431</height>
           </rect>
          </property>
         </widget>
@@ -3704,6 +3777,82 @@
          </property>
         </widget>
        </widget>
+       <widget class="QWidget" name="way_points">
+        <attribute name="title">
+         <string>way_points</string>
+        </attribute>
+        <widget class="QTableWidget" name="way_points_tableWidget">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>50</y>
+           <width>511</width>
+           <height>241</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <column>
+          <property name="text">
+           <string>altitude</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Neue Spalte</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>longitude</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>number</string>
+          </property>
+         </column>
+        </widget>
+        <widget class="QPushButton" name="way_points_pushButton_clear_all">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>350</y>
+           <width>110</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>clear all</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="way_points_pushButton_remove">
+         <property name="geometry">
+          <rect>
+           <x>320</x>
+           <y>350</y>
+           <width>110</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>remove</string>
+         </property>
+        </widget>
+        <zorder>way_points_tableWidget</zorder>
+        <zorder>way_points_pushButton_clear_all</zorder>
+        <zorder>way_points_pushButton_remove</zorder>
+        <zorder>left_tabs</zorder>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -3715,7 +3864,7 @@
      <x>0</x>
      <y>0</y>
      <width>1302</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -3791,6 +3940,70 @@
     <hint type="destinationlabel">
      <x>1014</x>
      <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_throttle</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_throttle</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>769</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_yaw</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_yaw</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>768</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_pitch</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_pitch</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>969</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1027</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>remote_slider_rc_marvic_roll</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_rc_marvic_roll</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1027</x>
+     <y>249</y>
     </hint>
    </hints>
   </connection>
