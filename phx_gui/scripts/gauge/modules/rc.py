@@ -19,7 +19,7 @@ class RCtab:
         self.plot_throttle = graphicsView_rc.plotItem.plot()
         self.plot_throttle.setPen(pyqtgraph.mkPen(color=(0, 200, 0)))
 
-    def update_rc(self):
+    def update_rc(self, update_plot=True):
         self.sliders[0].setValue(self.rc_data[-1, 0])
         self.sliders[1].setValue(self.rc_data[-1, 1])
         self.sliders[2].setValue(self.rc_data[-1, 2])
@@ -29,8 +29,9 @@ class RCtab:
         self.sliders[6].setValue(self.rc_data[-1, 6])
         self.sliders[7].setValue(self.rc_data[-1, 7])
 
-        x_axis = np.arange(0, self.rc_data.shape[0])
-        self.plot_pitch.setData(x_axis, self.rc_data[:, 0])
-        self.plot_roll.setData(x_axis, self.rc_data[:, 1])
-        self.plot_yaw.setData(x_axis, self.rc_data[:, 2])
-        self.plot_throttle.setData(x_axis, self.rc_data[:, 3])
+        if update_plot:
+            x_axis = np.arange(0, self.rc_data.shape[0])
+            self.plot_pitch.setData(x_axis, self.rc_data[:, 0])
+            self.plot_roll.setData(x_axis, self.rc_data[:, 1])
+            self.plot_yaw.setData(x_axis, self.rc_data[:, 2])
+            self.plot_throttle.setData(x_axis, self.rc_data[:, 3])
