@@ -17,8 +17,8 @@ class VIDEOtab:
         self.video_auto_range = False
         self.video_auto_level = False
         self.video_auto_histogram_range = False
-        self.video_item.setFixedWidth(611)
-        self.video_item.setFixedHeight(421)
+        self.video_item.setFixedWidth(631)
+        self.video_item.setFixedHeight(431)
         self.video_item.setImage(np.swapaxes(self.live_image, 0, 1), levels=(0, 255), autoHistogramRange=False)
 
         self.video_active = video_active
