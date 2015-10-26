@@ -1,9 +1,5 @@
 
 from PyQt4 import uic, QtCore, QtGui
-import pyqtgraph
-import time
-import numpy as np
-from goompy import GooMPy
 import layouts
 import modules
 import gauge_ros
@@ -45,6 +41,7 @@ led_tab = modules.led.LEDtab(strip0=(ui_win.horizontalSlider_led_0_r,
                                      ui_win.horizontalSlider_led_3_b),
                              ros_publish_function=None)
 QtCore.QObject.connect(ui_win.pushButton_led_strip_update, QtCore.SIGNAL('clicked()'), led_tab.send_all_strips)
+QtCore.QObject.connect(ui_win.led_comboBox_mode_selection, QtCore.SIGNAL('currentIndexChanged(QString)'), led_tab.set_mode)
 
 # init pid tab
 pid_tab = modules.pid.PIDtab(pid_config_storage_path='',
@@ -115,7 +112,7 @@ QtCore.QObject.connect(ui_win.pushButton_parameters_update, QtCore.SIGNAL('click
 QtCore.QObject.connect(ui_win.gps_comboBox_wp_controller, QtCore.SIGNAL('activated(int)'), ros_node.publish_management_gps_way_point_controller)
 QtCore.QObject.connect(ui_win.way_points_pushButton_remove, QtCore.SIGNAL('clicked()'), gps_tab.way_point_tab.way_point_remove)
 
-# main loop
+
 def mainloop():
     # gps
     gps_tab.update_gps_plot()

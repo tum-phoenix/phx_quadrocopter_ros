@@ -563,6 +563,26 @@
            <height>31</height>
           </rect>
          </property>
+         <item>
+          <property name="text">
+           <string>off</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>white</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>green-red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>white-red</string>
+          </property>
+         </item>
         </widget>
         <widget class="QLabel" name="led_label_info1">
          <property name="geometry">
@@ -591,6 +611,9 @@
          </property>
         </widget>
         <widget class="QPushButton" name="pushButton_led_mode_update">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="geometry">
           <rect>
            <x>330</x>
@@ -603,21 +626,6 @@
           <string>update LED strips</string>
          </property>
         </widget>
-        <zorder>gridLayoutWidget</zorder>
-        <zorder>led_label_strip_0</zorder>
-        <zorder>gridLayoutWidget_2</zorder>
-        <zorder>led_label_strip_1</zorder>
-        <zorder>gridLayoutWidget_3</zorder>
-        <zorder>led_label_strip_2</zorder>
-        <zorder>led_label_strip_3</zorder>
-        <zorder>gridLayoutWidget_4</zorder>
-        <zorder>pushButton_led_strip_update</zorder>
-        <zorder>checkBox_led_strip_update_continuous</zorder>
-        <zorder>led_comboBox_mode_selection</zorder>
-        <zorder>led_label_info1</zorder>
-        <zorder>led_label_info2</zorder>
-        <zorder>pushButton_led_mode_update</zorder>
-        <zorder>right_tabs</zorder>
        </widget>
       </widget>
      </item>

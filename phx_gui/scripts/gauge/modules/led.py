@@ -9,6 +9,30 @@ class LEDtab:
 
         self.ros_publish_function = ros_publish_function
 
+    def set_mode(self, mode):
+        if mode == 'off':
+            self.strip0[0].setValue(0);     self.strip0[1].setValue(0);     self.strip0[2].setValue(0)
+            self.strip1[0].setValue(0);     self.strip1[1].setValue(0);     self.strip1[2].setValue(0)
+            self.strip2[0].setValue(0);     self.strip2[1].setValue(0);     self.strip2[2].setValue(0)
+            self.strip3[0].setValue(0);     self.strip3[1].setValue(0);     self.strip3[2].setValue(0)
+        elif mode == 'white':
+            self.strip0[0].setValue(255);   self.strip0[1].setValue(255);   self.strip0[2].setValue(255)
+            self.strip1[0].setValue(255);   self.strip1[1].setValue(255);   self.strip1[2].setValue(255)
+            self.strip2[0].setValue(255);   self.strip2[1].setValue(255);   self.strip2[2].setValue(255)
+            self.strip3[0].setValue(255);   self.strip3[1].setValue(255);   self.strip3[2].setValue(255)
+        elif mode == 'green-red':
+            self.strip0[0].setValue(0);     self.strip0[1].setValue(255);   self.strip0[2].setValue(0)
+            self.strip1[0].setValue(0);     self.strip1[1].setValue(255);   self.strip1[2].setValue(0)
+            self.strip2[0].setValue(255);   self.strip2[1].setValue(0);     self.strip2[2].setValue(0)
+            self.strip3[0].setValue(255);   self.strip3[1].setValue(0);     self.strip3[2].setValue(0)
+        elif mode == 'white-red':
+            self.strip0[0].setValue(255);   self.strip0[1].setValue(255);   self.strip0[2].setValue(255)
+            self.strip1[0].setValue(255);   self.strip1[1].setValue(255);   self.strip1[2].setValue(255)
+            self.strip2[0].setValue(255);   self.strip2[1].setValue(0);     self.strip2[2].setValue(0)
+            self.strip3[0].setValue(255);   self.strip3[1].setValue(0);     self.strip3[2].setValue(0)
+        else:
+            print 'not implemented', mode
+
     def send_all_strips(self):
         if self.ros_publish_function:
             self.ros_publish_function(0, self.strip0[0].value(), self.strip0[1].value(), self.strip0[2].value())

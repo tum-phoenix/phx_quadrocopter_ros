@@ -230,25 +230,28 @@ class GPStab:
             gps_map_x_position = map_file['x']
             gps_map_y_position = map_file['y']
         elif 'phoenix' in self.gps_positions.keys():
-            cur_pos_lon = self.gps_positions['phoenix']['pos'][0]
-            cur_pos_lat = self.gps_positions['phoenix']['pos'][1]
+            try:
+                cur_pos_lon = self.gps_positions['phoenix']['pos'][0]
+                cur_pos_lat = self.gps_positions['phoenix']['pos'][1]
 
-            gps_map_coordinate = [cur_pos_lon, cur_pos_lat]
-            gps_map_zoom = 19
-            gps_map_type = 'satellite'
-            gps_map_resolution = 1200
-            gps_map = GooMPy(gps_map_resolution, gps_map_resolution, gps_map_coordinate[0], gps_map_coordinate[1], gps_map_zoom, gps_map_type)
-            gps_map_tile = gps_map.bigimage
-            gps_map_corner_upper_left = gps_map.northwest
-            gps_map_corner_lower_right = gps_map.southeast
-            gps_map_width = (gps_map_corner_lower_right[1] - gps_map_corner_upper_left[1]) * 4 / 3
-            gps_map_height = (gps_map_corner_upper_left[0] - gps_map_corner_lower_right[0]) * 4 / 3
-            gps_map_aspect_ratio = gps_map_width / gps_map_height
-            gps_map_array = np.array(gps_map_tile.resize((int(gps_map_resolution * gps_map_aspect_ratio), gps_map_resolution)))
-            gps_map_array = np.swapaxes(gps_map_array[::-1, :], 0, 1)
-            gps_map_effective_size = gps_map_height / gps_map_resolution
-            gps_map_x_position = gps_map_corner_upper_left[1] - gps_map_width / 8
-            gps_map_y_position = gps_map_corner_upper_left[0] - gps_map_height + gps_map_height / 8
+                gps_map_coordinate = [cur_pos_lon, cur_pos_lat]
+                gps_map_zoom = 19
+                gps_map_type = 'satellite'
+                gps_map_resolution = 1200
+                gps_map = GooMPy(gps_map_resolution, gps_map_resolution, gps_map_coordinate[0], gps_map_coordinate[1], gps_map_zoom, gps_map_type)
+                gps_map_tile = gps_map.bigimage
+                gps_map_corner_upper_left = gps_map.northwest
+                gps_map_corner_lower_right = gps_map.southeast
+                gps_map_width = (gps_map_corner_lower_right[1] - gps_map_corner_upper_left[1]) * 4 / 3
+                gps_map_height = (gps_map_corner_upper_left[0] - gps_map_corner_lower_right[0]) * 4 / 3
+                gps_map_aspect_ratio = gps_map_width / gps_map_height
+                gps_map_array = np.array(gps_map_tile.resize((int(gps_map_resolution * gps_map_aspect_ratio), gps_map_resolution)))
+                gps_map_array = np.swapaxes(gps_map_array[::-1, :], 0, 1)
+                gps_map_effective_size = gps_map_height / gps_map_resolution
+                gps_map_x_position = gps_map_corner_upper_left[1] - gps_map_width / 8
+                gps_map_y_position = gps_map_corner_upper_left[0] - gps_map_height + gps_map_height / 8
+            except:
+                pass
         else:
             return
         # update map from loaded data

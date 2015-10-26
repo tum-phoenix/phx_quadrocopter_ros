@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Mon Oct 26 01:54:44 2015
+# Created: Mon Oct 26 23:30:00 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -233,6 +233,10 @@ class Ui_MainWindow(object):
         self.led_comboBox_mode_selection = QtGui.QComboBox(self.ledPage)
         self.led_comboBox_mode_selection.setGeometry(QtCore.QRect(80, 404, 241, 31))
         self.led_comboBox_mode_selection.setObjectName(_fromUtf8("led_comboBox_mode_selection"))
+        self.led_comboBox_mode_selection.addItem(_fromUtf8(""))
+        self.led_comboBox_mode_selection.addItem(_fromUtf8(""))
+        self.led_comboBox_mode_selection.addItem(_fromUtf8(""))
+        self.led_comboBox_mode_selection.addItem(_fromUtf8(""))
         self.led_label_info1 = QtGui.QLabel(self.ledPage)
         self.led_label_info1.setGeometry(QtCore.QRect(10, 16, 191, 20))
         self.led_label_info1.setObjectName(_fromUtf8("led_label_info1"))
@@ -240,6 +244,7 @@ class Ui_MainWindow(object):
         self.led_label_info2.setGeometry(QtCore.QRect(10, 374, 191, 20))
         self.led_label_info2.setObjectName(_fromUtf8("led_label_info2"))
         self.pushButton_led_mode_update = QtGui.QPushButton(self.ledPage)
+        self.pushButton_led_mode_update.setEnabled(False)
         self.pushButton_led_mode_update.setGeometry(QtCore.QRect(330, 400, 131, 41))
         self.pushButton_led_mode_update.setObjectName(_fromUtf8("pushButton_led_mode_update"))
         self.left_tabs.addTab(self.ledPage, _fromUtf8(""))
@@ -727,7 +732,7 @@ class Ui_MainWindow(object):
         self.remote_checkBox_rc_fc_plot = QtGui.QCheckBox(self.rc_fc)
         self.remote_checkBox_rc_fc_plot.setEnabled(True)
         self.remote_checkBox_rc_fc_plot.setGeometry(QtCore.QRect(10, 240, 131, 18))
-        self.remote_checkBox_rc_fc_plot.setChecked(True)
+        self.remote_checkBox_rc_fc_plot.setChecked(False)
         self.remote_checkBox_rc_fc_plot.setObjectName(_fromUtf8("remote_checkBox_rc_fc_plot"))
         self.right_tabs.addTab(self.rc_fc, _fromUtf8(""))
         self.rc_marvic = QtGui.QWidget()
@@ -960,7 +965,7 @@ class Ui_MainWindow(object):
         self.graphicsView_rc_marvic.setObjectName(_fromUtf8("graphicsView_rc_marvic"))
         self.remote_checkBox_rc_marvic_plot = QtGui.QCheckBox(self.rc_marvic)
         self.remote_checkBox_rc_marvic_plot.setGeometry(QtCore.QRect(10, 240, 111, 18))
-        self.remote_checkBox_rc_marvic_plot.setChecked(True)
+        self.remote_checkBox_rc_marvic_plot.setChecked(False)
         self.remote_checkBox_rc_marvic_plot.setObjectName(_fromUtf8("remote_checkBox_rc_marvic_plot"))
         self.right_tabs.addTab(self.rc_marvic, _fromUtf8(""))
         self.altitude_tab = QtGui.QWidget()
@@ -1540,7 +1545,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.left_tabs.setCurrentIndex(1)
         self.gps_comboBox_wp_controller.setCurrentIndex(2)
-        self.right_tabs.setCurrentIndex(6)
+        self.right_tabs.setCurrentIndex(1)
         QtCore.QObject.connect(self.remote_slider_rc_fc_throttle, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_throttle.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_yaw, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_yaw.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_pitch, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_pitch.display)
@@ -1589,6 +1594,10 @@ class Ui_MainWindow(object):
         self.label_3_g.setText(_translate("MainWindow", "green", None))
         self.pushButton_led_strip_update.setText(_translate("MainWindow", "update LED strips", None))
         self.checkBox_led_strip_update_continuous.setText(_translate("MainWindow", "continuous", None))
+        self.led_comboBox_mode_selection.setItemText(0, _translate("MainWindow", "off", None))
+        self.led_comboBox_mode_selection.setItemText(1, _translate("MainWindow", "white", None))
+        self.led_comboBox_mode_selection.setItemText(2, _translate("MainWindow", "green-red", None))
+        self.led_comboBox_mode_selection.setItemText(3, _translate("MainWindow", "white-red", None))
         self.led_label_info1.setText(_translate("MainWindow", "manual position light control", None))
         self.led_label_info2.setText(_translate("MainWindow", "position light control", None))
         self.pushButton_led_mode_update.setText(_translate("MainWindow", "update LED strips", None))
