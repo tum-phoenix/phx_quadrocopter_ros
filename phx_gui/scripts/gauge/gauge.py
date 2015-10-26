@@ -26,7 +26,8 @@ gps_tab = modules.gps.GPStab(graphicsView_gps=ui_win.graphicsView_gps,
                                          ui_win.gps_position_way_point_TextBrowser,
                                          ui_win.gps_position_current_TextBrowser),
                              mouse_click_callback=None,
-                             mouse_move_callback=ui_win.statusbar)
+                             mouse_move_callback=ui_win.statusbar,
+                             way_point_list=ui_win.way_points_tableWidget)
 gps_tab.update_gps_map(use_map='/home/satellite/ros_catkin_ws/src/phx_quadrocopter_ros/phx_gui/scripts/maps/map3.npz')
 
 # init led tab
@@ -106,16 +107,20 @@ ros_node = gauge_ros.ROSgauge(gps_tab=gps_tab,
 gps_tab.mouse_click_callback = [None,
                                 ros_node.publish_gps_add_way_point,
                                 ros_node.publish_gps_way_point]
+gps_tab.way_point_tab.publish_way_point_remove = ros_node.publish_gps_remove_way_point
 led_tab.ros_publish_function = ros_node.publish_led_strip
 pid_tab.ros_publish_function = ros_node.publish_pid
 
 QtCore.QObject.connect(ui_win.pushButton_parameters_update, QtCore.SIGNAL('clicked()'), ros_node.publish_servos)
 QtCore.QObject.connect(ui_win.gps_comboBox_wp_controller, QtCore.SIGNAL('activated(int)'), ros_node.publish_management_gps_way_point_controller)
+QtCore.QObject.connect(ui_win.way_points_pushButton_remove, QtCore.SIGNAL('clicked()'), gps_tab.way_point_tab.way_point_remove)
 
 # main loop
 def mainloop():
     # gps
     gps_tab.update_gps_plot()
+    if gps_tab.way_point_tab:
+        gps_tab.way_point_tab.update_list()
 
     # video
     ros_node.optimize_ros_video_subscription(active=ui_win.checkBox_video_active.isChecked())

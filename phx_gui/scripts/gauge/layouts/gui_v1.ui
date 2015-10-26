@@ -624,7 +624,7 @@
      <item>
       <widget class="QTabWidget" name="right_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="parameter_tab">
         <attribute name="title">
@@ -1935,7 +1935,7 @@
           <string>update plot</string>
          </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </widget>
@@ -2551,7 +2551,7 @@
           <string>update plot</string>
          </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </widget>
@@ -3879,6 +3879,15 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="showGrid">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>0</number>
+         </property>
          <column>
           <property name="text">
            <string>number</string>
@@ -3900,23 +3909,10 @@
           </property>
          </column>
         </widget>
-        <widget class="QPushButton" name="way_points_pushButton_clear_all">
-         <property name="geometry">
-          <rect>
-           <x>450</x>
-           <y>350</y>
-           <width>110</width>
-           <height>32</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>clear all</string>
-         </property>
-        </widget>
         <widget class="QPushButton" name="way_points_pushButton_remove">
          <property name="geometry">
           <rect>
-           <x>320</x>
+           <x>450</x>
            <y>350</y>
            <width>110</width>
            <height>32</height>

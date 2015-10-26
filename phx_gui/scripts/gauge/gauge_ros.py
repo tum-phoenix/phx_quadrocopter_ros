@@ -76,6 +76,7 @@ class ROSgauge:
         if self.gps_tab:
             self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
             self.ros_pub_path_way_point = rospy.Publisher('/phx/way_points/add', WayPoint, queue_size=1)
+            self.ros_pub_path_way_point_remove = rospy.Publisher('/phx/way_points/remove', WayPoint, queue_size=1)
         if self.pid_tab:
             self.ros_pub_fc_set_pid = rospy.Publisher('/phx/fc/pid_set', PID_cleanflight, queue_size=1)
         if self.led_tab:
@@ -295,6 +296,15 @@ class ROSgauge:
         way_point_msg.stay_time = stay_time
         way_point_msg.wp_number = wp_number
         self.ros_pub_path_way_point.publish(way_point_msg)
+
+    def publish_gps_remove_way_point(self, lon, lat, altitude=0, stay_time=10, wp_number=0):
+        way_point_msg = WayPoint()
+        way_point_msg.position.longitude = lon
+        way_point_msg.position.latitude = lat
+        way_point_msg.position.altitude = altitude
+        way_point_msg.stay_time = stay_time
+        way_point_msg.wp_number = wp_number
+        self.ros_pub_path_way_point_remove.publish(way_point_msg)
 
     def publish_management_gps_way_point_controller(self, state=0):
         print 'publish_management_gps_way_point_controller', state

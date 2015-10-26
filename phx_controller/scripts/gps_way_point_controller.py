@@ -105,28 +105,29 @@ class ControllerWayPoint:
         number = wp_input.wp_number
         stay_time = wp_input.stay_time
         way_point = [lon, lat, alt, stay_time]
-        if number == 0 or len(self.current_way_points) < number:
-            self.current_way_points.append(way_point)
-            return
-        else:
-            new_way_point_list = []
-            for i in range(0, number):
-                new_way_point_list.append(self.current_way_points[i])
-            new_way_point_list.append(way_point)
-            for i in range(number, len(self.current_way_points)):
-                new_way_point_list.append(self.current_way_points[i])
-            self.current_way_points = new_way_point_list
+        if self.active_planing:
+            if number == 0 or len(self.current_way_points) < number:
+                self.current_way_points.append(way_point)
+                return
+            else:
+                new_way_point_list = []
+                for i in range(0, number):
+                    new_way_point_list.append(self.current_way_points[i])
+                new_way_point_list.append(way_point)
+                for i in range(number, len(self.current_way_points)):
+                    new_way_point_list.append(self.current_way_points[i])
+                self.current_way_points = new_way_point_list
 
     def callback_remove_way_point(self, wp_input=WayPoint()):
+        print 'removing way point', wp_input.wp_number, wp_input.stay_time
         lon = wp_input.position.longitude
         lat = wp_input.position.latitude
         alt = wp_input.position.altitude
         number = wp_input.wp_number
         stay_time = wp_input.stay_time
         way_point = [lon, lat, alt, stay_time]
-        if way_point in self.current_way_points:
-            self.current_way_points.pop(self.current_way_points.index(way_point))
-        elif lon == 0 and lat == 0 and alt == 0 and number < len(self.current_way_points):
+        if number < len(self.current_way_points):
+            print 'removing via number', number
             self.current_way_points.pop(number)
 
     def publish_current_way_points(self):

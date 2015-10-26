@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui_v1.ui'
 #
-# Created: Mon Oct 26 00:07:24 2015
+# Created: Mon Oct 26 01:54:44 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -1510,9 +1510,11 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.way_points_tableWidget.sizePolicy().hasHeightForWidth())
         self.way_points_tableWidget.setSizePolicy(sizePolicy)
+        self.way_points_tableWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.way_points_tableWidget.setShowGrid(True)
+        self.way_points_tableWidget.setRowCount(0)
         self.way_points_tableWidget.setObjectName(_fromUtf8("way_points_tableWidget"))
         self.way_points_tableWidget.setColumnCount(4)
-        self.way_points_tableWidget.setRowCount(0)
         item = QtGui.QTableWidgetItem()
         self.way_points_tableWidget.setHorizontalHeaderItem(0, item)
         item = QtGui.QTableWidgetItem()
@@ -1521,11 +1523,8 @@ class Ui_MainWindow(object):
         self.way_points_tableWidget.setHorizontalHeaderItem(2, item)
         item = QtGui.QTableWidgetItem()
         self.way_points_tableWidget.setHorizontalHeaderItem(3, item)
-        self.way_points_pushButton_clear_all = QtGui.QPushButton(self.way_points)
-        self.way_points_pushButton_clear_all.setGeometry(QtCore.QRect(450, 350, 110, 32))
-        self.way_points_pushButton_clear_all.setObjectName(_fromUtf8("way_points_pushButton_clear_all"))
         self.way_points_pushButton_remove = QtGui.QPushButton(self.way_points)
-        self.way_points_pushButton_remove.setGeometry(QtCore.QRect(320, 350, 110, 32))
+        self.way_points_pushButton_remove.setGeometry(QtCore.QRect(450, 350, 110, 32))
         self.way_points_pushButton_remove.setObjectName(_fromUtf8("way_points_pushButton_remove"))
         self.right_tabs.addTab(self.way_points, _fromUtf8(""))
         self.horizontalLayout.addWidget(self.right_tabs)
@@ -1541,7 +1540,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.left_tabs.setCurrentIndex(1)
         self.gps_comboBox_wp_controller.setCurrentIndex(2)
-        self.right_tabs.setCurrentIndex(2)
+        self.right_tabs.setCurrentIndex(6)
         QtCore.QObject.connect(self.remote_slider_rc_fc_throttle, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_throttle.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_yaw, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_yaw.display)
         QtCore.QObject.connect(self.remote_slider_rc_fc_pitch, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.lcdNumber_rc_fc_pitch.display)
@@ -1686,7 +1685,6 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "longitude", None))
         item = self.way_points_tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "latitude", None))
-        self.way_points_pushButton_clear_all.setText(_translate("MainWindow", "clear all", None))
         self.way_points_pushButton_remove.setText(_translate("MainWindow", "remove", None))
         self.right_tabs.setTabText(self.right_tabs.indexOf(self.way_points), _translate("MainWindow", "way_points", None))
 

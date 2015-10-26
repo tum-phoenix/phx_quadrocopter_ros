@@ -30,7 +30,12 @@ def generate_geo_circle(est_lon, est_lat, diameter):
 
 
 class GPStab:
-    def __init__(self, graphicsView_gps, text_boxes=(None, None, None), mouse_click_callback=None, mouse_move_callback=None):
+    def __init__(self,
+                 graphicsView_gps,
+                 text_boxes=(None, None, None),
+                 mouse_click_callback=None,
+                 mouse_move_callback=None,
+                 way_point_list=None):
         self.graphicsView_gps = graphicsView_gps
         self.text_boxes = text_boxes
 
@@ -84,6 +89,9 @@ class GPStab:
         self.graphicsView_gps.addItem(self.gps_background_image)
         self.gps_background_image.setZValue(-1)
         self.update_background_map = False
+
+        if way_point_list:
+            self.way_point_tab = WayPointTab(GPStab=self, qt_tabular_object=way_point_list)
 
     def init_geo_circle(self, lon, lat, diameter):
         self.gps_geo_cycle_data = generate_geo_circle(lon, lat, diameter)
@@ -250,6 +258,63 @@ class GPStab:
         self.gps_background_image.setY(gps_map_y_position)
         self.gps_background_image.update()
 
+
+class WayPointTab:
+    def __init__(self, GPStab, qt_tabular_object):
+        self.GPStab = GPStab
+        self.current_way_points = self.GPStab.way_point_path
+        self.qt_tabular_object = qt_tabular_object
+        self.publish_way_point_remove = None
+
+    def update_list(self):
+        self.current_way_points = self.GPStab.way_point_path
+        self.qt_tabular_object.setRowCount(len(self.current_way_points))
+        number_of_rows = self.qt_tabular_object.rowCount()
+        row = 0
+        for way_point in self.current_way_points:
+            if row < number_of_rows:
+                if not self.qt_tabular_object.item(row, 0):
+                    print self.qt_tabular_object.item(row, 0)
+                    cell = QtGui.QTableWidgetItem(str(way_point.wp_number))
+                    self.qt_tabular_object.setItem(row, 0, cell)
+                elif self.qt_tabular_object.item(row, 0).text() != str(way_point.wp_number):
+                    print self.qt_tabular_object.item(row, 0).text(), str(way_point.wp_number)
+                    self.qt_tabular_object.item(row, 0).setText(str(way_point.wp_number))
+                if not self.qt_tabular_object.item(row, 1):
+                    cell = QtGui.QTableWidgetItem(str(way_point.stay_time))
+                    self.qt_tabular_object.setItem(row, 1, cell)
+                elif self.qt_tabular_object.item(row, 1).text() != str(way_point.stay_time):
+                    self.qt_tabular_object.item(row, 1).setText(str(way_point.stay_time))
+                if not self.qt_tabular_object.item(row, 2):
+                    cell = QtGui.QTableWidgetItem(str(way_point.position.longitude))
+                    self.qt_tabular_object.setItem(row, 2, cell)
+                elif self.qt_tabular_object.item(row, 2).text() != str(way_point.position.longitude):
+                    self.qt_tabular_object.item(row, 2).setText(str(way_point.position.longitude))
+                if not self.qt_tabular_object.item(row, 3):
+                    cell = QtGui.QTableWidgetItem(str(way_point.position.latitude))
+                    self.qt_tabular_object.setItem(row, 3, cell)
+                elif self.qt_tabular_object.item(row, 3).text() != str(way_point.position.latitude):
+                    self.qt_tabular_object.item(row, 3).setText(str(way_point.position.latitude))
+            row += 1
+
+    def way_point_remove(self):
+        number_of_rows = self.qt_tabular_object.rowCount()
+        row = 0
+        for way_point in self.current_way_points:
+            if row < number_of_rows:
+                for i in range(0, 4):
+                    cell = self.qt_tabular_object.item(row, i)
+                    if not cell:
+                        continue
+                    if self.qt_tabular_object.isItemSelected(cell):
+                        if self.publish_way_point_remove:
+                            self.publish_way_point_remove(wp_number=int(self.qt_tabular_object.item(row, 0).text()),
+                                                          stay_time=int(self.qt_tabular_object.item(row, 1).text()),
+                                                          lon=float(self.qt_tabular_object.item(row, 2).text()),
+                                                          lat=float(self.qt_tabular_object.item(row, 3).text()))
+                        else:
+                            print 'no publish_way_point_remove set'
+            row += 1
 
 class MapGenerator:
     def __init__(self, tile_archive_path):
