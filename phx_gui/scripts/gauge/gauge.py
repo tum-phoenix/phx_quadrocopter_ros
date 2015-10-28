@@ -24,7 +24,8 @@ gps_tab = modules.gps.GPStab(graphicsView_gps=ui_win.graphicsView_gps,
                              mouse_click_callback=None,
                              mouse_move_callback=ui_win.statusbar,
                              way_point_list=ui_win.way_points_tableWidget)
-gps_tab.update_gps_map(use_map='/home/satellite/ros_catkin_ws/src/phx_quadrocopter_ros/phx_gui/scripts/maps/map3.npz')
+# gps_tab.update_gps_map(use_map='/home/satellite/ros_catkin_ws/src/phx_quadrocopter_ros/phx_gui/scripts/maps/map3.npz')
+gps_tab.update_gps_map(use_map=3)
 
 # init led tab
 led_tab = modules.led.LEDtab(strip0=(ui_win.horizontalSlider_led_0_r,

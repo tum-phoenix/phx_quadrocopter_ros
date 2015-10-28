@@ -3,7 +3,7 @@ import numpy as np
 from PyQt4 import QtGui
 import matplotlib.pyplot as plt
 from goompy import GooMPy
-
+import sys
 
 def calc_geo_distance(lon0, lat0, lon1, lat1):
     earth_radius = 6371000                          # meter
@@ -223,8 +223,16 @@ class GPStab:
                 self.mouse_move_callback(x_val, y_val)
 
     def update_gps_map(self, use_map=None):
-        if use_map:
+        if type(use_map) == str:
             map_file = np.load(use_map)
+            gps_map_effective_size = map_file['scale']
+            gps_map_array = map_file['map']
+            gps_map_x_position = map_file['x']
+            gps_map_y_position = map_file['y']
+        elif type(use_map) == int:
+            path = sys.argv[0][:-8]
+            print path, path + 'maps/map' + str(use_map) + '.npz'
+            map_file = np.load(path + 'maps/map' + str(use_map) + '.npz')
             gps_map_effective_size = map_file['scale']
             gps_map_array = map_file['map']
             gps_map_x_position = map_file['x']
