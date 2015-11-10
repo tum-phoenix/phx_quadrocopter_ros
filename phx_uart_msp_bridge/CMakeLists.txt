@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(phx_arduino_uart_bridge)
+project(phx_uart_msp_bridge)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
@@ -101,7 +101,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES phx_arduino_uart_bridge
+#  LIBRARIES phx_uart_msp_bridge
    CATKIN_DEPENDS  rospy sensor_msgs geometry_msgs diagnostic_msgs message_runtime tf
 #  DEPENDS system_lib
 )
@@ -124,104 +124,17 @@ include_directories(
  )
 
 ## Declare a cpp executable
-#add_executable(phx_arduino_uart_bridge_node_multiwii src/phx_arduino_uart_bridge_node_multiwii.cpp)
-#add_executable(phx_arduino_uart_bridge_node_marvic src/phx_arduino_uart_bridge_node_marvic.cpp)
-add_executable(phx_uart_bridge_node_naze src/phx_uart_bridge_node_naze.cpp)
-#add_executable(phx_uart_bridge_node_marvicRC src/phx_uart_bridge_node_marvicRC.cpp)
-#add_executable(phx_uart_bridge_node_marvicAltitude src/phx_uart_bridge_node_marvicAltitude.cpp)
-#add_executable(phx_uart_bridge_node_marvicRCaltitude src/phx_uart_bridge_node_marvicRCaltitude.cpp)
-add_executable(phx_uart_bridge_node_marvicRCaltitudeServo src/phx_uart_bridge_node_marvicRCaltitudeServo.cpp)
-#add_executable(phx_uart_bridge_node_crab src/phx_uart_bridge_node_crab.cpp)
+add_executable(phx_uart_msp_bridge_node_naze src/phx_uart_msp_bridge_node_naze.cpp)
+add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(phx_arduino_uart_bridge_node phx_arduino_uart_bridge_generate_messages_cpp)
 
-## Specify libraries to link a library or executable target against
-#target_link_libraries(phx_arduino_uart_bridge_node_multiwii
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
-
-#target_link_libraries(phx_arduino_uart_bridge_node_marvic
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
-
-target_link_libraries(phx_uart_bridge_node_naze
+target_link_libraries(phx_uart_msp_bridge_node_naze
    ${catkin_LIBRARIES}
    phx_serial_com
 )
 
-#target_link_libraries(phx_uart_bridge_node_marvicRC
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
 
-#target_link_libraries(phx_uart_bridge_node_marvicAltitude
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
-
-#target_link_libraries(phx_uart_bridge_node_marvicRCaltitude
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
-
-target_link_libraries(phx_uart_bridge_node_marvicRCaltitudeServo
+target_link_libraries(phx_uart_msp_bridge_node_marvicRCaltitudeServo
    ${catkin_LIBRARIES}
    phx_serial_com
 )
-
-#target_link_libraries(phx_uart_bridge_node_crab
-#   ${catkin_LIBRARIES}
-#   phx_serial_com
-#)
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS phx_arduino_uart_bridge phx_arduino_uart_bridge_node_multiwii
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_phx_arduino_uart_bridge.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)

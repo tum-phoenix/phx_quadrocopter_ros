@@ -1,4 +1,4 @@
-#include "phx_arduino_uart_bridge/serial_com.h"
+#include "phx_uart_msp_bridge/serial_com.h"
 
 uint32_t fix_int32(uint8_t *input_pointer) {
     uint8_t raw_input[4];

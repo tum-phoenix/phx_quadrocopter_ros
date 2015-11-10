@@ -7,21 +7,21 @@
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
 #include "sensor_msgs/NavSatFix.h"
-#include "phx_arduino_uart_bridge/Motor.h"
-#include "phx_arduino_uart_bridge/Status.h"
-#include "phx_arduino_uart_bridge/Altitude.h"
-#include "phx_arduino_uart_bridge/LEDstrip.h"
-#include "phx_arduino_uart_bridge/LED.h"
-#include "phx_arduino_uart_bridge/PID_cleanflight.h"
-#include "phx_arduino_uart_bridge/PID.h"
+#include "phx_uart_msp_bridge/Motor.h"
+#include "phx_uart_msp_bridge/Status.h"
+#include "phx_uart_msp_bridge/Altitude.h"
+#include "phx_uart_msp_bridge/LEDstrip.h"
+#include "phx_uart_msp_bridge/LED.h"
+#include "phx_uart_msp_bridge/PID_cleanflight.h"
+#include "phx_uart_msp_bridge/PID.h"
 
 #include <chrono>
 #include <iostream>
-#include "phx_arduino_uart_bridge/serial_com.h"
+#include "phx_uart_msp_bridge/serial_com.h"
 
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
-void set_pid_callback(const phx_arduino_uart_bridge::PID_cleanflight::ConstPtr&);
+void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
@@ -34,32 +34,32 @@ int main(int argc, char **argv)
     std_msgs::Header headerMsg;
 
     sensor_msgs::Imu imuMsg;
-    phx_arduino_uart_bridge::Motor motorMsg;
-    phx_arduino_uart_bridge::Status statusMsg;
-    phx_arduino_uart_bridge::Altitude altitudeMsg;
+    phx_uart_msp_bridge::Motor motorMsg;
+    phx_uart_msp_bridge::Status statusMsg;
+    phx_uart_msp_bridge::Altitude altitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
 
     sensor_msgs::Joy joyMsg;
     joyMsg.axes = std::vector<float> (4, 0);
     joyMsg.buttons = std::vector<int> (4, 0);
     
-    phx_arduino_uart_bridge::PID_cleanflight pidMsg;
+    phx_uart_msp_bridge::PID_cleanflight pidMsg;
     
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
-    ros::Publisher motor_pub = n.advertise<phx_arduino_uart_bridge::Motor>("phx/fc/motor", 1);
-    ros::Publisher status_pub = n.advertise<phx_arduino_uart_bridge::Status>("phx/fc/status", 1);
-    ros::Publisher altitude_pub = n.advertise<phx_arduino_uart_bridge::Altitude>("phx/fc/altitude", 1);
+    ros::Publisher motor_pub = n.advertise<phx_uart_msp_bridge::Motor>("phx/fc/motor", 1);
+    ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/fc/status", 1);
+    ros::Publisher altitude_pub = n.advertise<phx_uart_msp_bridge::Altitude>("phx/fc/altitude", 1);
     ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("phx/gps", 1);
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
     ros::Publisher gps_home_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_home", 1);
-    ros::Publisher pid_in_use = n.advertise<phx_arduino_uart_bridge::PID_cleanflight>("phx/fc/pid_in_use", 1);
+    ros::Publisher pid_in_use = n.advertise<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_in_use", 1);
 
     // ros init subscribers
     //ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
-    ros::Subscriber set_pid = n.subscribe<phx_arduino_uart_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
+    ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -411,7 +411,7 @@ void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr& set_gps_way_
     serial_interface.send_from_buffer();
 }
 
-void set_pid_callback(const phx_arduino_uart_bridge::PID_cleanflight::ConstPtr& set_pid) {
+void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr& set_pid) {
     std::cout << "\033[1;31m>>> set_pid_callback  not implemented jet\033[0m"<< std::endl;
     serial_interface.prepare_msg_pid((uint8_t) (set_pid->roll.p),
                                      (uint8_t) (set_pid->roll.i),

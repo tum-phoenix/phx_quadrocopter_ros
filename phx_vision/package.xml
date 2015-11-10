@@ -3,7 +3,7 @@
   <name>phx_vision</name>
   <version>0.0.1</version>
   <description>The phx_vision package</description>
-  <maintainer email="tatsch<at>gmail.com">tatsch<at>gmail.com</maintainer>
+  <maintainer email="tatsch@gmail.com">tatsch@gmail.com</maintainer>
   <license>MIT</license>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>

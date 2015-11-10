@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>phx_arduino_uart_bridge</name>
-  <version>0.0.1</version>
-  <description>The phx_arduino_uart_bridge package</description>
+  <name>phx_uart_msp_bridge</name>
+  <version>0.0.2</version>
+  <description>The phx_uart_msp_bridge package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
