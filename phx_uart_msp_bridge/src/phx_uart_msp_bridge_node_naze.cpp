@@ -19,9 +19,11 @@
 #include <iostream>
 #include "phx_uart_msp_bridge/serial_com.h"
 
+
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
 void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr&);
+void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr&);
 
 SerialCom serial_interface;                                              // create SerialCom instance
 
@@ -60,6 +62,8 @@ int main(int argc, char **argv)
     //ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
+    ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
+    ros::Subscriber set_rc_direct = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_set", 1, rc_direct_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -386,9 +390,23 @@ int main(int argc, char **argv)
 }
 
 // callbacks
+void motor_pwm_callback(const phx_arduino_uart_bridge::Motor::ConstPtr& set_motor_pwm) {
+    std::cout << "\033[1;31m>>> motor_pwm_callback is deactivated!\033[0m"<< std::endl;
+    /*
+    serial_interface.prepare_msg_motor((uint16_t) set_motor_pwm->motor0,
+                                       (uint16_t) set_motor_pwm->motor1,
+                                       (uint16_t) set_motor_pwm->motor2,
+                                       (uint16_t) set_motor_pwm->motor3,
+                                       (uint16_t) set_motor_pwm->motor4,
+                                       (uint16_t) set_motor_pwm->motor5);
+    serial_interface.send_from_buffer();
+    */
+}
+
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
-    std::cout << "\033[1;31m>>> rc_direct_callback\033[0m"<< std::endl;
-    serial_interface.prepare_msg_rc((uint16_t) (*joyMsg).axes[3],
+    std::cout << "\033[1;31m>>> rc_direct_callback is deactivated\033[0m"<< std::endl;
+    /*
+    serial_interface.prepare_msg_rc((uint16_t) joyMsg->axes[3],
                                     (uint16_t) joyMsg->axes[1],
                                     (uint16_t) joyMsg->axes[0],
                                     (uint16_t) joyMsg->axes[2],
@@ -397,6 +415,7 @@ void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
                                     (uint16_t) joyMsg->buttons[2],
                                     (uint16_t) joyMsg->buttons[3]);
     serial_interface.send_from_buffer();
+    */
 }
 
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr& set_gps_way_point) {
