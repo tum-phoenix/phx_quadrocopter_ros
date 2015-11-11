@@ -99,8 +99,8 @@ struct Payload {
         } marvic_led_strip;                 // MARVIC_LED_0 = 50, MARVIC_LED_1 = 51, MARVIC_LED_2 = 52, MARVIC_LED_3 = 53
 
         struct {
-            uint8_t led_id;
             uint8_t strip_index;
+            uint8_t led_id;
             uint8_t led_r;  uint8_t led_g;  uint8_t led_b;
         } marvic_led_single;                // MARVIC_SINGLE_LED = 54
 
