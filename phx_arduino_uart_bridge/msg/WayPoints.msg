@@ -1,2 +1,0 @@
-Header header
-phx_arduino_uart_bridge/WayPoint[] way_points
