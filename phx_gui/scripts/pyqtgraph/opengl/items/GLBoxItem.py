@@ -20,6 +20,13 @@ class GLBoxItem(GLGraphicsItem):
             color = (255,255,255,80)
         self.setColor(color)
         self.setGLOptions(glOptions)
+        self.setGLOptions({
+            GL_ALPHA_TEST: True,
+            GL_BLEND: True,
+            GL_CULL_FACE: True,
+            GL_DEPTH_TEST:True,
+            'glBlendFunc': (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+            })
     
     def setSize(self, x=None, y=None, z=None, size=None):
         """
@@ -50,38 +57,46 @@ class GLBoxItem(GLGraphicsItem):
         ##glAlphaFunc( GL_ALWAYS,0.5 )
         #glEnable( GL_POINT_SMOOTH )
         #glDisable( GL_DEPTH_TEST )
+
+
+        glColor4f(1.0, 1.0, 1.0, 0.5);
+
         self.setupGLState()
-        
-        glBegin( GL_LINES )
+
+        glBegin( GL_QUADS )
         
         glColor4f(*self.color().glColor())
-        x,y,z = self.size()
-        glVertex3f(0, 0, 0)
+        x, y, z = self.size()
+
         glVertex3f(0, 0, z)
+        glVertex3f(0, 0, 0)
         glVertex3f(x, 0, 0)
         glVertex3f(x, 0, z)
+
+        glVertex3f(x, y, z)
+        glVertex3f(x, y, 0)
         glVertex3f(0, y, 0)
         glVertex3f(0, y, z)
+
+        glVertex3f(x, y, 0)
+        glVertex3f(x, 0, 0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, y, 0)
+
+        glVertex3f(0, y, z)
+        glVertex3f(0, 0, z)
+        glVertex3f(x, 0, z)
+        glVertex3f(x, y, z)
+
+        glVertex3f(x, 0, z)
+        glVertex3f(x, 0, 0)
         glVertex3f(x, y, 0)
         glVertex3f(x, y, z)
 
-        glVertex3f(0, 0, 0)
-        glVertex3f(0, y, 0)
-        glVertex3f(x, 0, 0)
-        glVertex3f(x, y, 0)
         glVertex3f(0, 0, z)
         glVertex3f(0, y, z)
-        glVertex3f(x, 0, z)
-        glVertex3f(x, y, z)
-        
-        glVertex3f(0, 0, 0)
-        glVertex3f(x, 0, 0)
         glVertex3f(0, y, 0)
-        glVertex3f(x, y, 0)
-        glVertex3f(0, 0, z)
-        glVertex3f(x, 0, z)
-        glVertex3f(0, y, z)
-        glVertex3f(x, y, z)
+        glVertex3f(0, 0, 0)
         
         glEnd()
         

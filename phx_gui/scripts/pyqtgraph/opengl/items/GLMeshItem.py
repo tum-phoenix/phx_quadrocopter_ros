@@ -52,6 +52,13 @@ class GLMeshItem(GLGraphicsItem):
         GLGraphicsItem.__init__(self)
         glopts = kwds.pop('glOptions', 'opaque')
         self.setGLOptions(glopts)
+        self.setGLOptions({
+            GL_ALPHA_TEST: True,
+            GL_BLEND: True,
+            GL_DEPTH_TEST:True,
+            'glBlendFunc': (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+            })
+
         shader = kwds.pop('shader', None)
         self.setShader(shader)
         
