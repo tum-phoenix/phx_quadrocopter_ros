@@ -1,5 +1,6 @@
 import rospy
 from phx_arduino_uart_bridge.msg import Servo
+from phx_arduino_uart_bridge.msg import Motor
 from phx_arduino_uart_bridge.msg import LED
 from phx_arduino_uart_bridge.msg import LEDstrip
 from phx_arduino_uart_bridge.msg import Altitude
@@ -73,6 +74,7 @@ class ROSgauge:
         self.ros_pub_management = rospy.Publisher('/phx/management', Management, queue_size=1)
         if self.parameter_tab:
             self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
+            self.ros_pub_motor_cmd = rospy.Publisher('/phx/fc/motor_set', Motor, queue_size=1)
         if self.gps_tab:
             self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
             self.ros_pub_path_way_point = rospy.Publisher('/phx/way_points/add', WayPoint, queue_size=1)
@@ -334,6 +336,17 @@ class ROSgauge:
             send_servos_msg.servo16 = self.parameter_tab.get_parameters_slider(16)
             send_servos_msg.servo17 = self.parameter_tab.get_parameters_slider(17)
             self.ros_pub_servo_cmd.publish(send_servos_msg)
+
+    def publish_motors(self):
+        if self.parameter_tab:
+            send_motor_msg = Motor()
+            send_motor_msg.motor0 = self.parameter_tab.get_parameters_slider(12)
+            send_motor_msg.motor1 = self.parameter_tab.get_parameters_slider(13)
+            send_motor_msg.motor2 = self.parameter_tab.get_parameters_slider(14)
+            send_motor_msg.motor3 = self.parameter_tab.get_parameters_slider(15)
+            send_motor_msg.motor4 = self.parameter_tab.get_parameters_slider(16)
+            send_motor_msg.motor5 = self.parameter_tab.get_parameters_slider(17)
+            self.ros_pub_motor_cmd.publish(send_motor_msg)
 
     def publish_pid(self, pid_msg):
         self.ros_pub_fc_set_pid.publish(pid_msg)

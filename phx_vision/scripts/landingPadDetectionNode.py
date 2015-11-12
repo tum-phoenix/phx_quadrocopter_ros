@@ -18,10 +18,8 @@ class image_converter:
 
   def callback(self, data):
     try:
-      print "before bridging image"
       cv_image = self.bridge.imgmsg_to_cv2(data, "mono8")
       resizedGreyImage = cv_image
-      print "after bridging image"
     except CvBridgeError, e:
       print e
 
@@ -37,14 +35,11 @@ class image_converter:
     lower = 245
     upper = 260
 
-    print lower
-    print upper
-
     edgedImage = cv2.Canny(resizedGreyImage, lower, upper)
     cv2.imshow("Image", resizedGreyImage)
     cv2.imshow("edgedImage", edgedImage)
     #cv2.imshow("ThresholdedImage", thresholdedImage)
-    cv2.waitKey()
+    cv2.waitKey(1)
 
 def main(args):
   ic = image_converter()

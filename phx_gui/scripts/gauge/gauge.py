@@ -137,6 +137,7 @@ def mainloop():
 
     # parameter
     if ui_win.checkBox_parameters_update_continuous.isChecked():
+        ros_node.publish_motors()
         ros_node.publish_servos()
 
 win.show()

@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 }
 
 // callbacks
-void motor_pwm_callback(const phx_arduino_uart_bridge::Motor::ConstPtr& set_motor_pwm) {
+void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pwm) {
     std::cout << "\033[1;31m>>> motor_pwm_callback is deactivated!\033[0m"<< std::endl;
     /*
     serial_interface.prepare_msg_motor((uint16_t) set_motor_pwm->motor0,
