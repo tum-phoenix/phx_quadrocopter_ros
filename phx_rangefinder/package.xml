@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>phx_vision</name>
+  <name>phx_rangefinder</name>
   <version>0.0.1</version>
   <description>The phx_rangefinder package</description>
   <maintainer email="manuel.viermetz@dum.de">manuel.viermetz@dum.de</maintainer>
