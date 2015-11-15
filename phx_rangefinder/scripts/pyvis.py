@@ -67,7 +67,8 @@ class Plotter3D:
     """
     This class just plots points of a given color to the specified coordinates.
     """
-    def __init__(self, point_size=3.0, color=(255, 255, 0, 255), widget=None):
+    def __init__(self, point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
+
         """
         If there is no widget given a new window is created and its id is accessible via self.widget.
         :param point_size: optional, float
@@ -75,8 +76,13 @@ class Plotter3D:
         :param widget: optional, gl.GLViewWidget
         :return: None
         """
-        if not widget:
+        if not widget and not app:
             self.app = QtGui.QApplication([])
+            self.widget = gl.GLViewWidget()
+            self.widget.opts['distance'] = 40
+            self.widget.show()
+        elif not widget:
+            self.app = app
             self.widget = gl.GLViewWidget()
             self.widget.opts['distance'] = 40
             self.widget.show()
@@ -102,9 +108,14 @@ class Plotter3D:
         self.update()
 
     def add_point(self, x, y, z):
-        self.coords_x.append(x)
-        self.coords_y.append(y)
-        self.coords_z.append(z)
+        if type(x) == list:
+            self.coords_x += x
+            self.coords_y += y
+            self.coords_z += z
+        else:
+            self.coords_x.append(x)
+            self.coords_y.append(y)
+            self.coords_z.append(z)
 
     def update(self):
         pts = np.vstack([self.coords_x, self.coords_y, self.coords_z]).transpose()
