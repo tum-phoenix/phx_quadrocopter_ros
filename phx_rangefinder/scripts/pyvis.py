@@ -6,6 +6,71 @@ import numpy as np
 import time
 
 
+class World3D:
+    def __init__(self, sampling=0.1, world_shape=(200, 200, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
+        """
+        If there is no widget given a new window is created and its id is accessible via self.widget.
+        During init also the sampling can be specified which is 0.1 by default.
+        :param sampling: optional, float
+        :param world_shape: optional, 3d tupel
+        :param widget: optional, gl.GLViewWidget
+        :return: None
+        """
+        if not widget and not app:
+            self.app = QtGui.QApplication([])
+            self.widget = gl.GLViewWidget()
+            self.widget.opts['distance'] = 40
+            self.widget.show()
+        elif not app:
+            self.app = False
+            self.widget = widget
+        else:
+            self.app = app
+            self.widget = gl.GLViewWidget()
+            self.widget.opts['distance'] = 40
+            self.widget.show()
+
+        self.sampling = sampling
+        self.world = np.zeros(world_shape, dtype=np.uint8)  # 0: no box, 1-255: box with color
+        self.world_offset = world_offset
+
+        self.color = color
+        self.point_size = point_size
+        pts = np.vstack(np.where(self.world == 1)).transpose() * self.sampling
+        self.scatter_plot = gl.GLScatterPlotItem(pos=pts, color=self.color, size=self.point_size)
+        self.widget.addItem(self.scatter_plot)
+
+    def addData(self, x, y, z, val=1):
+        self.world[x, y, z] = val
+
+    def setWorld(self, world):
+        self.world = world
+
+    def update(self):
+        pts = np.vstack(np.where(self.world == 1)).transpose() * self.sampling
+        pts[:, 0] -= self.world_offset[0]
+        pts[:, 1] -= self.world_offset[1]
+        pts[:, 2] -= self.world_offset[2]
+        color = np.ones((pts.shape[0], 3))
+        min = 1.0 * np.min(pts[:, 2])
+        var = 1.0 * np.max(pts[:, 2]) - min
+        color[:, 0] = (pts[:, 2] - min) / var
+        color[:, 1] = ((pts[:, 2] - min) / var) + 0.5
+        color[:, 1][color[:, 1] > 1.0] -= 1.0
+        color[:, 2] = 1 - (pts[:, 2] - min) / var
+        self.scatter_plot.setData(pos=pts, color=color, size=self.point_size)
+
+    def run(self):
+        """
+        Starts the visualisation
+        :return: None
+        """
+        if self.app != False:
+            self.app.exec_()
+        else:
+            print 'THIS IS NOT THE CORRECT OBJECT TO RUN THE APP!'
+
+
 class BoxWorld3D:
     """
     This class builds a world based on cubes or scattered points. the world is sampled in 0.1 samples.
@@ -314,6 +379,12 @@ if __name__ == '__main__':
 
     line = LinePlot2D(app=axes.app)
     line.setData(np.random.rand((20)))
+
+    w = World3D(app=axes.app)
+    w.world += 1
+    w.update()
+
+    ax = Axes3D(widget=w.widget)
 
     def main_loop():
         scatter.add_point(np.sin(1.5*time.time())*5, np.cos(1.2*time.time())*5, np.sin(15*time.time())+1)
