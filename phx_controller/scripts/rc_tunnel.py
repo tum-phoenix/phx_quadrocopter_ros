@@ -4,22 +4,42 @@ import rospy
 from sensor_msgs.msg import Joy
 
 
-class ControllerNode():
+class RCReflectNode:
+    """
+    This node's function is simply to read the original 'human' RC input and send it to the flight controller as an active command.
+    Therefore this node has no scientific relevance, but is a nice example and can be used for a proof of concept.
+    """
     def __init__(self):
-        self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
-        self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
-        self.pub = rospy.Publisher('/phx/rc_computer', Joy)
+        """
+        initiate ros node, init subscribers and publishers, and setup the necessary variables
+        :return: None
+        """
+        self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]        # setup list which should in future hold active rc parameters
 
-        self.freq = 100                 # Hz
-        r = rospy.Rate(self.freq)
-        self.counter_input = 0
-        self.counter_output = 0
-        self.start_time = time.time()
+        rospy.init_node('RC_reflect_node')                                      # init ros node
+        self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)     # init ros subscriber on /phx/rc_marvic message channel and link self.rcCallback
+        self.pub = rospy.Publisher('/phx/rc_computer', Joy)                     # init ros publisher of computer rc which is transmitted to the fc
+
+        # init some kind of ugly main loop ... not too nice ... but it works pretty well.
+        self.freq = 100                             # define main loop frequency in Hz
+        r = rospy.Rate(self.freq)                   # init a rospy.Rate() object doing the timing in future
+        self.counter_input = 0                      # setup some more useful variables
+        self.counter_output = 0                     # setup some more useful variables
+        self.start_time = time.time()               # setup some more useful variables
         
-        while not rospy.is_shutdown():
-            r.sleep()
+        while not rospy.is_shutdown():              # run the mainloop until ros is shut down
+            # main loop stuff goes here:
+                                                    # this node has nothing to do in the mainloop
+
+            r.sleep()                               # let the rospy.Rate object controll the rate depending on the set frequency
 
     def rcCallback(self, joy_msg):
+        """
+        This function is meant to receive an incoming joy message and analyse the info.
+        In this case every second incoming message is used to update the self.input_rc list of current 'human' remote data and then published to the flight controller.
+        :param joy_msg:
+        :return:
+        """
         self.counter_input += 1
 
         if self.counter_input % 2 == 0:
@@ -43,9 +63,6 @@ class ControllerNode():
             print 'rc_tunnel_node.py >>', self.counter_input/(time.time()-self.start_time), 'rc inputs/sec  ', self.counter_output/(time.time()-self.start_time), 'rc outputs/sec'
 
 
+# if this script is executed directly the following if statement is true and the node is started!
 if __name__ == '__main__':
-    rospy.init_node('controller')
-    try:
-        controller_node = ControllerNode()
-    except rospy.ROSInterruptException:
-        pass
+    controller_node = RCReflectNode()

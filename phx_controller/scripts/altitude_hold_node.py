@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import time
-import rospy
 import numpy as np
+import rospy
 from phx_arduino_uart_bridge.msg import Altitude
 from sensor_msgs.msg import Joy
 
 
-class ControllerNode():
+class AltitudeHoldNode():
     def __init__(self):
+        rospy.init_node('altitude_hold_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.sub = rospy.Subscriber('/phx/altitude_marvic', Altitude, self.altitudeCallback)
@@ -66,8 +66,8 @@ class ControllerNode():
 
 
 if __name__ == '__main__':
-    rospy.init_node('controller')
     try:
-        controller_node = ControllerNode()
+        controller_node = AltitudeHoldNode()
         controller_node.run()
-    except rospy.ROSInterruptException: pass
+    except rospy.ROSInterruptException:
+        pass
