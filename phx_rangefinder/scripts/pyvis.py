@@ -7,7 +7,7 @@ import time
 
 
 class World3D:
-    def __init__(self, sampling=0.1, world_shape=(200, 200, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
+    def __init__(self, sampling=0.1, world_shape=(100, 100, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
         """
         If there is no widget given a new window is created and its id is accessible via self.widget.
         During init also the sampling can be specified which is 0.1 by default.
