@@ -19,10 +19,12 @@
 	        <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" />
     </node>
 
-	<node name="ImageProc" pkg="image_proc" type="image_proc">
+    <node name="ImageProc" pkg="image_proc" type="image_proc">
             <remap from="image_raw" to="/image_raw" />
             <remap from="camera_info" to="/camera_info" />
     </node>
+
+    <node name="LaserScanner" pkg="urg_node" type="urg_node" />
     
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
       <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
