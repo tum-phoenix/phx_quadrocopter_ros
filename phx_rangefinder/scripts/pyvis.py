@@ -41,7 +41,7 @@ class World3D:
         self.widget.addItem(self.scatter_plot)
 
     def addData(self, x, y, z, val=1):
-        self.world[x, y, z] = val
+        self.world[int(x / self.sampling), int(y / self.sampling), int(z / self.sampling)] = val
 
     def setWorld(self, world):
         self.world = world
