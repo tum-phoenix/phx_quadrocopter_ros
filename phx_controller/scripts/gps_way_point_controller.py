@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import rospy
 
-from phx_arduino_uart_bridge.msg import WayPoint
-from phx_arduino_uart_bridge.msg import WayPoints
-from phx_arduino_uart_bridge.msg import Management
+from phx_uart_msp_bridge.msg import WayPoint
+from phx_uart_msp_bridge.msg import WayPoints
+from phx_uart_msp_bridge.msg import Management
 from sensor_msgs.msg import NavSatFix
 
 import numpy as np
