@@ -3,6 +3,7 @@
 #include <sstream>
 #include "ros/ros.h"
 #include "tf/tf.h"
+#include <math.h>               // for M_PI
 #include "std_msgs/Header.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
@@ -10,6 +11,7 @@
 #include "phx_uart_msp_bridge/Motor.h"
 #include "phx_uart_msp_bridge/Status.h"
 #include "phx_uart_msp_bridge/Altitude.h"
+#include "phx_uart_msp_bridge/Attitude.h"
 #include "phx_uart_msp_bridge/LEDstrip.h"
 #include "phx_uart_msp_bridge/LED.h"
 #include "phx_uart_msp_bridge/PID_cleanflight.h"
@@ -39,6 +41,7 @@ int main(int argc, char **argv)
     phx_uart_msp_bridge::Motor motorMsg;
     phx_uart_msp_bridge::Status statusMsg;
     phx_uart_msp_bridge::Altitude altitudeMsg;
+    phx_uart_msp_bridge::Attitude attitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
 
     sensor_msgs::Joy joyMsg;
@@ -49,6 +52,7 @@ int main(int argc, char **argv)
     
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
+    ros::Publisher attitude_pub = n.advertise<phx_uart_msp_bridge::Attitude>("phx/fc/attitude", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
     ros::Publisher motor_pub = n.advertise<phx_uart_msp_bridge::Motor>("phx/fc/motor", 1);
     ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/fc/status", 1);
@@ -261,21 +265,30 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
                         // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 50.);
-                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 50.);
-                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 50.);
+                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 52.);
+                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 52.);
+                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 52.);
                         imuMsg.angular_velocity.x = ((float) input_msg.msg_data.multiwii_raw_imu.gyrx / 8192 * 2000);
                         imuMsg.angular_velocity.y = ((float) input_msg.msg_data.multiwii_raw_imu.gyry / 8192 * 2000);
                         imuMsg.angular_velocity.z = ((float) input_msg.msg_data.multiwii_raw_imu.gyrz / 8192 * 2000);
                         received_imu++;
                     } else if (input_msg.msg_code == MULTIWII_ATTITUDE) {
+                        // publish as imu in quaternions
                         headerMsg.seq = received_imu;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
                         imuMsg.header = headerMsg;
-                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
+                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * M_PI),
+                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * M_PI),
+                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.yaw / 360. * M_PI));
                         imuMsg.orientation = quaternion;
                         imu_pub.publish(imuMsg);
+                        // publish as attitude
+                        attitudeMsg.header = headerMsg;
+                        attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);
+                        attitudeMsg.pitch = ((float) input_msg.msg_data.multiwii_attitude.pitch * 0.1);
+                        attitudeMsg.yaw = ((float) input_msg.msg_data.multiwii_attitude.yaw);
+                        attitude_pub.publish(attitudeMsg);
                         received_attitude++;
                     } else if (input_msg.msg_code == MULTIWII_MOTOR) {
                         headerMsg.seq = received_motor;
