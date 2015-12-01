@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
    Cycletime.msg
    Status.msg
    Altitude.msg
+   Attitude.msg
    Autonomous.msg
    LEDstrip.msg
    LED.msg

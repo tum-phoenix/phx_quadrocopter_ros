@@ -7,7 +7,7 @@ import time
 
 
 class World3D:
-    def __init__(self, sampling=0.1, world_shape=(200, 200, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
+    def __init__(self, sampling=0.1, world_shape=(100, 100, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
         """
         If there is no widget given a new window is created and its id is accessible via self.widget.
         During init also the sampling can be specified which is 0.1 by default.
@@ -41,7 +41,7 @@ class World3D:
         self.widget.addItem(self.scatter_plot)
 
     def addData(self, x, y, z, val=1):
-        self.world[x, y, z] = val
+        self.world[int(x / self.sampling), int(y / self.sampling), int(z / self.sampling)] = val
 
     def setWorld(self, world):
         self.world = world
@@ -364,32 +364,90 @@ class LinePlot2D:
             print 'THIS IS NOT THE CORRECT OBJECT TO RUN THE APP!'
 
 
+class PlaneRadialPlotter3D:
+    def __init__(self, color=(1.0, 5.0, 5.0, 1.0), start_angle=-3*np.pi/4., stop_angle=3*np.pi/4., widget=None, app=None):
+        if not widget and not app:
+            self.app = QtGui.QApplication([])
+            self.widget = gl.GLViewWidget()
+            self.widget.opts['distance'] = 40
+            self.widget.show()
+        elif not app:
+            self.app = False
+            self.widget = widget
+        else:
+            self.app = app
+            self.widget = gl.GLViewWidget()
+            self.widget.opts['distance'] = 40
+            self.widget.show()
+
+        data_shape = 1000
+        radius = np.ones((data_shape)) * 5
+        self.start_angle = start_angle
+        self.stop_angle = stop_angle
+        self.angle = np.linspace(self.start_angle, self.stop_angle, data_shape)
+        x = np.sin(self.angle) * radius
+        y = np.cos(self.angle) * radius
+        z = np.ones((data_shape))
+        pts = np.vstack([x, y, z]).transpose()
+        # self.line_plot = gl.GLLinePlotItem(pos=pts, color=np.array(color * data_shape).reshape((data_shape, 3)))
+        self.line_plot = gl.GLScatterPlotItem(pos=pts, color=np.array(color * data_shape).reshape((data_shape, len(color))), size=3.0)
+        self.widget.addItem(self.line_plot)
+
+    def set_angles(self, start_angle=-3*np.pi/4., stop_angle=3*np.pi/4.):
+        self.start_angle = start_angle
+        self.stop_angle = stop_angle
+
+    def set_data(self, data, color=(1.0, 5.0, 5.0, 1.0)):
+        data_shape = data.shape[0]
+        self.angle = np.linspace(self.start_angle, self.stop_angle, data_shape)
+        x = np.sin(self.angle) * data
+        y = np.cos(self.angle) * data
+        z = np.ones((data_shape))
+        pts = np.vstack([x, y, z]).transpose()
+        self.line_plot.setData(pos=pts, color=np.array(color * data_shape).reshape((data_shape, len(color))), size=3.0)
+
+    def run(self):
+        """
+        Starts the visualisation
+        :return: None
+        """
+        if self.app != False:
+            self.app.exec_()
+        else:
+            print 'THIS IS NOT THE CORRECT OBJECT TO RUN THE APP!'
+
+
 if __name__ == '__main__':
+    # build first window with axes, grid, four boxes and a 3Dplotter
     axes = Axes3D()
-
     grid = Grid3D(widget=axes.widget)
-
     scatter = Plotter3D(widget=axes.widget)
-
     boxes = BoxWorld3D(widget=axes.widget)
     boxes.add_new_box(pos=np.array((-2,-2,-2)))
     boxes.add_new_box(pos=np.array((-2,2,-2)))
     boxes.add_new_box(pos=np.array((2,2,-2)))
     boxes.add_new_box(pos=np.array((2,-2,-2)))
 
+    # add new window with a 2d line plot and set random data
     line = LinePlot2D(app=axes.app)
     line.setData(np.random.rand((20)))
 
+    # add a world3D window
     w = World3D(app=axes.app)
     w.world += 1
     w.update()
 
-    ax = Axes3D(widget=w.widget)
+    # add a radial plotter in a new window
+    radial_plotter = PlaneRadialPlotter3D(app=axes.app)
+    ax = Axes3D(widget=radial_plotter.widget)
+    grid = Grid3D(widget=radial_plotter.widget)
+
 
     def main_loop():
         scatter.add_point(np.sin(1.5*time.time())*5, np.cos(1.2*time.time())*5, np.sin(15*time.time())+1)
         scatter.update()
         axes.update(z=np.sin(time.time()), rot2=180.*np.sin(time.time()))
+        radial_plotter.set_data(np.sin(np.linspace(0, 4*np.pi, 800) + time.time()) + 3)
         pass
     timer = QtCore.QTimer()
     timer.timeout.connect(main_loop)
