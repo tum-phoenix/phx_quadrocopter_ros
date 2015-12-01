@@ -1,4 +1,4 @@
 Header header
-float16 pitch
-float16 roll
-float16 yaw
+float32 pitch
+float32 roll
+float32 yaw
