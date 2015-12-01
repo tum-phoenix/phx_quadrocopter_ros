@@ -261,9 +261,9 @@ int main(int argc, char **argv)
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
                         // the message is only published if fresh attitude data is present.
-                        imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 50.);
-                        imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 50.);
-                        imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 50.);
+                        //imuMsg.linear_acceleration.x = ((float) input_msg.msg_data.multiwii_raw_imu.accx / 52.7);
+                        //imuMsg.linear_acceleration.y = ((float) input_msg.msg_data.multiwii_raw_imu.accy / 52.7);
+                        //imuMsg.linear_acceleration.z = ((float) input_msg.msg_data.multiwii_raw_imu.accz / 52.7);
                         imuMsg.angular_velocity.x = ((float) input_msg.msg_data.multiwii_raw_imu.gyrx / 8192 * 2000);
                         imuMsg.angular_velocity.y = ((float) input_msg.msg_data.multiwii_raw_imu.gyry / 8192 * 2000);
                         imuMsg.angular_velocity.z = ((float) input_msg.msg_data.multiwii_raw_imu.gyrz / 8192 * 2000);
@@ -274,7 +274,10 @@ int main(int argc, char **argv)
                         headerMsg.frame_id = "naze_fc";
                         imuMsg.header = headerMsg;
                         geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(input_msg.msg_data.multiwii_attitude.roll, input_msg.msg_data.multiwii_attitude.pitch, input_msg.msg_data.multiwii_attitude.yaw);
-                        imuMsg.orientation = quaternion;
+                        imuMsg.linear_acceleration.x = ((float)input_msg.msg_data.multiwii_attitude.pitch * 0.1);
+                        imuMsg.linear_acceleration.y = ((float)input_msg.msg_data.multiwii_attitude.roll * 0.1);
+                        imuMsg.linear_acceleration.z = ((float)input_msg.msg_data.multiwii_attitude.yaw);
+			imuMsg.orientation = quaternion;
                         imu_pub.publish(imuMsg);
                         received_attitude++;
                     } else if (input_msg.msg_code == MULTIWII_MOTOR) {
