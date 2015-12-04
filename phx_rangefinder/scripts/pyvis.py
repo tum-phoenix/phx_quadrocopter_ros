@@ -177,6 +177,11 @@ class Plotter3D:
             self.coords_x += x
             self.coords_y += y
             self.coords_z += z
+            print 'new points', len(self.coords_x)
+        elif type(x) == np.ndarray:
+            self.coords_x += x.tolist()
+            self.coords_y += y.tolist()
+            self.coords_z += z.tolist()
         else:
             self.coords_x.append(x)
             self.coords_y.append(y)
