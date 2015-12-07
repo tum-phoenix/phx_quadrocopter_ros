@@ -35,36 +35,29 @@ class hokuyo3D:
         self.radial_plot.set_data(data=data)                                    # display input data in the radial_plot 3D window
 
         angle = np.linspace(new_LaserScan.angle_min, new_LaserScan.angle_max, len(new_LaserScan.ranges))
-        distance_x = np.sin(angle) * new_LaserScan.ranges
-        distance_y = np.cos(angle) * new_LaserScan.ranges
-        distance_z = np.zeros(len(new_LaserScan.ranges))                        #2D-radial plot
+        data = np.array(new_LaserScan.ranges)
+        data[np.isnan(data)] = 0
+        data[data < 0.2] = 0
 
-        pitch, roll, yaw = np.array(self.current_pose) / 180 * np.pi
-        roll = -roll
+        distance_x = np.sin(angle) * data
+        distance_y = np.cos(angle) * data
+        distance_z = np.zeros(len(data))                        #2D-radial plot
 
-        rotation_y = np.array([[np.cos(roll), 0, -np.sin(roll)],
-                             [0, 1, 0],
-                             [np.sin(roll), 0, np.cos(roll)]])
+        cp, cr, cy = np.cos(np.array(self.current_pose) / 180 * np.pi)
+        sp, sr, sy = np.sin(np.array(self.current_pose) / 180 * np.pi)
 
-        rotation_x = np.array([[1, 0, 0],
-                            [0, np.cos(pitch), np.sin(pitch)],
-                             [0, -np.sin(pitch), np.cos(pitch)]])
-
-        rotation_z = np.array([[np.cos(yaw), np.sin(yaw),0],
-                             [-np.sin(yaw), np.cos(yaw),0],
-                               [0, 0, 1]])
-
+        rotation = np.array([[cr*cy+sp*sr*sy, cp*sy, cr*sp*sy-sr*cy],
+                            [sp*sr*cy-cr*sy, cp*cy, sr*sy+cr*sp*cy],
+                            [cp*sr, -sp, cr*cp]])
 
         points = np.vstack([distance_x, distance_y, distance_z])
-        points= rotation_y.dot(points)
-        points= rotation_x.dot(points)
-        points= rotation_z.dot(points)
+        points = rotation.dot(points)
         self.world_scatter.add_point(points[0].tolist(), points[1].tolist(), points[2].tolist())                 #add coordinates to world_scatter window
         self.world_scatter.update()
 
     def callback_Attitude(self, new_attitude=Attitude()):
 
         #print new_imu.linear_acceleration.x, new_imu.linear_acceleration.y, new_imu.linear_acceleration.z
-        self.current_pose = [new_attitude.pitch, new_attitude.roll, new_attitude.yaw]
+        self.current_pose = [new_attitude.pitch, -new_attitude.roll, new_attitude.yaw]
 
 H = hokuyo3D()
