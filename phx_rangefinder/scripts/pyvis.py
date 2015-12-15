@@ -7,7 +7,7 @@ import time
 
 
 class World3D:
-    def __init__(self, sampling=0.1, world_shape=(100, 100, 100), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
+    def __init__(self, sampling=0.07, world_shape=(250, 250, 200), world_offset=(10, 10, 5), point_size=3.0, color=(255, 255, 0, 255), widget=None, app=None):
         """
         If there is no widget given a new window is created and its id is accessible via self.widget.
         During init also the sampling can be specified which is 0.1 by default.
@@ -40,13 +40,17 @@ class World3D:
         self.scatter_plot = gl.GLScatterPlotItem(pos=pts, color=self.color, size=self.point_size)
         self.widget.addItem(self.scatter_plot)
 
-    def addData(self, x, y, z, val=1):
-        self.world[int(x / self.sampling), int(y / self.sampling), int(z / self.sampling)] = val
+    def add_point(self, x, y, z, val=1):
+        print np.max(x), np.max(y)
+        self.world[np.int16(x / self.sampling) + self.world.shape[0]//2,
+                   np.int16(y / self.sampling) + self.world.shape[1]//2,
+                   np.int16(z / self.sampling) + self.world.shape[2]//2] = val
 
     def setWorld(self, world):
         self.world = world
 
     def update(self):
+        print 'updating world'
         pts = np.vstack(np.where(self.world == 1)).transpose() * self.sampling
         pts[:, 0] -= self.world_offset[0]
         pts[:, 1] -= self.world_offset[1]
@@ -69,6 +73,16 @@ class World3D:
             self.app.exec_()
         else:
             print 'THIS IS NOT THE CORRECT OBJECT TO RUN THE APP!'
+
+    def start_updates(self):
+        # QTimer
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update)
+        self.timer.start(250)
+        print 'timer started'
+
+    def stop_updates(self):
+        self.timer.stop()
 
 
 class BoxWorld3D:
