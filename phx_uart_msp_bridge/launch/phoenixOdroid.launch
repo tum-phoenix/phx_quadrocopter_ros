@@ -36,6 +36,6 @@
     
     <!-- coordinate system convention red = x = forward,  green = y = left and blue = z = up -->
     <!-- t2_ros format x,y,z | qx, qy, qz, qw -->
-    <node name="base_link_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 0.0 0.0 0.0 1 base_link laser" />
-    
+    <node name="base_link_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 base_link laser" />
+    <node name="transform_altitude_lidar" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />    
 </launch>

@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_msgs
   message_generation
   tf
+  tf2_ros
   std_msgs
 )
 

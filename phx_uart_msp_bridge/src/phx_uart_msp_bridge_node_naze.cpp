@@ -3,6 +3,7 @@
 #include <sstream>
 #include "ros/ros.h"
 #include "tf/tf.h"
+#include <tf2_ros/transform_broadcaster.h>
 #include <math.h>               // for M_PI
 #include "std_msgs/Header.h"
 #include "sensor_msgs/Imu.h"
@@ -61,6 +62,11 @@ int main(int argc, char **argv)
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
     ros::Publisher gps_home_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_home", 1);
     ros::Publisher pid_in_use = n.advertise<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_in_use", 1);
+    
+    boost::shared_ptr<tf2_ros::TransformBroadcaster> transformPublisher_;
+    transformPublisher_.reset(new tf2_ros::TransformBroadcaster());
+
+
 
     // ros init subscribers
     //ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
@@ -283,6 +289,26 @@ int main(int argc, char **argv)
                                                                                                        ((float) input_msg.msg_data.multiwii_attitude.yaw / 360. * M_PI));
                         imuMsg.orientation = quaternion;
                         imu_pub.publish(imuMsg);
+                        
+                        //publish transform
+                        
+                        geometry_msgs::Transform transform;
+                        
+                        transform.translation.x = 0;
+                        transform.translation.y = 0;
+                        transform.translation.z = 10; //here goes the calculated altitude above ground
+                        
+                        transform.rotation = quaternion;
+                        
+                        geometry_msgs::TransformStamped transformStamped;
+                        
+                        transformStamped.header.stamp = ros::Time::now();
+                        transformStamped.header.frame_id = "base_link";
+                        transformStamped.child_frame_id = "base_footprint";
+                        transformStamped.transform = transform;
+                        transformPublisher_->sendTransform(transformStamped);
+                        
+                        
                         // publish as attitude
                         attitudeMsg.header = headerMsg;
                         attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);
