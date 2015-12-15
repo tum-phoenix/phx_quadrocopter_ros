@@ -296,7 +296,7 @@ int main(int argc, char **argv)
                         
                         transform.translation.x = 0;
                         transform.translation.y = 0;
-                        transform.translation.z = 10; //here goes the calculated altitude above ground
+                        transform.translation.z = -10; //here goes the calculated altitude above ground
                         
                         transform.rotation = quaternion;
                         
