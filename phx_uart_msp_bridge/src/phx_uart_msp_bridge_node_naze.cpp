@@ -6,9 +6,13 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <math.h>               // for M_PI
 #include "std_msgs/Header.h"
+#include "std_msgs/String.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
 #include "sensor_msgs/NavSatFix.h"
+#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/PoseWithCovariance.h"
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "phx_uart_msp_bridge/Motor.h"
 #include "phx_uart_msp_bridge/Status.h"
 #include "phx_uart_msp_bridge/Altitude.h"
@@ -54,6 +58,7 @@ int main(int argc, char **argv)
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
     ros::Publisher attitude_pub = n.advertise<phx_uart_msp_bridge::Attitude>("phx/fc/attitude", 1);
+    ros::Publisher initial_heading_pub = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
     ros::Publisher motor_pub = n.advertise<phx_uart_msp_bridge::Motor>("phx/fc/motor", 1);
     ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/fc/status", 1);
@@ -62,6 +67,7 @@ int main(int argc, char **argv)
     ros::Publisher gps_wp_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_way_point", 1);
     ros::Publisher gps_home_pub = n.advertise<sensor_msgs::NavSatFix>("phx/fc/gps_home", 1);
     ros::Publisher pid_in_use = n.advertise<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_in_use", 1);
+    ros::Publisher hector_reset_pub = n.advertise<std_msgs::String>("syscommand", 1);
     
     boost::shared_ptr<tf2_ros::TransformBroadcaster> transformPublisher_;
     transformPublisher_.reset(new tf2_ros::TransformBroadcaster());
@@ -284,31 +290,51 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
                         imuMsg.header = headerMsg;
-                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * M_PI),
-                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * M_PI),
-                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.yaw / 360. * M_PI));
+                        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * 2*M_PI),
+                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * 2*M_PI),
+                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
                         imuMsg.orientation = quaternion;
                         imu_pub.publish(imuMsg);
-                        
-                        //publish transform
-                        
-                        geometry_msgs::Transform transform;
-                        
-                        transform.translation.x = 0;
-                        transform.translation.y = 0;
+
+                        //Publish initial heading for hector
+			if(received_imu == 50){
+				geometry_msgs::Pose pose;
+				geometry_msgs::Point point;
+                                point.x = 0;
+                                point.y = 0;
+                                point.z = 0;
+                                pose.position = point;
+                                pose.orientation = quaternion;
+				geometry_msgs::PoseWithCovariance poseWithCovariance;
+				poseWithCovariance.pose = pose;
+				geometry_msgs::PoseWithCovarianceStamped poseWithCovarianceStamped;
+				poseWithCovarianceStamped.header = headerMsg;
+				poseWithCovarianceStamped.header.frame_id = "map";
+				poseWithCovarianceStamped.pose = poseWithCovariance;
+				initial_heading_pub.publish(poseWithCovarianceStamped);
+				std_msgs::String msg;
+				msg.data = "reset";
+				hector_reset_pub.publish(msg);
+			}
+
+                        //publish transforms
+
+                       	geometry_msgs::Transform transform;
+                       	transform.translation.x = 0;
+                       	transform.translation.y = 0;
                         transform.translation.z = 0;
-                        
-                        transform.rotation = quaternion;
-                        
+                        geometry_msgs::Quaternion quaternion2 = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * 2*M_PI),
+                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * 2*M_PI),
+                                                                                                       ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
+			transform.rotation = quaternion2;
                         geometry_msgs::TransformStamped transformStamped;
-                        
                         transformStamped.header.stamp = ros::Time::now();
-                        transformStamped.header.frame_id = "base_link";
-                        transformStamped.child_frame_id = "base_stabelized";
+			transformStamped.header.seq = received_imu;
+                        transformStamped.header.frame_id = "base_stabelized";
+                        transformStamped.child_frame_id = "base_link";
                         transformStamped.transform = transform;
                         transformPublisher_->sendTransform(transformStamped);
-                        
-                        
+
                         // publish as attitude
                         attitudeMsg.header = headerMsg;
                         attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);
