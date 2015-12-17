@@ -296,7 +296,7 @@ int main(int argc, char **argv)
                         
                         transform.translation.x = 0;
                         transform.translation.y = 0;
-                        transform.translation.z = -10; //here goes the calculated altitude above ground
+                        transform.translation.z = 0;
                         
                         transform.rotation = quaternion;
                         
@@ -304,7 +304,7 @@ int main(int argc, char **argv)
                         
                         transformStamped.header.stamp = ros::Time::now();
                         transformStamped.header.frame_id = "base_link";
-                        transformStamped.child_frame_id = "base_footprint";
+                        transformStamped.child_frame_id = "base_stabelized";
                         transformStamped.transform = transform;
                         transformPublisher_->sendTransform(transformStamped);
                         
