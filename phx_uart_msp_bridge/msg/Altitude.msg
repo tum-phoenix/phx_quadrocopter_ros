@@ -1,3 +1,3 @@
 Header header
-int32 estimated_altitude
-int16 variation
+float32 estimated_altitude
+float32 variation
