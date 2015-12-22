@@ -24,7 +24,12 @@
             <remap from="camera_info" to="/camera_info" />
     </node>
 
-    <node name="LaserScanner" pkg="urg_node" type="urg_node" />
+    <node name="LaserScanner" pkg="urg_node" type="urg_node" >
+	<param name="ip_address" value="192.168.3.10" />
+	<param name="ip_port" value="10940" />
+	<param name="publish_intensity" value="True" />
+    </node>
+    
     <!-- hector_slam_start.launch -->
     <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" />
     
