@@ -1,8 +1,8 @@
 import numpy as np
 import os
 
-from phx_arduino_uart_bridge.msg import PID
-from phx_arduino_uart_bridge.msg import PID_cleanflight
+from phx_uart_msp_bridge.msg import PID
+from phx_uart_msp_bridge.msg import PID_cleanflight
 
 
 class PIDtab:
