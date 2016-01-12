@@ -16,7 +16,7 @@
       		<param name="fps" value="45" />
      		<param name="gain" value="0" />
 	    	<param name="Auto Exposure" value="0" />
-	        <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" />
+	        <!-- <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" /> -->
     </node>
 
 	<node name="ImageProc" pkg="image_proc" type="image_proc">
