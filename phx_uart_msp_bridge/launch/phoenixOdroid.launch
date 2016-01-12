@@ -4,7 +4,7 @@
 
 	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze" output="screen" machine="phoenix" />
 	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
-	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /image_mono" machine="phoenix" />
+	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
 
 	<node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
 
@@ -19,10 +19,19 @@
 	        <!-- <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" /> -->
     </node>
 
-	<node name="ImageProc" pkg="image_proc" type="image_proc">
+    <node name="ImageProc" pkg="image_proc" type="image_proc">
             <remap from="image_raw" to="/image_raw" />
             <remap from="camera_info" to="/camera_info" />
     </node>
+
+    <node name="LaserScanner" pkg="urg_node" type="urg_node" >
+	<param name="ip_address" value="192.168.3.10" />
+	<param name="ip_port" value="10940" />
+	<param name="publish_intensity" value="True" />
+    </node>
+    
+    <!-- hector_slam_start.launch -->
+    <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" />
     
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
       <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
@@ -34,6 +43,14 @@
     
     <!-- coordinate system convention red = x = forward,  green = y = left and blue = z = up -->
     <!-- t2_ros format x,y,z | qx, qy, qz, qw -->
-    <node name="base_link_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 0.0 0.0 0.0 1 base_link laser_link" />
+    <node name="base_link_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 base_link laser" />
+    <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom base_footprint" />
+    <node name="transform_altitude_lidar" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />    
+    <node name="odometry_based_on_hector" pkg="phx_odometry" type="hector_based_odometry.py" output="screen" machine="phoenix" />
     
+    <!-- robot model -->
+    <param name="robot_description" command="$(find xacro)/xacro.py $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
+    <param name="use_gui" value="False"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 </launch>

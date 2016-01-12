@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import rospy
 
-from phx_arduino_uart_bridge.msg import WayPoint
-from phx_arduino_uart_bridge.msg import WayPoints
-from phx_arduino_uart_bridge.msg import Management
+from phx_uart_msp_bridge.msg import WayPoint
+from phx_uart_msp_bridge.msg import WayPoints
+from phx_uart_msp_bridge.msg import Management
 from sensor_msgs.msg import NavSatFix
 
 import numpy as np
@@ -22,7 +22,7 @@ def calc_geo_distance(lon0, lat0, lon1, lat1):
     return d
 
 
-class ControllerWayPoint:
+class GPWWayPointNode:
     def __init__(self):
         # init ros
         rospy.init_node('way_point_controller')
@@ -172,6 +172,6 @@ class ControllerWayPoint:
         exit()
 
 if __name__ == '__main__':
-    controller = ControllerWayPoint()
+    controller = GPWWayPointNode()
 
     controller.run()

@@ -197,8 +197,8 @@ int main(int argc, char **argv)
                         */
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt;
-                        altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt / 100.;
+                        altitudeMsg.variation = input_msg.msg_data.multiwii_altitude.variation / 100.;
                         altitude_pub.publish(altitudeMsg);
                         received_altitude++;
                     } else if ((input_msg.msg_protocol == PHOENIX_RC_PROTOCOL) && (input_msg.msg_code == MARVIC_LIDAR)) {
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance / 100.;
                         altitudeMsg.variation = 0;
                         lidar_pub.publish(altitudeMsg);
                         received_lidar++;
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance / 100.;
                         altitudeMsg.variation = 0;
                         infra_red_pub.publish(altitudeMsg);
                         received_infra_red++;
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance / 100.;
                         altitudeMsg.variation = 0;
                         sonar_pub.publish(altitudeMsg);
                         received_sonar++;
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicAltitude";
                         altitudeMsg.header = headerMsg;
-                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance;
+                        altitudeMsg.estimated_altitude = input_msg.msg_data.marvic_altitude.distance / 100.;
                         altitudeMsg.variation = 0;
                         barometer_pub.publish(altitudeMsg);
                         received_barometer++;

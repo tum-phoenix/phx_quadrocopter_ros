@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_msgs
   message_generation
   tf
+  tf2_ros
   std_msgs
 )
 
@@ -59,6 +60,7 @@ find_package(catkin REQUIRED COMPONENTS
    Cycletime.msg
    Status.msg
    Altitude.msg
+   Attitude.msg
    Autonomous.msg
    LEDstrip.msg
    LED.msg
