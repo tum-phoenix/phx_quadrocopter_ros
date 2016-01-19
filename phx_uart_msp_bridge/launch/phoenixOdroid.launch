@@ -4,7 +4,7 @@
 
 	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze" output="screen" machine="phoenix" />
 	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
-	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /home/phoenix/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
+	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
 
 	<node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
 
@@ -16,7 +16,7 @@
       		<param name="fps" value="45" />
      		<param name="gain" value="0" />
 	    	<param name="Auto Exposure" value="0" />
-	        <!-- <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" /> -->
+	        <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" />
     </node>
 
     <node name="ImageProc" pkg="image_proc" type="image_proc">
@@ -49,7 +49,7 @@
     <node name="odometry_based_on_hector" pkg="phx_odometry" type="hector_based_odometry.py" output="screen" machine="phoenix" />
     
     <!-- robot model -->
-    <param name="robot_description" command="$(find xacro)/xacro.py $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
+    <param name="robot_description" command="xacro $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
     <param name="use_gui" value="False"/>
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
