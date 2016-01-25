@@ -7,10 +7,13 @@ enum MessageDirection : uint8_t {
 enum MessageProtocol : uint8_t {
     MULTIWII_PROTOCOL = 'M',
     PHOENIX_RC_PROTOCOL = 'R',
-    PHOENIX_LED_PROTOCOL = 'L'
+    PHOENIX_LED_PROTOCOL = 'L',
+    PHOENIX_SCANNER_PROTOCOL = 'S'
 };
 
 enum MessageCode : uint8_t {
+    SCANNER_READING = 45,
+    SCANNER_RESTART = 46,
     MARVIC_LED_0 = 50,
     MARVIC_LED_1 = 51,
     MARVIC_LED_2 = 52,
@@ -44,6 +47,8 @@ enum MessageCode : uint8_t {
 
 enum MessageLength : uint8_t {
     REQUEST = 0,
+    SCANNER_READING_LENGTH = 6,
+    SCANNER_RESTART_LENGTH = 2,
     MARVIC_BATTERY_LENGTH = 8,
     MARVIC_SONAR_LENGTH = 6,
     MARVIC_LIDAR_LENGTH = 6,
@@ -72,6 +77,16 @@ enum MessageLength : uint8_t {
 
 struct Payload {
     union {
+        struct {
+            uint16_t distance_scanner_1;
+            uint16_t distance_scanner_2;
+            uint16_t measurement_index;
+        } scanner_distance;
+
+        struct {
+            uint16_t angles;
+        } scanner_restart;
+
         struct {
             uint8_t p1;     uint8_t i1;     uint8_t d1;     // roll
             uint8_t p2;     uint8_t i2;     uint8_t d2;     // pitch

@@ -163,7 +163,6 @@ bool SerialCom::receive_to_buffer() {
     }
 }
 
-
 bool SerialCom::send_from_buffer() {
     if (do_debug_printout == true) std::cout << "SerialCom::send_from_buffer  starts sending on serial port " << serial_device_path << std::endl;
     int result, loopCount = buffer_io_max;
@@ -505,7 +504,6 @@ bool SerialCom::prepare_msg_single_led(uint8_t led_id, uint8_t strip_index, uint
     write_msg_to_buffer(msg);
 }
 
-
 bool SerialCom::prepare_msg_pid(uint8_t roll_p, uint8_t roll_i, uint8_t roll_d,
                                 uint8_t pitch_p, uint8_t pitch_i, uint8_t pitch_d,
                                 uint8_t yaw_p, uint8_t yaw_i, uint8_t yaw_d,
@@ -662,10 +660,11 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
             if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found";
             msg_preamble = '$';
             uint8_t temp_protocol_type = read_from_input_buffer();
-            if (temp_protocol_type == 'M' || temp_protocol_type == 'R' || temp_protocol_type == 'L') {
+            if (temp_protocol_type == 'M' || temp_protocol_type == 'R' || temp_protocol_type == 'L' || temp_protocol_type == 'S') {
                 // MultiWii protocol byte found
                 if ((do_debug_printout == true) && (temp_protocol_type == 'M')) std::cout << "  >> MultiWii protocol byte found";
                 if ((do_debug_printout == true) && (temp_protocol_type == 'P')) std::cout << "  >> PHOENIX protocol byte found";
+                if ((do_debug_printout == true) && (temp_protocol_type == 'S')) std::cout << "  >> SCANNER protocol byte found";
                 msg_protocol = temp_protocol_type;
                 msg_direction = read_from_input_buffer();
                 msg_length = read_from_input_buffer();
@@ -702,7 +701,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                     for (uint16_t index=0; index < msg_length; index++) {
                         data = read_from_input_buffer();
                         msg_data_bytes[index] = data;
-                        if (do_debug_printout == true) printf(" %i ", msg_data_bytes[index]);
+                        if (do_debug_printout == true) printf("%i ", (uint8_t) msg_data_bytes[index]);
                         checksum = checksum ^ data;
                     }
                     msg_checksum = read_from_input_buffer();
@@ -741,7 +740,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         return true;
                     } else if (msg_checksum == checksum) {
                         // the message is valid and can now be saved
-                        if (do_debug_printout == true) {
+                        if (true == true) {
                             std::cout << "SerialCom::read_msg_from_buffer   >>> this message was probably a valid message" << std::endl;
                             std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                             char cc;
@@ -771,7 +770,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         }
                         return true;
                     } else {
-                        //printf("SerialCom::read_msg_from_buffer  broken message received! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
+                        printf("SerialCom::read_msg_from_buffer  broken message received! code %i length %i checksum: %i <-> %i \n", msg_code, msg_length, checksum, msg_checksum);
                         input_buffer_read_position = analysis_start + 1;
                         if (input_buffer_read_position >= input_buffer_length) {
                             input_buffer_read_position -= input_buffer_length;
@@ -804,7 +803,6 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
     if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer    >> analysis reached real time" << std::endl;
     return false;   // exiting because there is now new data in the input_buffer
 }
-
 
 void print_multiwii_message(Message* msg) {
     printf(" print_multiwii_message:\n");
