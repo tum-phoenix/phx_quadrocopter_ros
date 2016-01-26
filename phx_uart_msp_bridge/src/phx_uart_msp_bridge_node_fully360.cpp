@@ -139,19 +139,23 @@ int main(int argc, char **argv)
                         if (laser_scanner_buffer_write_position > 1) {
                             std::cout << " SCANNER_RESTART received!" << std::endl;
                             uint16_t number_of_angles = laser_scanner_buffer_write_position;
-                            float scanned_ranges[number_of_angles * 2];
 
                             headerMsg.seq = received_restart;
                             headerMsg.stamp = ros::Time::now();
                             headerMsg.frame_id = "fully360";
                             laserMsg.header = headerMsg;
-                            laserMsg.angle_min = -M_PI;
-                            laserMsg.angle_max = M_PI;
-                            laserMsg.angle_increment = 2. * M_PI / number_of_angles;
+                            float offset = M_PI / 180. * (40. / 180.) * 0.;
+                            if ((received_restart % 2) == 0) {
+                                laserMsg.angle_min = - M_PI;
+                                laserMsg.angle_max = M_PI;
+                            } else {
+                                laserMsg.angle_min = - M_PI - offset;
+                                laserMsg.angle_max = M_PI - offset;
+                            }
+                            laserMsg.angle_increment = 2. * M_PI / number_of_angles / 2;
                             laserMsg.time_increment = 0;
                             laserMsg.range_min = 0.05;
                             laserMsg.range_max = 40.0;
-                            //laserMsg.ranges = scanned_ranges;
                             laserMsg.ranges.resize(number_of_angles * 2);
                             for (uint16_t index=0; index < laser_scanner_buffer_write_position; index++) {
                                 laserMsg.ranges[index] = 0.01 * (uint16_t) laser_scanner_buffer_1[index];
