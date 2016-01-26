@@ -9,7 +9,6 @@
   <node name="base_frame_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0 0 0 0 0 0 1 robot laser" />
 
   <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
-
     <param name="pub_map_odom_transform" value="true"/>
     <param name="map_frame" value="map" />
     <param name="base_frame" value="robot" />
@@ -32,11 +31,6 @@
     <param name="update_factor_occupied" value="0.9" />
     <param name="map_update_distance_thresh" value="0.4"/>
     <param name="map_update_angle_thresh" value="0.06" />
-
-    <!--
-      <param name="pub_drawings" value="true"/>
-      <param name="pub_debug_output" value="true"/>
-    -->
   </node>
 
   <arg name="disable_poseupdate" default="false" />
