@@ -740,7 +740,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                         return true;
                     } else if (msg_checksum == checksum) {
                         // the message is valid and can now be saved
-                        if (true == true) {
+                        if (do_debug_printout == true) {
                             std::cout << "SerialCom::read_msg_from_buffer   >>> this message was probably a valid message" << std::endl;
                             std::cout << "SerialCom::read_msg_from_buffer   >>> message was: \033[34;1m";
                             char cc;

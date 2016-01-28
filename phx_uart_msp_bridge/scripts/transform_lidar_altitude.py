@@ -20,8 +20,8 @@ def update_footprint_transform(height):
     t = geometry_msgs.msg.TransformStamped()
 
     t.header.stamp = rospy.Time.now()
-    t.header.frame_id = "base_footprint"
-    t.child_frame_id = "base_stabelized"
+    t.header.frame_id = "footprint"
+    t.child_frame_id = "copter_stabilized"
     t.transform.translation.x = 0.0
     t.transform.translation.y = 0.0
     t.transform.translation.z = height
@@ -53,7 +53,33 @@ ros_subscribe_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, receive_
 ros_subscribe_altitude = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, convert_altitude_measurement)
 ros_publish_new_altitude = rospy.Publisher('/phx/altitude', Altitude, queue_size=1)
 
-r = rospy.Rate(10)
+r = rospy.Rate(50)
+received_map_odom = 0
+
+tf_listener = tf.TransformListener()
 
 while not rospy.is_shutdown():
+    try:
+        (trans, rot) = tf_listener.lookupTransform('map', 'odom', rospy.Time(0))
+        received_map_odom += 1
+    except:
+        if received_map_odom == 0:
+            trans = [0, 0, 0]
+        else:
+            continue
+    br = tf2_ros.TransformBroadcaster()
+    t = geometry_msgs.msg.TransformStamped()
+    t.header.stamp = rospy.Time.now()
+    t.header.frame_id = "map"
+    t.child_frame_id = "rot_free_odom"
+    t.transform.translation.x = trans[0]
+    t.transform.translation.y = trans[1]
+    t.transform.translation.z = trans[2]
+    q = tf.transformations.quaternion_from_euler(0, 0, 0)
+    t.transform.rotation.x = q[0]
+    t.transform.rotation.y = q[1]
+    t.transform.rotation.z = q[2]
+    t.transform.rotation.w = q[3]
+    br.sendTransform(t)
+
     r.sleep()

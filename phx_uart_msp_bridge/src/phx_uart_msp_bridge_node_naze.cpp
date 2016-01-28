@@ -180,7 +180,7 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
         }
-        if (loop_counter % 5 == 0) {
+        if (loop_counter % 7 == 0) {
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
@@ -188,11 +188,11 @@ int main(int argc, char **argv)
         } else {
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+                serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
             }
-            if (loop_counter % 2 == 0) {
+            if (loop_counter % 4 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-                serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
@@ -304,7 +304,10 @@ int main(int argc, char **argv)
                                 point.y = 0;
                                 point.z = 0;
                                 pose.position = point;
-                                pose.orientation = quaternion;
+                                geometry_msgs::Quaternion quaternion0 = tf::createQuaternionMsgFromRollPitchYaw(((float) 0),
+                                                                                                                ((float) 0),
+                                                                                                                ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
+                                pose.orientation = quaternion0;
 				geometry_msgs::PoseWithCovariance poseWithCovariance;
 				poseWithCovariance.pose = pose;
 				geometry_msgs::PoseWithCovarianceStamped poseWithCovarianceStamped;
@@ -317,23 +320,40 @@ int main(int argc, char **argv)
 				hector_reset_pub.publish(msg);
 			}
 
-                        //publish transforms
-
-                       	geometry_msgs::Transform transform;
-                       	transform.translation.x = 0;
-                       	transform.translation.y = 0;
-                        transform.translation.z = 0;
+                        // publish transforms
+                        //  copter_stabilized -> copter
+                       	geometry_msgs::Transform transform2;
+                       	transform2.translation.x = 0;
+                       	transform2.translation.y = 0;
+                        transform2.translation.z = 0;
                         geometry_msgs::Quaternion quaternion2 = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * 2*M_PI),
-                                                                                                       ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * 2*M_PI),
-                                                                                                       ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
-			transform.rotation = quaternion2;
-                        geometry_msgs::TransformStamped transformStamped;
-                        transformStamped.header.stamp = ros::Time::now();
-			transformStamped.header.seq = received_imu;
-                        transformStamped.header.frame_id = "base_stabelized";
-                        transformStamped.child_frame_id = "base_link";
-                        transformStamped.transform = transform;
-                        transformPublisher_->sendTransform(transformStamped);
+                                                                                                        ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * 2*M_PI),
+                                                                                                        ((float) 0));
+			transform2.rotation = quaternion2;
+                        geometry_msgs::TransformStamped transformStamped2;
+                        transformStamped2.header.stamp = ros::Time::now();
+			transformStamped2.header.seq = received_imu;
+                        transformStamped2.header.frame_id = "copter_stabilized";
+                        transformStamped2.child_frame_id = "copter";
+                        transformStamped2.transform = transform2;
+                        transformPublisher_->sendTransform(transformStamped2);
+
+                        // odom -> footprint
+                        geometry_msgs::Transform transform3;
+                        transform3.translation.x = 0;
+                        transform3.translation.y = 0;
+                        transform3.translation.z = 0;
+                        geometry_msgs::Quaternion quaternion3 = tf::createQuaternionMsgFromRollPitchYaw(((float) 0),
+                                                                                                        ((float) 0),
+                                                                                                        ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
+                        transform3.rotation = quaternion3;
+                        geometry_msgs::TransformStamped transformStamped3;
+                        transformStamped3.header.stamp = ros::Time::now();
+                        transformStamped3.header.seq = received_imu;
+                        transformStamped3.header.frame_id = "rot_free_odom";
+                        transformStamped3.child_frame_id = "footprint";
+                        transformStamped3.transform = transform3;
+                        transformPublisher_->sendTransform(transformStamped3);
 
                         // publish as attitude
                         attitudeMsg.header = headerMsg;

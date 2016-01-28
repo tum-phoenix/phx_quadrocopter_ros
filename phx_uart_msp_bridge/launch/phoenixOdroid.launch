@@ -29,12 +29,13 @@
     <node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
 	    <param name="ip_address" value="192.168.3.10" />
 	    <param name="ip_port" value="10940" />
-	    <param name="frame_id" value="laser" />
+	    <param name="frame_id" value="laserHOKUYO" />
 	    <param name="publish_intensity" value="True" />
     </node>
     
     <!-- hector_slam_start.launch -->
-    <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" />
+    <!-- <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" /> -->
+    <include file="$(find phx_uart_msp_bridge)/launch/mapping_box.launch" />
 
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
       <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
@@ -46,10 +47,13 @@
 
     <!-- coordinate system convention red = x = forward,  green = y = left and blue = z = up -->
     <!-- t2_ros format x,y,z | qx, qy, qz, qw -->
-    <node name="base_link_to_laser_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 base_link laser" />
-    <node name="scanmatcher_to_odom" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 scanmatcher_frame odom" />
-    <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom base_footprint" />
-    <node name="transform_altitude_lidar" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
+
+    <node name="copter_to_laserHOKUYO_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 copter laserHOKUYO" />
+    <!-- link from copter_stabilized to copter introduces pitch and roll from the imu and is published by the phy_uart_msp_bridge_naze node -->
+    <node name="footprint_to_copter_stabilized" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
+
+    <!-- <node name="scanmatcher_to_odom" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 scanmatcher_frame odom" /> -->
+    <!-- <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom base_footprint" /> -->    
     <!-- <node name="odometry_based_on_hector" pkg="phx_odometry" type="hector_based_odometry.py" output="screen" machine="phoenix" /> -->
 
     <!-- robot model -->
