@@ -14,8 +14,8 @@ def update_odometry_frame(x, y, z):
     t = geometry_msgs.msg.TransformStamped()
 
     t.header.stamp = rospy.Time.now()
-    t.header.frame_id = "odom"
-    t.child_frame_id = "map"
+    t.header.frame_id = "map"
+    t.child_frame_id = "odom"
     t.transform.translation.x = x
     t.transform.translation.y = y
     t.transform.translation.z = z
