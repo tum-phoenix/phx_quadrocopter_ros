@@ -339,13 +339,13 @@ int main(int argc, char **argv)
                         transformPublisher_->sendTransform(transformStamped2);
 
                         // odom -> footprint
-                        geometry_msgs::Transform transform3;
+                        /*geometry_msgs::Transform transform3;
                         transform3.translation.x = 0;
                         transform3.translation.y = 0;
                         transform3.translation.z = 0;
                         geometry_msgs::Quaternion quaternion3 = tf::createQuaternionMsgFromRollPitchYaw(((float) 0),
                                                                                                         ((float) 0),
-                                                                                                        ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
+                                                                                                        ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2 *M_PI));
                         transform3.rotation = quaternion3;
                         geometry_msgs::TransformStamped transformStamped3;
                         transformStamped3.header.stamp = ros::Time::now();
@@ -354,7 +354,8 @@ int main(int argc, char **argv)
                         transformStamped3.child_frame_id = "footprint";
                         transformStamped3.transform = transform3;
                         transformPublisher_->sendTransform(transformStamped3);
-
+                        */
+                        
                         // publish as attitude
                         attitudeMsg.header = headerMsg;
                         attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);

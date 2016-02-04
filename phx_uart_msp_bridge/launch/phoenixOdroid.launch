@@ -53,7 +53,7 @@
     <node name="footprint_to_copter_stabilized" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
 
     <!-- <node name="scanmatcher_to_odom" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 scanmatcher_frame odom" /> -->
-    <!-- <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom base_footprint" /> -->    
+    <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom footprint" />    
     <!-- <node name="odometry_based_on_hector" pkg="phx_odometry" type="hector_based_odometry.py" output="screen" machine="phoenix" /> -->
 
     <!-- robot model -->
