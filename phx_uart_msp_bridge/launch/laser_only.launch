@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!--
+  <node name="LaserScanner" pkg="urg_node" type="urg_node" >
+    <param name="serial_port" value="/dev/ttyACM0" />
+    <param name="frame_id" value="laserHOKUYO" />
+    <param name="publish_intensity" value="false" />
+  </node>
+  -->
+
+  <node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
+    <param name="ip_address" value="192.168.3.10" />
+    <param name="ip_port" value="10940" />
+    <param name="frame_id" value="laserHOKUYO" />
+    <param name="publish_intensity" value="True" />
+  </node>
+  
+  <node name="copter_to_laserHOKUYO_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 copter laserHOKUYO" />
+
+
+</launch>
