@@ -21,14 +21,14 @@ int main(int argc, char **argv)
 {
     // init ------------------------------------------------------------------------------------------------
     // ros init
-    ros::init(argc, argv, "UART_bridge_crab");
+    ros::init(argc, argv, "UART_bridge_servo");
     ros::NodeHandle n;
 
     // ros init publishers
-    servo_pub = n.advertise<phx_arduino_uart_bridge::Servo>("crab/uart_bridge/cur_servo_cmd", 1);
+    servo_pub = n.advertise<phx_arduino_uart_bridge::Servo>("servo/uart_servo_state", 1);
 
     // ros init subscribers
-    ros::Subscriber servo_sub = n.subscribe<phx_arduino_uart_bridge::Servo>("crab/uart_bridge/servo_cmd", 1, servo_direct_callback);
+    ros::Subscriber servo_sub = n.subscribe<phx_arduino_uart_bridge::Servo>("servo/uart_servo_cmd", 1, servo_direct_callback);
     
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     auto real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
     
 
-    ROS_INFO("uart bridge CRAB starts main loop");
+    ROS_INFO("uart bridge SERVO starts main loop");
     // main loop -------------------------------------------------------------------------------------------
     while (ros::ok())
     {
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
             serial_interface.init();                                                 // start serial connection
             sleep(1);                                                                // wait for boot loader and calibration
             serial_interface.clear_input_buffer();                                   // clear serial buffer
-            ROS_INFO("uart bridge CRAB goes back to main loop");
+            ROS_INFO("uart bridge SERVO goes back to main loop");
         }
         loop_counter++;
         // print statistics from while to while
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     
     
     // shutdown -------------------------------------------------------------------------------------------
-    ROS_INFO("uart bridge is shutting down");
+    ROS_INFO("uart bridge SERVO is shutting down");
     
     
     serial_interface.deinitialize();
@@ -115,7 +115,7 @@ void servo_direct_callback(const phx_arduino_uart_bridge::Servo::ConstPtr& servo
 
     headerMsg.seq = msg_sent;
     headerMsg.stamp = ros::Time::now();
-    headerMsg.frame_id = "crab";
+    headerMsg.frame_id = "servo_board";
     servoMsg.header = headerMsg;
     servoMsg.servo0 = servo_values->servo0;
     servoMsg.servo1 = servo_values->servo1;
