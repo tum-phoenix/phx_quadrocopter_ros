@@ -17,6 +17,9 @@ import pyqtgraph
 import numpy as np
 import time
 
+################
+# This are only helper functions! the real code you are looking for is in gauge.py
+################
 
 def generate_led_strip_msg(color_r, color_g, color_b):
     LEDstrip_msg = LEDstrip()

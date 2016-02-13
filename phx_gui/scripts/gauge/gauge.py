@@ -1,5 +1,4 @@
-
-from PyQt4 import uic, QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 import layouts
 import modules
 import gauge_ros
