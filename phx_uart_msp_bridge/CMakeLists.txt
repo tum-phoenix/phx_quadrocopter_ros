@@ -128,6 +128,7 @@ include_directories(
 ## Declare a cpp executable
 add_executable(phx_uart_msp_bridge_node_naze src/phx_uart_msp_bridge_node_naze.cpp)
 add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
+add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fully360.cpp)
 
 
 target_link_libraries(phx_uart_msp_bridge_node_naze
@@ -137,6 +138,12 @@ target_link_libraries(phx_uart_msp_bridge_node_naze
 
 
 target_link_libraries(phx_uart_msp_bridge_node_marvicRCaltitudeServo
+   ${catkin_LIBRARIES}
+   phx_serial_com
+)
+
+
+target_link_libraries(phx_uart_msp_bridge_node_fully360
    ${catkin_LIBRARIES}
    phx_serial_com
 )
