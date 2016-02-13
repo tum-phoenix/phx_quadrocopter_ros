@@ -1,0 +1,7 @@
+
+<launch>
+  	<machine name="servo_board"  address="localhost" />
+
+  	<node name="UARTBridge_servo" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_servo" output="screen" machine="servo_board" />
+
+</launch>
