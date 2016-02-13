@@ -1,7 +1,11 @@
+#!/usr/bin/env python
 from PyQt4 import QtCore, QtGui
+import sys
+print sys.argv
 import layouts
 import modules
 import gauge_ros
+
 
 
 """
