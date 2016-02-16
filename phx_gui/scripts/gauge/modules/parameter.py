@@ -85,8 +85,10 @@ class ParameterTab:
         else:
             print ' -> set_parameters_slider_limits requested number', number, 'not available'
     
-    def set_parameters_slider(self, number, val, lcd_linked=True):
-        if number == 0:
+    def set_parameters_slider(self, number, val, lcd_linked=True, update_slider=True):
+        if update_slider is False:
+            pass
+        elif number == 0:
             self.ui_win.horizontalSlider_parameter_00.setValue(val)
         elif number == 1:
             self.ui_win.horizontalSlider_parameter_01.setValue(val)

@@ -94,6 +94,7 @@ rc_marvic_tab = modules.rc.RCtab(graphicsView_rc=ui_win.graphicsView_rc_marvic,
 parameter_tab = modules.parameter.ParameterTab(ui_win=ui_win)
 for i in range(0, 18):
     parameter_tab.set_parameters_slider_limits(i, 300, 2450)
+    parameter_tab.set_parameters_slider(number=i, val=1500)
 
 # init ros node
 ros_node = gauge_ros.ROSgauge(gps_tab=gps_tab,

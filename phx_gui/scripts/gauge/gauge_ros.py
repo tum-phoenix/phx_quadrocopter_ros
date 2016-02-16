@@ -53,7 +53,8 @@ class ROSgauge:
 
         # setup subscriptions and their callbacks
         if self.parameter_tab:
-            self.ros_sub_cur_servo_cmd = rospy.Subscriber('/phx/marvicServo/cur_servo_cmd', Servo, self.callback_cur_servo)
+            # self.ros_sub_cur_servo_cmd = rospy.Subscriber('/phx/marvicServo/cur_servo_cmd', Servo, self.callback_cur_servo)
+            self.ros_sub_cur_servo_cmd = rospy.Subscriber('/servo/uart_servo_state', Servo, self.callback_cur_servo)
         if self.gps_tab:
             self.ros_sub_gps_position = rospy.Subscriber('/phx/gps', NavSatFix, self.callback_gps_position)
             self.ros_sub_gps_way_point = rospy.Subscriber('/phx/fc/gps_way_point', NavSatFix, self.callback_gps_way_point)
@@ -76,7 +77,8 @@ class ROSgauge:
         # setup publishers and their callbacks
         self.ros_pub_management = rospy.Publisher('/phx/management', Management, queue_size=1)
         if self.parameter_tab:
-            self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
+            # self.ros_pub_servo_cmd = rospy.Publisher('/phx/marvicServo/servo_cmd', Servo, queue_size=1)
+            self.ros_pub_servo_cmd = rospy.Publisher('/servo/uart_servo_cmd', Servo, queue_size=1)
             self.ros_pub_motor_cmd = rospy.Publisher('/phx/fc/motor_set', Motor, queue_size=1)
         if self.gps_tab:
             self.ros_pub_gps_way_point = rospy.Publisher('/phx/gps_way_point', NavSatFix, queue_size=1)
@@ -257,24 +259,24 @@ class ROSgauge:
 
     def callback_cur_servo(self, cur_servo_cmd):
         if self.parameter_tab:
-            self.parameter_tab.set_parameters_slider(0, cur_servo_cmd.servo0)
-            self.parameter_tab.set_parameters_slider(1, cur_servo_cmd.servo1)
-            self.parameter_tab.set_parameters_slider(2, cur_servo_cmd.servo2)
-            self.parameter_tab.set_parameters_slider(3, cur_servo_cmd.servo3)
-            self.parameter_tab.set_parameters_slider(4, cur_servo_cmd.servo4)
-            self.parameter_tab.set_parameters_slider(5, cur_servo_cmd.servo5)
-            self.parameter_tab.set_parameters_slider(6, cur_servo_cmd.servo6)
-            self.parameter_tab.set_parameters_slider(7, cur_servo_cmd.servo7)
-            self.parameter_tab.set_parameters_slider(8, cur_servo_cmd.servo8)
-            self.parameter_tab.set_parameters_slider(9, cur_servo_cmd.servo9)
-            self.parameter_tab.set_parameters_slider(10, cur_servo_cmd.servo10)
-            self.parameter_tab.set_parameters_slider(11, cur_servo_cmd.servo11)
-            self.parameter_tab.set_parameters_slider(12, cur_servo_cmd.servo12)
-            self.parameter_tab.set_parameters_slider(13, cur_servo_cmd.servo13)
-            self.parameter_tab.set_parameters_slider(14, cur_servo_cmd.servo14)
-            self.parameter_tab.set_parameters_slider(15, cur_servo_cmd.servo15)
-            self.parameter_tab.set_parameters_slider(16, cur_servo_cmd.servo16)
-            self.parameter_tab.set_parameters_slider(17, cur_servo_cmd.servo17)
+            self.parameter_tab.set_parameters_slider(0, cur_servo_cmd.servo0, update_slider=False)
+            self.parameter_tab.set_parameters_slider(1, cur_servo_cmd.servo1, update_slider=False)
+            self.parameter_tab.set_parameters_slider(2, cur_servo_cmd.servo2, update_slider=False)
+            self.parameter_tab.set_parameters_slider(3, cur_servo_cmd.servo3, update_slider=False)
+            self.parameter_tab.set_parameters_slider(4, cur_servo_cmd.servo4, update_slider=False)
+            self.parameter_tab.set_parameters_slider(5, cur_servo_cmd.servo5, update_slider=False)
+            self.parameter_tab.set_parameters_slider(6, cur_servo_cmd.servo6, update_slider=False)
+            self.parameter_tab.set_parameters_slider(7, cur_servo_cmd.servo7, update_slider=False)
+            self.parameter_tab.set_parameters_slider(8, cur_servo_cmd.servo8, update_slider=False)
+            self.parameter_tab.set_parameters_slider(9, cur_servo_cmd.servo9, update_slider=False)
+            self.parameter_tab.set_parameters_slider(10, cur_servo_cmd.servo10, update_slider=False)
+            self.parameter_tab.set_parameters_slider(11, cur_servo_cmd.servo11, update_slider=False)
+            self.parameter_tab.set_parameters_slider(12, cur_servo_cmd.servo12, update_slider=False)
+            self.parameter_tab.set_parameters_slider(13, cur_servo_cmd.servo13, update_slider=False)
+            self.parameter_tab.set_parameters_slider(14, cur_servo_cmd.servo14, update_slider=False)
+            self.parameter_tab.set_parameters_slider(15, cur_servo_cmd.servo15, update_slider=False)
+            self.parameter_tab.set_parameters_slider(16, cur_servo_cmd.servo16, update_slider=False)
+            self.parameter_tab.set_parameters_slider(17, cur_servo_cmd.servo17, update_slider=False)
 
     def publish_led_strip(self, strip_index, color_r, color_g, color_b):
         if strip_index == 0:
