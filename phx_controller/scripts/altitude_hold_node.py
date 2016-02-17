@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import rospy
-from phx_arduino_uart_bridge.msg import Altitude
+from phx_uart_msp_bridge.msg import Altitude
 from sensor_msgs.msg import Joy
 
 
