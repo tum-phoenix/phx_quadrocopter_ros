@@ -76,12 +76,11 @@ int main(int argc, char **argv)
 
 
     // ros init subscribers
-    //ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer_direct", 1, rc_direct_callback);
+    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
-    ros::Subscriber set_rc_direct = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_set", 1, rc_direct_callback);
-    
+
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
     ros::Rate loop_rate(500);
     
@@ -146,6 +145,7 @@ int main(int argc, char **argv)
             std::cout << "       request\tin\tloss" << std::endl;
             std::cout << "status   " << request_status      << "\t" << received_status     << "\t" << request_status - received_status         << std::endl;
             std::cout << "rc       " << request_rc          << "\t" << received_rc         << "\t" << request_rc - received_rc                 << std::endl;
+            std::cout << "rc_pilot " << request_rc_pilot    << "\t" << received_rc_pilot   << "\t" << request_rc_pilot - received_rc_pilot     << std::endl;
             std::cout << "imu      " << request_imu         << "\t" << received_imu        << "\t" << request_imu - received_imu               << std::endl;
             std::cout << "attitude " << request_attitude    << "\t" << received_attitude   << "\t" << request_attitude - received_attitude     << std::endl;
             std::cout << "motor    " << request_motor       << "\t" << received_motor      << "\t" << request_motor - received_motor           << std::endl;
@@ -161,6 +161,7 @@ int main(int argc, char **argv)
             real_duration = std::chrono::duration_cast<std::chrono::microseconds>( t1 - t0 ).count() / 1000000.;
             std::cout << "freq status   " << received_status     / real_duration << " msg/s" << std::endl;
             std::cout << "freq rc       " << received_rc         / real_duration << " msg/s" << std::endl;
+            std::cout << "freq rc_pilot " << received_rc_pilot   / real_duration << " msg/s" << std::endl;
             std::cout << "freq imu      " << received_imu        / real_duration << " msg/s" << std::endl;
             std::cout << "freq attitude " << received_attitude   / real_duration << " msg/s" << std::endl;
             std::cout << "freq motor    " << received_motor      / real_duration << " msg/s" << std::endl;
@@ -182,20 +183,20 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
         }
-        if (loop_counter % 7 == 0) {
+        if (loop_counter % 8 == 0) {
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
+            serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
         } else {
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-                serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
             }
             if (loop_counter % 4 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
-                serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
+                serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
@@ -508,8 +509,7 @@ void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pw
 }
 
 void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
-    std::cout << "\033[1;31m>>> rc_direct_callback is deactivated\033[0m"<< std::endl;
-    /*
+    std::cout << "\033[1;31m>>> rc_direct_callback\033[0m"<< std::endl;
     serial_interface.prepare_msg_rc((uint16_t) joyMsg->axes[3],
                                     (uint16_t) joyMsg->axes[1],
                                     (uint16_t) joyMsg->axes[0],
@@ -519,7 +519,6 @@ void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
                                     (uint16_t) joyMsg->buttons[2],
                                     (uint16_t) joyMsg->buttons[3]);
     serial_interface.send_from_buffer();
-    */
 }
 
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr& set_gps_way_point) {
