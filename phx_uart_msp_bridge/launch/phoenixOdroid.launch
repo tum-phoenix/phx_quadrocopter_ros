@@ -2,7 +2,7 @@
     <!--  -->
 	<machine name="phoenix" address="localhost" />
 
-	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze" output="screen" machine="phoenix" />
+	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
 	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
 	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
 
