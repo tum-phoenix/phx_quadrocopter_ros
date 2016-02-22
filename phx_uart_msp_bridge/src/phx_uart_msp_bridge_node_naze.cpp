@@ -14,6 +14,7 @@
 #include "geometry_msgs/PoseWithCovariance.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "phx_uart_msp_bridge/Motor.h"
+#include "phx_uart_msp_bridge/RemoteControl.h"
 #include "phx_uart_msp_bridge/Status.h"
 #include "phx_uart_msp_bridge/Altitude.h"
 #include "phx_uart_msp_bridge/Attitude.h"
@@ -27,7 +28,7 @@
 #include "phx_uart_msp_bridge/serial_com.h"
 
 
-void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
+void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr&);
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
 void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr&);
 void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr&);
@@ -48,18 +49,14 @@ int main(int argc, char **argv)
     phx_uart_msp_bridge::Altitude altitudeMsg;
     phx_uart_msp_bridge::Attitude attitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
-
-    sensor_msgs::Joy joyMsg;
-    joyMsg.axes = std::vector<float> (4, 0);
-    joyMsg.buttons = std::vector<int> (4, 0);
-    
+    phx_uart_msp_bridge::RemoteControl RemoteControlMsg;
     phx_uart_msp_bridge::PID_cleanflight pidMsg;
     
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
     ros::Publisher attitude_pub = n.advertise<phx_uart_msp_bridge::Attitude>("phx/fc/attitude", 1);
     ros::Publisher initial_heading_pub = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
-    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
+    ros::Publisher active_rc_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc", 1);
     ros::Publisher motor_pub = n.advertise<phx_uart_msp_bridge::Motor>("phx/fc/motor", 1);
     ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/fc/status", 1);
     ros::Publisher altitude_pub = n.advertise<phx_uart_msp_bridge::Altitude>("phx/fc/altitude", 1);
@@ -75,7 +72,7 @@ int main(int argc, char **argv)
 
 
     // ros init subscribers
-    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer", 1, rc_direct_callback);
+    ros::Subscriber rc_sub = n.subscribe<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc_computer", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
@@ -262,16 +259,16 @@ int main(int argc, char **argv)
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
-                        joyMsg.header = headerMsg;
-                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                        joy_pub.publish(joyMsg);
+                        RemoteControlMsg.header = headerMsg;
+                        RemoteControlMsg.roll = (uint16_t) input_msg.msg_data.multiwii_rc.roll;
+                        RemoteControlMsg.pitch = (uint16_t) input_msg.msg_data.multiwii_rc.pitch;
+                        RemoteControlMsg.yaw = (uint16_t) input_msg.msg_data.multiwii_rc.yaw;
+                        RemoteControlMsg.throttle = (uint16_t) input_msg.msg_data.multiwii_rc.throttle;
+                        RemoteControlMsg.aux1 = (uint16_t) input_msg.msg_data.multiwii_rc.aux1;
+                        RemoteControlMsg.aux2 = (uint16_t) input_msg.msg_data.multiwii_rc.aux2;
+                        RemoteControlMsg.aux3 = (uint16_t) input_msg.msg_data.multiwii_rc.aux3;
+                        RemoteControlMsg.aux4 = (uint16_t) input_msg.msg_data.multiwii_rc.aux4;
+                        active_rc_pub.publish(RemoteControlMsg);
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
@@ -296,28 +293,28 @@ int main(int argc, char **argv)
                         imu_pub.publish(imuMsg);
 
                         //Publish initial heading for hector
-			if(received_imu == 50){
-				geometry_msgs::Pose pose;
-				geometry_msgs::Point point;
-                                point.x = 0;
-                                point.y = 0;
-                                point.z = 0;
-                                pose.position = point;
-                                geometry_msgs::Quaternion quaternion0 = tf::createQuaternionMsgFromRollPitchYaw(((float) 0),
-                                                                                                                ((float) 0),
-                                                                                                                ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
-                                pose.orientation = quaternion0;
-				geometry_msgs::PoseWithCovariance poseWithCovariance;
-				poseWithCovariance.pose = pose;
-				geometry_msgs::PoseWithCovarianceStamped poseWithCovarianceStamped;
-				poseWithCovarianceStamped.header = headerMsg;
-				poseWithCovarianceStamped.header.frame_id = "map";
-				poseWithCovarianceStamped.pose = poseWithCovariance;
-				initial_heading_pub.publish(poseWithCovarianceStamped);
-				std_msgs::String msg;
-				msg.data = "reset";
-				hector_reset_pub.publish(msg);
-			}
+                        if (received_imu == 50){
+                            geometry_msgs::Pose pose;
+                            geometry_msgs::Point point;
+                                            point.x = 0;
+                                            point.y = 0;
+                                            point.z = 0;
+                                            pose.position = point;
+                                            geometry_msgs::Quaternion quaternion0 = tf::createQuaternionMsgFromRollPitchYaw(((float) 0),
+                                                                                                                            ((float) 0),
+                                                                                                                            ((float) -input_msg.msg_data.multiwii_attitude.yaw / 360. * 2*M_PI));
+                                            pose.orientation = quaternion0;
+                            geometry_msgs::PoseWithCovariance poseWithCovariance;
+                            poseWithCovariance.pose = pose;
+                            geometry_msgs::PoseWithCovarianceStamped poseWithCovarianceStamped;
+                            poseWithCovarianceStamped.header = headerMsg;
+                            poseWithCovarianceStamped.header.frame_id = "map";
+                            poseWithCovarianceStamped.pose = poseWithCovariance;
+                            initial_heading_pub.publish(poseWithCovarianceStamped);
+                            std_msgs::String msg;
+                            msg.data = "reset";
+                            hector_reset_pub.publish(msg);
+                        }
 
                         // publish transforms
                         //  copter_stabilized -> copter
@@ -328,10 +325,10 @@ int main(int argc, char **argv)
                         geometry_msgs::Quaternion quaternion2 = tf::createQuaternionMsgFromRollPitchYaw(((float) input_msg.msg_data.multiwii_attitude.roll / 3600. * 2*M_PI),
                                                                                                         ((float) input_msg.msg_data.multiwii_attitude.pitch / 3600. * 2*M_PI),
                                                                                                         ((float) 0));
-			transform2.rotation = quaternion2;
+			            transform2.rotation = quaternion2;
                         geometry_msgs::TransformStamped transformStamped2;
                         transformStamped2.header.stamp = ros::Time::now();
-			transformStamped2.header.seq = received_imu;
+			            transformStamped2.header.seq = received_imu;
                         transformStamped2.header.frame_id = "copter_stabilized";
                         transformStamped2.child_frame_id = "copter";
                         transformStamped2.transform = transform2;
@@ -488,17 +485,17 @@ void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pw
     */
 }
 
-void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
+void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& RemoteControlMsg_input) {
     std::cout << "\033[1;31m>>> rc_direct_callback is deactivated\033[0m"<< std::endl;
     /*
-    serial_interface.prepare_msg_rc((uint16_t) joyMsg->axes[3],
-                                    (uint16_t) joyMsg->axes[1],
-                                    (uint16_t) joyMsg->axes[0],
-                                    (uint16_t) joyMsg->axes[2],
-                                    (uint16_t) joyMsg->buttons[0],
-                                    (uint16_t) joyMsg->buttons[1],
-                                    (uint16_t) joyMsg->buttons[2],
-                                    (uint16_t) joyMsg->buttons[3]);
+    serial_interface.prepare_msg_rc((uint16_t) RemoteControlMsg_input->throttle,
+                                    (uint16_t) RemoteControlMsg_input->pitch,
+                                    (uint16_t) RemoteControlMsg_input->roll,
+                                    (uint16_t) RemoteControlMsg_input->yaw,
+                                    (uint16_t) RemoteControlMsg_input->aux1,
+                                    (uint16_t) RemoteControlMsg_input->aux2,
+                                    (uint16_t) RemoteControlMsg_input->aux3,
+                                    (uint16_t) RemoteControlMsg_input->aux4);
     serial_interface.send_from_buffer();
     */
 }

@@ -55,6 +55,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Motor.msg
+   RemoteControl.msg
    Servo.msg
    Battery.msg
    Cycletime.msg

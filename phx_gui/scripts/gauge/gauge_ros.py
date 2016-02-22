@@ -1,6 +1,7 @@
 import rospy
 from phx_uart_msp_bridge.msg import Servo
 from phx_uart_msp_bridge.msg import Motor
+from phx_uart_msp_bridge.msg import RemoteControl
 from phx_uart_msp_bridge.msg import LED
 from phx_uart_msp_bridge.msg import LEDstrip
 from phx_uart_msp_bridge.msg import Altitude
@@ -57,7 +58,7 @@ class ROSgauge:
             self.ros_sub_gps_home = rospy.Subscriber('/phx/fc/gps_home', NavSatFix, self.callback_gps_home)
             self.ros_sub_gps_path_way_points = rospy.Subscriber('/phx/way_points/path', WayPoints, self.callback_gps_way_point_path)
         if self.rc_fc_tab:
-            self.ros_sub_fc_rc = rospy.Subscriber('/phx/fc/rc', Joy, self.callback_fc_rc)
+            self.ros_sub_fc_rc = rospy.Subscriber('/phx/fc/rc', RemoteControl, self.callback_fc_rc)
         if self.altitude_tab:
             self.ros_sub_fc_altitude = rospy.Subscriber('/phx/fc/altitude', Altitude, self.callback_fc_altitude)
             self.ros_sub_marvic_altitude = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.callback_marvic_altitude_fused)
@@ -66,7 +67,8 @@ class ROSgauge:
         if self.pid_tab:
             self.ros_sub_fc_pid_in_use = rospy.Subscriber('/phx/fc/pid_in_use', PID_cleanflight, self.pid_tab.callback_fc_pid_cleanflight)
         if self.rc_marvic_tab:
-            self.ros_sub_marvic_rc = rospy.Subscriber('/phx/marvicRC/rc_input', Joy, self.callback_marvic_rc)
+            # self.ros_sub_marvic_rc = rospy.Subscriber('/phx/marvicRC/rc_input', Joy, self.callback_marvic_rc)
+            self.ros_sub_marvic_rc = rospy.Subscriber('/phx/fc/rc_pilot', RemoteControl, self.callback_marvic_rc)
         if self.video_tab:
             self.ros_sub_image_mono = rospy.Subscriber('/image_mono', Image, self.callback_image_mono)
 
@@ -222,29 +224,29 @@ class ROSgauge:
         self.altitude_tab.altitude_dataset[-1, index, 0] = cur_altitude.estimated_altitude
         self.altitude_tab.altitude_dataset[-1, index, 1] = time_stamp
 
-    def callback_fc_rc(self, cur_joy_cmd):
+    def callback_fc_rc(self, cur_joy_cmd=RemoteControl()):
         if self.rc_fc_tab:
             self.rc_fc_tab.rc_data[:-1, :] = self.rc_fc_tab.rc_data[1:, :]
-            self.rc_fc_tab.rc_data[-1, 0] = cur_joy_cmd.axes[1]          # pitch
-            self.rc_fc_tab.rc_data[-1, 1] = cur_joy_cmd.axes[0]          # roll
-            self.rc_fc_tab.rc_data[-1, 2] = cur_joy_cmd.axes[2]          # yaw
-            self.rc_fc_tab.rc_data[-1, 3] = cur_joy_cmd.axes[3]          # Throttle
-            self.rc_fc_tab.rc_data[-1, 4] = cur_joy_cmd.buttons[0]       # gps
-            self.rc_fc_tab.rc_data[-1, 5] = cur_joy_cmd.buttons[1]       #
-            self.rc_fc_tab.rc_data[-1, 6] = cur_joy_cmd.buttons[2]       #
-            self.rc_fc_tab.rc_data[-1, 7] = cur_joy_cmd.buttons[3]       # barometer
+            self.rc_fc_tab.rc_data[-1, 0] = cur_joy_cmd.pitch           # pitch
+            self.rc_fc_tab.rc_data[-1, 1] = cur_joy_cmd.roll            # roll
+            self.rc_fc_tab.rc_data[-1, 2] = cur_joy_cmd.yaw             # yaw
+            self.rc_fc_tab.rc_data[-1, 3] = cur_joy_cmd.throttle        # Throttle
+            self.rc_fc_tab.rc_data[-1, 4] = cur_joy_cmd.aux1            # gps
+            self.rc_fc_tab.rc_data[-1, 5] = cur_joy_cmd.aux2            #
+            self.rc_fc_tab.rc_data[-1, 6] = cur_joy_cmd.aux3            #
+            self.rc_fc_tab.rc_data[-1, 7] = cur_joy_cmd.aux4            # barometer
 
-    def callback_marvic_rc(self, cur_joy_cmd):
+    def callback_marvic_rc(self, cur_joy_cmd=RemoteControl()):
         if self.rc_marvic_tab:
             self.rc_marvic_tab.rc_data[:-1, :] = self.rc_marvic_tab.rc_data[1:, :]
-            self.rc_marvic_tab.rc_data[-1, 0] = cur_joy_cmd.axes[1]          # pitch
-            self.rc_marvic_tab.rc_data[-1, 1] = cur_joy_cmd.axes[0]          # roll
-            self.rc_marvic_tab.rc_data[-1, 2] = cur_joy_cmd.axes[2]          # yaw
-            self.rc_marvic_tab.rc_data[-1, 3] = cur_joy_cmd.axes[3]          # Throttle
-            self.rc_marvic_tab.rc_data[-1, 4] = cur_joy_cmd.buttons[0]       # gps
-            self.rc_marvic_tab.rc_data[-1, 5] = cur_joy_cmd.buttons[1]       #
-            self.rc_marvic_tab.rc_data[-1, 6] = cur_joy_cmd.buttons[2]       #
-            self.rc_marvic_tab.rc_data[-1, 7] = cur_joy_cmd.buttons[3]       # barometer
+            self.rc_marvic_tab.rc_data[-1, 0] = cur_joy_cmd.pitch           # pitch
+            self.rc_marvic_tab.rc_data[-1, 1] = cur_joy_cmd.roll            # roll
+            self.rc_marvic_tab.rc_data[-1, 2] = cur_joy_cmd.yaw             # yaw
+            self.rc_marvic_tab.rc_data[-1, 3] = cur_joy_cmd.throttle        # Throttle
+            self.rc_marvic_tab.rc_data[-1, 4] = cur_joy_cmd.aux1            # gps
+            self.rc_marvic_tab.rc_data[-1, 5] = cur_joy_cmd.aux2            #
+            self.rc_marvic_tab.rc_data[-1, 6] = cur_joy_cmd.aux3            #
+            self.rc_marvic_tab.rc_data[-1, 7] = cur_joy_cmd.aux4            # barometer
 
     def callback_image_mono(self, cur_image_mono):
         if self.video_tab:

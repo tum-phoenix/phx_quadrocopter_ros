@@ -14,6 +14,7 @@
 #include "geometry_msgs/PoseWithCovariance.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "phx_uart_msp_bridge/Motor.h"
+#include "phx_uart_msp_bridge/RemoteControl.h"
 #include "phx_uart_msp_bridge/Status.h"
 #include "phx_uart_msp_bridge/Altitude.h"
 #include "phx_uart_msp_bridge/Attitude.h"
@@ -27,7 +28,7 @@
 #include "phx_uart_msp_bridge/serial_com.h"
 
 
-void rc_direct_callback(const sensor_msgs::Joy::ConstPtr&);
+void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr&);
 void gps_way_point_callback(const sensor_msgs::NavSatFix::ConstPtr&);
 void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr&);
 void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr&);
@@ -49,18 +50,16 @@ int main(int argc, char **argv)
     phx_uart_msp_bridge::Attitude attitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
 
-    sensor_msgs::Joy joyMsg;
-    joyMsg.axes = std::vector<float> (4, 0);
-    joyMsg.buttons = std::vector<int> (4, 0);
-    
+    phx_uart_msp_bridge::RemoteControl RemoteControlMsg;
+
     phx_uart_msp_bridge::PID_cleanflight pidMsg;
     
     // ros init publishers
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("phx/imu", 1);
     ros::Publisher attitude_pub = n.advertise<phx_uart_msp_bridge::Attitude>("phx/fc/attitude", 1);
     ros::Publisher initial_heading_pub = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
-    ros::Publisher rc_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc", 1);
-    ros::Publisher rc_pilot_pub = n.advertise<sensor_msgs::Joy>("phx/fc/rc_pilot", 1);
+    ros::Publisher active_rc_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc", 1);
+    ros::Publisher rc_pilot_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc_pilot", 1);
     ros::Publisher motor_pub = n.advertise<phx_uart_msp_bridge::Motor>("phx/fc/motor", 1);
     ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/fc/status", 1);
     ros::Publisher altitude_pub = n.advertise<phx_uart_msp_bridge::Altitude>("phx/fc/altitude", 1);
@@ -76,19 +75,19 @@ int main(int argc, char **argv)
 
 
     // ros init subscribers
-    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/fc/rc_computer", 1, rc_direct_callback);
+    ros::Subscriber rc_sub = n.subscribe<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc_computer", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(500);
+    ros::Rate loop_rate(100);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
-    //serial_interface.set_device("/dev/ttyUSB0");                             // select the device
+    serial_interface.set_device("/dev/ttyUSB0");                             // select the device
     //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
-    serial_interface.set_device("/dev/naze");                             // select the device
+    //serial_interface.set_device("/dev/naze");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
@@ -177,14 +176,14 @@ int main(int argc, char **argv)
             std::cout << " communication took " << real_duration << " real seconds" << std::endl;
             std::cout << "       CPU workload " << system_duration / real_duration << std::endl;
         }
-        
+
         // serial com send requests
-        if (loop_counter % 50 == 0) {
+        if (loop_counter % 100 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
         }
-        if (loop_counter % 8 == 0) {
-            serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
+        if (loop_counter % 25 == 0) {
+        //    serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
@@ -193,7 +192,7 @@ int main(int argc, char **argv)
             if (loop_counter % 1 == 0) {
                 serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             }
-            if (loop_counter % 4 == 0) {
+            if (loop_counter % 10 == 0) {
                 serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
                 serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
@@ -267,31 +266,31 @@ int main(int argc, char **argv)
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
-                        joyMsg.header = headerMsg;
-                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                        rc_pub.publish(joyMsg);
+                        RemoteControlMsg.header = headerMsg;
+                        RemoteControlMsg.roll = (uint16_t) input_msg.msg_data.multiwii_rc.roll;
+                        RemoteControlMsg.pitch = (uint16_t) input_msg.msg_data.multiwii_rc.pitch;
+                        RemoteControlMsg.yaw = (uint16_t) input_msg.msg_data.multiwii_rc.yaw;
+                        RemoteControlMsg.throttle = (uint16_t) input_msg.msg_data.multiwii_rc.throttle;
+                        RemoteControlMsg.aux1 = (uint16_t) input_msg.msg_data.multiwii_rc.aux1;
+                        RemoteControlMsg.aux2 = (uint16_t) input_msg.msg_data.multiwii_rc.aux2;
+                        RemoteControlMsg.aux3 = (uint16_t) input_msg.msg_data.multiwii_rc.aux3;
+                        RemoteControlMsg.aux4 = (uint16_t) input_msg.msg_data.multiwii_rc.aux4;
+                        active_rc_pub.publish(RemoteControlMsg);
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_RC_PILOT) {
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "naze_fc";
-                        joyMsg.header = headerMsg;
-                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                        rc_pilot_pub.publish(joyMsg);
+                        RemoteControlMsg.header = headerMsg;
+                        RemoteControlMsg.roll = (uint16_t) input_msg.msg_data.multiwii_rc.roll;
+                        RemoteControlMsg.pitch = (uint16_t) input_msg.msg_data.multiwii_rc.pitch;
+                        RemoteControlMsg.yaw = (uint16_t) input_msg.msg_data.multiwii_rc.yaw;
+                        RemoteControlMsg.throttle = (uint16_t) input_msg.msg_data.multiwii_rc.throttle;
+                        RemoteControlMsg.aux1 = (uint16_t) input_msg.msg_data.multiwii_rc.aux1;
+                        RemoteControlMsg.aux2 = (uint16_t) input_msg.msg_data.multiwii_rc.aux2;
+                        RemoteControlMsg.aux3 = (uint16_t) input_msg.msg_data.multiwii_rc.aux3;
+                        RemoteControlMsg.aux4 = (uint16_t) input_msg.msg_data.multiwii_rc.aux4;
+                        rc_pilot_pub.publish(RemoteControlMsg);
                         received_rc_pilot++;
                     } else if (input_msg.msg_code == MULTIWII_IMU) {
                         // if raw_imu data is received this is updated in the imu ros message but not directly published.
@@ -508,16 +507,16 @@ void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pw
     */
 }
 
-void rc_direct_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
+void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& RemoteControlMsg_input) {
     std::cout << "\033[1;31m>>> rc_direct_callback\033[0m"<< std::endl;
-    serial_interface.prepare_msg_rc((uint16_t) joyMsg->axes[3],
-                                    (uint16_t) joyMsg->axes[1],
-                                    (uint16_t) joyMsg->axes[0],
-                                    (uint16_t) joyMsg->axes[2],
-                                    (uint16_t) joyMsg->buttons[0],
-                                    (uint16_t) joyMsg->buttons[1],
-                                    (uint16_t) joyMsg->buttons[2],
-                                    (uint16_t) joyMsg->buttons[3]);
+    serial_interface.prepare_msg_rc((uint16_t) RemoteControlMsg_input->pitch,       // pitch
+                                    (uint16_t) RemoteControlMsg_input->yaw,         // yaw
+                                    (uint16_t) RemoteControlMsg_input->aux1,        // aux 1
+                                    (uint16_t) RemoteControlMsg_input->aux2,        // aux 2
+                                    (uint16_t) RemoteControlMsg_input->aux3,        // aux 3
+                                    (uint16_t) RemoteControlMsg_input->aux4,        // aux 4
+                                    (uint16_t) RemoteControlMsg_input->roll,        // roll
+                                    (uint16_t) RemoteControlMsg_input->throttle);   // throttle
     serial_interface.send_from_buffer();
 }
 
