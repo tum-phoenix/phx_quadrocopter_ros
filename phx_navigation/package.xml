@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package>
+  <name>phx_navigation</name>
+  <version>0.0.1</version>
+  <description>The phx_navigation package</description>
+  <maintainer email="tatsch@gmail.com">tatsch@gmail.com</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>move_base</build_depend>
+  <run_depend>move_base</run_depend>
+</package>

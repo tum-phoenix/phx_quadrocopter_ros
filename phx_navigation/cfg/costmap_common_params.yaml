@@ -1,0 +1,8 @@
+obstacle_range: 5.0
+raytrace_range: 3.0
+footprint: [[0.3, 0.0], [0.0, 0.3], [0.0, 0.3], [-0.3, 0.0]]
+inflation_radius: 2.0
+
+observation_sources: laser_scan_sensor
+
+laser_scan_sensor: {sensor_frame: laserHOKUYO, data_type: LaserScan, topic: scan, marking: true, clearing: true}
