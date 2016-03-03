@@ -335,7 +335,8 @@ int main(int argc, char **argv)
                         transformPublisher_->sendTransform(transformStamped2);
 
                         // odom -> footprint
-                        /*geometry_msgs::Transform transform3;
+                        /*
+                        geometry_msgs::Transform transform3;
                         transform3.translation.x = 0;
                         transform3.translation.y = 0;
                         transform3.translation.z = 0;
@@ -351,7 +352,7 @@ int main(int argc, char **argv)
                         transformStamped3.transform = transform3;
                         transformPublisher_->sendTransform(transformStamped3);
                         */
-                        
+
                         // publish as attitude
                         attitudeMsg.header = headerMsg;
                         attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);
