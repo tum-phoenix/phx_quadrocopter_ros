@@ -13,6 +13,7 @@
 #include "phx_uart_msp_bridge/LEDstrip.h"
 #include "phx_uart_msp_bridge/LED.h"
 #include "phx_uart_msp_bridge/Servo.h"
+#include "phx_uart_msp_bridge/RemoteControl.h"
 
 #include <chrono>
 #include <iostream>
