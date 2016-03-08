@@ -18,7 +18,7 @@
 #include <iostream>
 #include "phx_uart_msp_bridge/serial_com.h"
 
-void rc_computer_callback(const sensor_msgs::Joy::ConstPtr&);
+void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr&);
 void led_strip_0_callback(const phx_uart_msp_bridge::LEDstrip::ConstPtr&);
 void led_strip_1_callback(const phx_uart_msp_bridge::LEDstrip::ConstPtr&);
 void led_strip_2_callback(const phx_uart_msp_bridge::LEDstrip::ConstPtr&);
@@ -36,16 +36,14 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     std_msgs::Header headerMsg;
     sensor_msgs::Imu imuMsg;
-    sensor_msgs::Joy joyMsg;
-    joyMsg.axes = std::vector<float> (4, 0);
-    joyMsg.buttons = std::vector<int> (4, 0);
+    phx_uart_msp_bridge::RemoteControl RemoteControlMsg;
     phx_uart_msp_bridge::Motor motorMsg;
     phx_uart_msp_bridge::Status statusMsg;
     phx_uart_msp_bridge::Altitude altitudeMsg;
     sensor_msgs::NavSatFix gpsMsg;
     
     // ros init publishers
-    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("phx/marvicRC/rc_input", 1);
+    ros::Publisher active_rc_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("phx/marvicRC/rc_input", 1);
     ros::Publisher status_pub = n.advertise<phx_uart_msp_bridge::Status>("phx/marvicRC/status", 1);
 
     ros::Publisher altitude_pub = n.advertise<phx_uart_msp_bridge::Altitude>("phx/marvicAltitude/altitude", 1);
@@ -55,7 +53,7 @@ int main(int argc, char **argv)
     ros::Publisher barometer_pub = n.advertise<phx_uart_msp_bridge::Altitude>("phx/marvicAltitude/barometer", 1);
 
     // ros init subscriber
-    ros::Subscriber rc_sub = n.subscribe<sensor_msgs::Joy>("phx/rc_computer", 1, rc_computer_callback);
+    //ros::Subscriber rc_sub = n.subscribe<phx_uart_msp_bridge::RemoteControl>("phx/rc_computer", 1, rc_computer_callback);
     ros::Subscriber led_strip_0_sub = n.subscribe<phx_uart_msp_bridge::LEDstrip>("phx/led/led_strip_0", 1, led_strip_0_callback);
     ros::Subscriber led_strip_1_sub = n.subscribe<phx_uart_msp_bridge::LEDstrip>("phx/led/led_strip_1", 1, led_strip_1_callback);
     ros::Subscriber led_strip_2_sub = n.subscribe<phx_uart_msp_bridge::LEDstrip>("phx/led/led_strip_2", 1, led_strip_2_callback);
@@ -171,30 +169,16 @@ int main(int argc, char **argv)
                         headerMsg.seq = received_rc;
                         headerMsg.stamp = ros::Time::now();
                         headerMsg.frame_id = "marvicRC";
-                        joyMsg.header = headerMsg;
-                        joyMsg.axes[0] = (float) input_msg.msg_data.multiwii_rc.roll;
-                        joyMsg.axes[1] = (float) input_msg.msg_data.multiwii_rc.pitch;
-                        joyMsg.axes[2] = (float) input_msg.msg_data.multiwii_rc.yaw;
-                        joyMsg.axes[3] = (float) input_msg.msg_data.multiwii_rc.throttle;
-                        joyMsg.buttons[0] = (int) input_msg.msg_data.multiwii_rc.aux1;
-                        joyMsg.buttons[1] = (int) input_msg.msg_data.multiwii_rc.aux2;
-                        joyMsg.buttons[2] = (int) input_msg.msg_data.multiwii_rc.aux3;
-                        joyMsg.buttons[3] = (int) input_msg.msg_data.multiwii_rc.aux4;
-                        joy_pub.publish(joyMsg);
-                        /*
-                        // this demonstrates that it is possible to fly the copter via the serial bridge by sending every second rc update back.
-                        if (received_rc % 2 == 0) {
-                            serial_interface.prepare_msg_rc((uint16_t) input_msg.msg_data.multiwii_rc.throttle,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.pitch,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.roll,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.yaw,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux1,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux2,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux3,
-                                                           (uint16_t) input_msg.msg_data.multiwii_rc.aux4);
-                            serial_interface.send_from_buffer();
-                        }
-                        */
+                        RemoteControlMsg.header = headerMsg;
+                        RemoteControlMsg.roll = (uint16_t) input_msg.msg_data.multiwii_rc.roll;
+                        RemoteControlMsg.pitch = (uint16_t) input_msg.msg_data.multiwii_rc.pitch;
+                        RemoteControlMsg.yaw = (uint16_t) input_msg.msg_data.multiwii_rc.yaw;
+                        RemoteControlMsg.throttle = (uint16_t) input_msg.msg_data.multiwii_rc.throttle;
+                        RemoteControlMsg.aux1 = (uint16_t) input_msg.msg_data.multiwii_rc.aux1;
+                        RemoteControlMsg.aux2 = (uint16_t) input_msg.msg_data.multiwii_rc.aux2;
+                        RemoteControlMsg.aux3 = (uint16_t) input_msg.msg_data.multiwii_rc.aux3;
+                        RemoteControlMsg.aux4 = (uint16_t) input_msg.msg_data.multiwii_rc.aux4;
+                        active_rc_pub.publish(RemoteControlMsg);
                         received_rc++;
                     } else if (input_msg.msg_code == MULTIWII_ALTITUDE) {
                         altitudeMsg.estimated_altitude = input_msg.msg_data.multiwii_altitude.estAlt / 100.;
@@ -283,17 +267,16 @@ int main(int argc, char **argv)
 
 
 // callbacks
-void rc_computer_callback(const sensor_msgs::Joy::ConstPtr& joyMsg) {
+void rc_computer_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& RemoteControlMsg_input) {
     std::cout << "\033[1;31m>>> rc_computer_callback\033[0m"<< std::endl;
-    serial_interface.prepare_msg_rc((uint16_t) (*joyMsg).axes[3],
-                                    (uint16_t) joyMsg->axes[1],
-                                    (uint16_t) joyMsg->axes[0],
-                                    (uint16_t) joyMsg->axes[2],
-                                    (uint16_t) joyMsg->buttons[0],
-                                    (uint16_t) joyMsg->buttons[1],
-                                    (uint16_t) joyMsg->buttons[2],
-                                    (uint16_t) joyMsg->buttons[3],
-                                    PHOENIX_RC_PROTOCOL);
+    serial_interface.prepare_msg_rc((uint16_t) RemoteControlMsg_input->roll,
+                                    (uint16_t) RemoteControlMsg_input->yaw,
+                                    (uint16_t) RemoteControlMsg_input->throttle,
+                                    (uint16_t) RemoteControlMsg_input->pitch,
+                                    (uint16_t) RemoteControlMsg_input->aux1,
+                                    (uint16_t) RemoteControlMsg_input->aux2,
+                                    (uint16_t) RemoteControlMsg_input->aux3,
+                                    (uint16_t) RemoteControlMsg_input->aux4);
     serial_interface.send_from_buffer();
 }
 
