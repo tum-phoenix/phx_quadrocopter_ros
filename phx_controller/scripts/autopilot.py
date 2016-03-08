@@ -10,7 +10,6 @@ class Autopilot:
 
         rospy.init_node('Autopilot_node')
         self.twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.callback_twist)
-        self.rc_sub = rospy.Subscriber('/phx/rc_marvic', RemoteControl, self.callback_rc)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
 
 
