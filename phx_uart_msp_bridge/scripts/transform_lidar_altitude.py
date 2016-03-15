@@ -53,12 +53,13 @@ ros_subscribe_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, receive_
 ros_subscribe_altitude = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, convert_altitude_measurement)
 ros_publish_new_altitude = rospy.Publisher('/phx/altitude', Altitude, queue_size=1)
 
-r = rospy.Rate(50)
+r = rospy.Rate(1)
 received_map_odom = 0
 
 tf_listener = tf.TransformListener()
 
 while not rospy.is_shutdown():
+    """
     try:
         (trans, rot) = tf_listener.lookupTransform('map', 'odom', rospy.Time(0))
         received_map_odom += 1
@@ -81,5 +82,5 @@ while not rospy.is_shutdown():
     t.transform.rotation.z = q[2]
     t.transform.rotation.w = q[3]
     br.sendTransform(t)
-
+    """
     r.sleep()
