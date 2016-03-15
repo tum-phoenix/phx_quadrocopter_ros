@@ -33,7 +33,8 @@
 	    <param name="publish_intensity" value="True" />
             <param name="cluster" value="3" />
     </node>
-    
+    <node name="laser_to_pointcloud2" pkg="phx_rangefinder" type="laser_to_pointcloud" output="screen" machine="phoenix" />
+
     <!-- hector_slam_start.launch -->
     <!-- <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" /> -->
     <include file="$(find phx_uart_msp_bridge)/launch/mapping_box.launch" />
