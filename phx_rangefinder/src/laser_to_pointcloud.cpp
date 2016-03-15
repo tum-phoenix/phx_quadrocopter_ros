@@ -23,8 +23,14 @@ My_Filter::My_Filter(){
 
 void My_Filter::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan){
     sensor_msgs::PointCloud2 cloud;
-    projector_.transformLaserScanToPointCloud("map", *scan, cloud, tfListener_);
-    point_cloud_publisher_.publish(cloud);
+    try {
+        tfListener_.waitForTransform("map", "laserHOKUYO", ros::Time::now(), ros::Duration(0.2));
+        projector_.transformLaserScanToPointCloud("map", *scan, cloud, tfListener_);
+        point_cloud_publisher_.publish(cloud);
+    } catch (tf::TransformException ex){
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+    }
 }
 
 
