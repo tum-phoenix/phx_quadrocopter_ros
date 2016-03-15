@@ -13,10 +13,11 @@ from phx_uart_msp_bridge.msg import Attitude
 
 pitch_angle = 0    # rad
 roll_angle = 0     # rad#
+br = tf2_ros.TransformBroadcaster()
 
 
 def update_footprint_transform(height):
-    br = tf2_ros.TransformBroadcaster()
+    global br
     t = geometry_msgs.msg.TransformStamped()
 
     t.header.stamp = rospy.Time.now()
@@ -25,7 +26,7 @@ def update_footprint_transform(height):
     t.transform.translation.x = 0.0
     t.transform.translation.y = 0.0
     t.transform.translation.z = height
-    q = tf.transformations.quaternion_from_euler(0, 0, 0)
+    # q = tf.transformations.quaternion_from_euler(0, 0, 0)
     t.transform.rotation.x = 0
     t.transform.rotation.y = 0
     t.transform.rotation.z = 0
@@ -56,7 +57,7 @@ ros_publish_new_altitude = rospy.Publisher('/phx/altitude', Altitude, queue_size
 r = rospy.Rate(1)
 received_map_odom = 0
 
-tf_listener = tf.TransformListener()
+#  = tf.TransformListener()
 
 while not rospy.is_shutdown():
     """
