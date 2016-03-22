@@ -2,10 +2,10 @@
     <!--  -->
 	<machine name="phoenix" address="localhost" />
 
-	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
+	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze" output="screen" machine="phoenix" />
 	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
-
 	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
+
 	<node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
 
 	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
@@ -33,11 +33,66 @@
 	    <param name="publish_intensity" value="True" />
             <param name="cluster" value="3" />
     </node>
-    <node name="laser_to_pointcloud2" pkg="phx_rangefinder" type="laser_to_pointcloud" output="screen" machine="phoenix" />
-
+    
     <!-- hector_slam_start.launch -->
-    <!-- <include file="$(find phx_uart_msp_bridge)/launch/hector_slam_start.launch" /> -->
-    <include file="$(find phx_uart_msp_bridge)/launch/mapping_box.launch" />
+
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+        <param name="pub_map_odom_transform" value="true"/>
+        <param name="map_frame" value="map" />
+        <param name="base_frame" value="copter" />
+        <param name="odom_frame" value="odom" />
+        <param name="output_timing" value="false"/>
+        <param name="use_tf_scan_transformation" value="true"/>
+        <param name="use_tf_pose_start_estimate" value="false"/>
+        <param name="scan_topic" value="scan"/>
+
+        <!-- Map size / start point -->
+        <param name="map_resolution" value="0.050"/>
+        <param name="map_size" value="2048"/>
+        <param name="map_start_x" value="0.5"/>
+        <param name="map_start_y" value="0.5" />
+
+        <!-- Map update parameters -->
+        <param name="update_factor_free" value="0.4"/>
+        <param name="update_factor_occupied" value="0.9" />
+        <param name="map_update_distance_thresh" value="0.1"/>
+        <param name="map_update_angle_thresh" value="0.06" />
+    </node>
+
+    <arg name="disable_poseupdate" default="false" />
+    <arg name="geotiff_map_file_path" default="$(find hector_geotiff)/maps"/>
+
+    <include file="$(find hector_geotiff)/launch/geotiff_mapper.launch">
+        <arg name="trajectory_source_frame_name" value="scanmatcher_frame"/>
+        <arg name="map_file_path" value="$(arg geotiff_map_file_path)"/>
+    </include>
+
+    <node pkg="hector_map_server" type="hector_map_server" name="hector_map_server" output="screen" />
+    <node pkg="topic_tools" type="throttle" name="map_throttle" args="messages map 0.1 throttled_map" />
+
+    <node pkg="hector_elevation_mapping" type="ElevationMappingNode" name="ElevationMapping"  output="screen">
+        <param name="elevation_resolution" value="0.01" />
+        <param name="elevation_zero_level" value="16384" />
+        <param name="min_observable_elevation" value="-1.0" />
+        <param name="max_observable_elevation" value="0.5" />
+        <param name="max_observable_distance" value="4.0" /> 
+        <param name="sensor_variance" value="0.001" />   
+        <param name="map_frame_id" value="map" />
+        <param name="local_map_frame_id" value="copter" />
+        <param name="local_elevation_map_topic" value="elevation_map_local" />
+        <param name="gloabl_elevation_map_topic" value="elevation_map_global" />
+        <param name="point_cloud_topic" value="openni/depth/points"/>
+        <param name="grid_map_topic" value="scanmatcher_map"/>
+        <param name="sys_msg_topic" value="syscommand" />
+        <param name="publish_poseupdate" value="false" />
+        <param name="poseupdate_pub_period" value="1.0" />
+        <param name="poseupdate_height_covariance" value="0.25" />
+        <param name="poseupdate_used_pattern_size" value="3" />
+        <!-- Not necessary to set, set by scanmatcher -->
+            <!--param name="map_resolution" value="0.05" /-->
+            <!--param name="max_grid_size_x" value="1024" /-->
+            <!--param name="max_grid_size_y" value="1024" /-->
+    </node>
 
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
       <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
@@ -55,31 +110,14 @@
     <node name="footprint_to_copter_stabilized" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
 
     <!-- <node name="scanmatcher_to_odom" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 scanmatcher_frame odom" /> -->
-    <node name="odom_to_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom footprint" respawn="true" />
+    <node name="odom_to_base_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom footprint" />    
     <!-- <node name="odometry_based_on_hector" pkg="phx_odometry" type="hector_based_odometry.py" output="screen" machine="phoenix" /> -->
 
     <!-- robot model -->
+    <!--
     <param name="robot_description" command="xacro $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
     <param name="use_gui" value="False"/>
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-   
-    <!-- cost map -->
-    <include file="$(find phx_navigation)/move_base.launch" />
-
-    <!-- octomap map -->
-    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-		<param name="resolution" value="0.05" />
-		
-		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="map" />
-		
-		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="5.0" />
-		
-		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="/slam_cloud" />
-   </node>
-
+    -->
 </launch>
-

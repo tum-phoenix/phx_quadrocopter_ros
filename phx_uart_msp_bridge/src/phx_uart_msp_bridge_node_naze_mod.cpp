@@ -75,19 +75,19 @@ int main(int argc, char **argv)
 
 
     // ros init subscribers
-    ros::Subscriber rc_sub = n.subscribe<phx_uart_msp_bridge::RemoteControl>("phx/fc/rc_computer", 1, rc_direct_callback);
+    ros::Subscriber rc_sub = n.subscribe<phx_uart_msp_bridge::RemoteControl>("phx/rc_computer", 1, rc_direct_callback);
     ros::Subscriber gps_wp = n.subscribe<sensor_msgs::NavSatFix>("phx/gps_way_point", 1, gps_way_point_callback);
     ros::Subscriber set_pid = n.subscribe<phx_uart_msp_bridge::PID_cleanflight>("phx/fc/pid_set", 1, set_pid_callback);
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(100);
+    ros::Rate loop_rate(125);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
-    serial_interface.set_device("/dev/ttyUSB0");                             // select the device
+    //serial_interface.set_device("/dev/ttyUSB0");                             // select the device
     //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
-    //serial_interface.set_device("/dev/naze");                             // select the device
+    serial_interface.set_device("/dev/naze");                             // select the device
     serial_interface.set_baudrate(115200);                                   // set the communication baudrate
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
@@ -182,22 +182,22 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
         }
-        if (loop_counter % 25 == 0) {
-        //    serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
+        if (loop_counter % 10 == 0) {
+            serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
             serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
-        } else {
-            if (loop_counter % 1 == 0) {
-                serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
-            }
-            if (loop_counter % 10 == 0) {
-                serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
-                serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
-                serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
-            }
         }
+        if (loop_counter % 1 == 0) {
+            serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+        }
+        if (loop_counter % 2 == 0) {
+            serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+            serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
+            serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+        }
+
         serial_interface.send_from_buffer();
 
         // receive serial stuff
@@ -357,7 +357,8 @@ int main(int argc, char **argv)
                         transformPublisher_->sendTransform(transformStamped2);
 
                         // odom -> footprint
-                        /*geometry_msgs::Transform transform3;
+/*
+                        geometry_msgs::Transform transform3;
                         transform3.translation.x = 0;
                         transform3.translation.y = 0;
                         transform3.translation.z = 0;
@@ -372,8 +373,8 @@ int main(int argc, char **argv)
                         transformStamped3.child_frame_id = "footprint";
                         transformStamped3.transform = transform3;
                         transformPublisher_->sendTransform(transformStamped3);
-                        */
-                        
+*/
+
                         // publish as attitude
                         attitudeMsg.header = headerMsg;
                         attitudeMsg.roll = ((float) input_msg.msg_data.multiwii_attitude.roll * 0.1);
