@@ -121,6 +121,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+
+
 ## Declare a cpp library
  add_library(phx_serial_com
    src/serial_com.cpp
@@ -131,6 +133,8 @@ add_executable(phx_uart_msp_bridge_node_naze src/phx_uart_msp_bridge_node_naze.c
 add_executable(phx_uart_msp_bridge_node_naze_mod src/phx_uart_msp_bridge_node_naze_mod.cpp)
 add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
 add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fully360.cpp)
+
+add_dependencies(phx_uart_msp_bridge_node_naze ${PROJECT_NAME}_gencpp)
 
 
 target_link_libraries(phx_uart_msp_bridge_node_naze
