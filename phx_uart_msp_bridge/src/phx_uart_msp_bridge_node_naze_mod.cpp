@@ -44,6 +44,15 @@ int main(int argc, char **argv)
     std_msgs::Header headerMsg;
 
     sensor_msgs::Imu imuMsg;
+    boost::array<double,9> lin_covariance = { {0.0004, 0.0, 0.0,            // accel noise is 400 ug's
+                                               0.0, 0.0004, 0.0,
+                                               0.0, 0.0, 0.0004} };
+    boost::array<double,9> ang_covariance = { {0.05*M_PI/180.0, 0.0, 0.0,   // gyro noise is 0.05 deg/s
+                                               0.0, 0.05*M_PI/180.0, 0.0,
+                                               0.0, 0.0, 0.05*M_PI/180.0} };
+    imuMsg.angular_velocity_covariance = ang_covariance;
+    imuMsg.linear_acceleration_covariance = lin_covariance;
+
     phx_uart_msp_bridge::Motor motorMsg;
     phx_uart_msp_bridge::Status statusMsg;
     phx_uart_msp_bridge::Altitude altitudeMsg;
@@ -315,7 +324,7 @@ int main(int argc, char **argv)
                         imu_pub.publish(imuMsg);
 
                         //Publish initial heading for hector
-			if(received_imu == 50){
+			if(received_imu == -1){
 				geometry_msgs::Pose pose;
 				geometry_msgs::Point point;
                                 point.x = 0;

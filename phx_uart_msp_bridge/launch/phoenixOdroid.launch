@@ -5,9 +5,9 @@
 	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
 	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
 
-	<node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono" machine="phoenix" />
-	<node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
-
+        <node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono /map /throttled_map /move_base/global_costmap/costmap /occupied_cells_vis_array" machine="phoenix" />
+        <node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
+<!--
 	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
       		<param name="device" value="/dev/video0" />
       		<param name="width" value="640" />
@@ -18,7 +18,7 @@
 	    	<param name="Auto Exposure" value="0" />
 	        <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" />
     </node>
-
+-->
     <node name="ImageProc" pkg="image_proc" type="image_proc">
             <remap from="image_raw" to="/image_raw" />
             <remap from="camera_info" to="/camera_info" />
@@ -32,6 +32,11 @@
 	    <param name="frame_id" value="laserHOKUYO" />
 	    <param name="publish_intensity" value="True" />
             <param name="cluster" value="3" />
+    </node>
+    
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+        <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
+        <remap from="scan" to="scan" />
     </node>
     <node name="laser_to_pointcloud2" pkg="phx_rangefinder" type="laser_to_pointcloud" output="screen" machine="phoenix" />
 
@@ -69,13 +74,14 @@
 
     <!-- octomap map -->
     <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-		<param name="resolution" value="0.05" />
+		<param name="resolution" value="0.1" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
 		<param name="frame_id" type="string" value="map" />
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="5.0" />
+		<param name="sensor_model/max_range" value="10.0" />
+                <param name="sensor_model/max" value="0.6" />
 		
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/slam_cloud" />

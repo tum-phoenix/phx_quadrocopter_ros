@@ -1,0 +1,95 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	
+	<!-- Serial interfaces -->
+	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
+	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
+	
+	<!-- Data Logging to Bag File -->
+        <node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono /map /throttled_map /move_base/global_costmap/costmap /occupied_cells_vis_array /tf" machine="phoenix" />
+        
+	<!-- GPS -->
+	<node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
+	<node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+	      	<param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
+      		<param name="yaw_offset" value="1.5707963"/> <!-- yaw offset for zero point not facing east but north  -->
+      		<remap from="/imu/data" to="/phx/imu" />
+      		<remap from="/gps/fix" to="/phx/gps" />
+      		<remap from="/odometry/filtered" to="/your/robot_localization/output/topic" />
+	</node>
+	
+	<!-- Camera -->
+	<node name="Camera" pkg="uvc_camera" type="uvc_camera_node" output="screen">
+      		<param name="device" value="/dev/video0" />
+      		<param name="width" value="640" />
+      		<param name="height" value="480" />
+      		<param name="format" value="YUYV" />
+      		<param name="fps" value="30" />
+     		<param name="gain" value="0" />
+	    	<param name="Auto Exposure" value="0" />
+	        <param name="camera_info_url" value="file://$(find phx_vision)/ps3eye.yaml" />
+	</node>
+	<node name="ImageProc" pkg="image_proc" type="image_proc">
+		<remap from="image_raw" to="/image_raw" />
+		<remap from="camera_info" to="/camera_info" />
+	</node>
+
+	<!-- Laser Scanner -->
+	<!-- <node name="LaserScanner" pkg="urg_node" type="urg_node" /> -->
+	<node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
+	    <param name="ip_address" value="192.168.3.10" />
+	    <param name="ip_port" value="10940" />
+	    <param name="frame_id" value="laserHOKUYO" />
+	    <param name="publish_intensity" value="True" />
+            <param name="cluster" value="3" />
+	</node>
+	
+	<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+		<rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
+        	<remap from="scan" to="scan" />
+	</node>
+	<node name="laser_to_pointcloud2" pkg="phx_rangefinder" type="laser_to_pointcloud" output="screen" machine="phoenix" />
+
+	<include file="$(find phx_launch_files)/launch/hector_mapping.launch" />
+
+	<!-- Transforms -->
+	<!-- coordinate system convention red = x = forward,  green = y = left and blue = z = up -->
+	<!-- t2_ros format x,y,z | qx, qy, qz, qw -->
+	
+	<!-- copter -> laserHOKUYO -->
+	<node name="copter_to_laserHOKUYO_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 copter laserHOKUYO" />
+	
+	<!-- copter_stabilized -> copter --> 
+	<!-- link from copter_stabilized to copter introduces pitch and roll from the imu and is published by the phx_uart_msp_bridge_naze node -->
+	
+	<!-- footprint -> copter_stabilized -->
+	<node name="footprint_to_copter_stabilized" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
+	
+	<!-- odom -> footprint -->
+	<node name="odom_to_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom footprint" respawn="true" />
+
+	<!-- robot model -->
+	<param name="robot_description" command="xacro $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
+	<param name="use_gui" value="False"/>
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+	<!-- cost map -->
+	<include file="$(find phx_navigation)/move_base.launch" />
+
+	<!-- octomap map -->
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		<param name="resolution" value="0.1" />
+		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+		<param name="frame_id" type="string" value="map" />
+		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="20.0" />
+                <param name="sensor_model/max" value="0.6" />
+		
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/slam_cloud" />
+   </node>
+</launch>
+
