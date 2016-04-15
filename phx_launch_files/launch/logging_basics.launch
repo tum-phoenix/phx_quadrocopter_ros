@@ -1,0 +1,6 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <node name="FlightLogger_basics" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_basics /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan_filtered /cloud_filtered /tf /tf_static" machine="phoenix" />
+
+</launch>

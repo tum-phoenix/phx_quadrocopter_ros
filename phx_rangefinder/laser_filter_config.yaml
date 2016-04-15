@@ -1,0 +1,9 @@
+scan_filter_chain:
+- name: range
+  type: LaserScanRangeFilter
+  params:
+    lower_threshold: 0.30
+    upper_threshold: .inf
+- name: interpolation
+  type: InterpolationFilter
+

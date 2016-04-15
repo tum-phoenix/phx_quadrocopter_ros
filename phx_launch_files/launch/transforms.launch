@@ -1,0 +1,21 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	
+	<!-- Transforms -->
+	<!-- coordinate system convention red = x = forward,  green = y = left and blue = z = up -->
+	<!-- t2_ros format x,y,z | qx, qy, qz, qw -->
+	
+	<!-- copter -> laserHOKUYO -->
+	<node name="copter_to_laserHOKUYO_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.12 -0.09 0.0 1.0 0.0 0.0 0.0 copter laserHOKUYO" />
+	
+	<!-- copter_stabilized -> copter --> 
+	<!-- link from copter_stabilized to copter introduces pitch and roll from the imu and is published by the phx_uart_msp_bridge_naze node -->
+	
+	<!-- footprint -> copter_stabilized -->
+	<node name="footprint_to_copter_stabilized" pkg="phx_uart_msp_bridge" type="transform_lidar_altitude.py" output="screen" machine="phoenix" />
+	
+	<!-- odom -> footprint -->
+	<node name="odom_to_footprint" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 odom footprint" respawn="true" />
+
+</launch>
+
