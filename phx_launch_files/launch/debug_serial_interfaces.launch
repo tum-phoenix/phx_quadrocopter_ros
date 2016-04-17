@@ -1,0 +1,12 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	
+	<!-- Serial interfaces -->
+	<node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
+	<node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
+
+    <!-- Logging -->
+    <include file="$(find phx_launch_files)/launch/logging_serial_interfaces.launch" />
+
+</launch>
+

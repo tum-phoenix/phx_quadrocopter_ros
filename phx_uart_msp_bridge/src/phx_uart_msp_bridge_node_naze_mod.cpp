@@ -349,6 +349,7 @@ int main(int argc, char **argv)
 
                         // publish transforms
                         //  copter_stabilized -> copter
+/*
                        	geometry_msgs::Transform transform2;
                        	transform2.translation.x = 0;
                        	transform2.translation.y = 0;
@@ -364,7 +365,7 @@ int main(int argc, char **argv)
                         transformStamped2.child_frame_id = "copter";
                         transformStamped2.transform = transform2;
                         transformPublisher_->sendTransform(transformStamped2);
-
+*/
                         // odom -> footprint
 /*
                         geometry_msgs::Transform transform3;

@@ -1,0 +1,6 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <node name="FlightLogger_replay" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_replay --all" machine="phoenix" />
+
+</launch>

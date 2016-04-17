@@ -133,6 +133,7 @@ add_executable(phx_uart_msp_bridge_node_naze src/phx_uart_msp_bridge_node_naze.c
 add_executable(phx_uart_msp_bridge_node_naze_mod src/phx_uart_msp_bridge_node_naze_mod.cpp)
 add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
 add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fully360.cpp)
+add_executable(phx_tf_copter_to_copter_stabilized src/transform_copter_stabilized_to_copter.cpp)
 
 add_dependencies(phx_uart_msp_bridge_node_naze ${PROJECT_NAME}_gencpp)
 
@@ -152,6 +153,10 @@ target_link_libraries(phx_uart_msp_bridge_node_naze_mod
 target_link_libraries(phx_uart_msp_bridge_node_marvicRCaltitudeServo
    ${catkin_LIBRARIES}
    phx_serial_com
+)
+
+target_link_libraries(phx_tf_copter_to_copter_stabilized
+   ${catkin_LIBRARIES}
 )
 
 
