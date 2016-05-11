@@ -2,6 +2,7 @@
 import numpy as np
 import rospy
 from phx_uart_msp_bridge.msg import Altitude
+from phx_uart_msp_bridge.msg import RemoteControl
 from sensor_msgs.msg import Joy
 
 
@@ -10,21 +11,22 @@ class AltitudeHoldNode():
         rospy.init_node('altitude_hold_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
-        self.sub = rospy.Subscriber('/phx/altitude_marvic', Altitude, self.altitudeCallback)
-        self.pub = rospy.Publisher('/phx/rc_computer', Joy, queue_size=1)
+        self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
+        self.pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
 
-        self.setPoint = 150
+        self.setPoint = 1
 
         self.p = 1
         self.d = 4
         self.setPoint_d = 0
-        self.i = 0
+        self.i = 1
         self.sum_i = 0
         self.i_stop = 100
-        self.controlCommand = 1000
+        self.controlCommand = 1500
 
         self.freq = 100     # Hz
         self.r = rospy.Rate(self.freq)
+        self.previousAltitude = 0
 
     def run(self):
         while not rospy.is_shutdown():
@@ -41,16 +43,22 @@ class AltitudeHoldNode():
         elif self.sum_i <= -self.i_stop:
             self.sum_i = -self.i_stop
         controlCommand_p = (self.setPoint - altitude_msg.estimated_altitude) * self.p
-        controlCommand_d = (self.setPoint_d - altitude_msg.variation) * self.d
+        controlCommand_d = (self.setPoint_d - (altitude_msg.estimated_altitude - self.previousAltitude) * 100) * self.d
         controlCommand_i = self.sum_i * self.i
         un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
         self.controlCommand = np.clip(un_cliped, 1000, 2000)
         joy_msg = Joy()
 
         # Replay and override current rc
-        joy_msg.axes = self.input_rc[0:3] + [self.controlCommand]
-        joy_msg.buttons = self.input_rc[4:]
-        
+        joy_msg.pitch = self.input_rc[0]
+        joy_msg.roll = self.input_rc[1]
+        joy_msg.yaw = self.input_rc[2]
+        joy_msg.throttle = self.input_rc[3]
+        joy_msg.aux1 = self.input_rc[4]
+        joy_msg.aux2 = self.input_rc[5]
+        joy_msg.aux3 = self.input_rc[6]
+        joy_msg.aux4 = self.input_rc[7]
+        self.previousAltitude = altitude_msg.estimated_altitude
         self.pub.publish(joy_msg)
         print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude, '\t controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i, 'd:', controlCommand_d
 

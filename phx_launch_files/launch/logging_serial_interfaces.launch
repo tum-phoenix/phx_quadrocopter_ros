@@ -1,0 +1,39 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <!-- logged topics:
+            /initialpose
+            /phx/altitude
+            /phx/fc/altitude
+            /phx/fc/attitude
+            /phx/fc/gps_home
+            /phx/fc/gps_way_point
+            /phx/fc/motor
+            /phx/fc/motor_set
+            /phx/fc/pid_in_use
+            /phx/fc/pid_set
+            /phx/fc/rc
+            /phx/fc/rc_pilot
+            /phx/fc/status
+            /phx/gps
+            /phx/gps_way_point
+            /phx/imu
+            /phx/led/led_single
+            /phx/led/led_strip_0
+            /phx/led/led_strip_1
+            /phx/led/led_strip_2
+            /phx/led/led_strip_3
+            /phx/marvicAltitude/altitude
+            /phx/marvicAltitude/barometer
+            /phx/marvicAltitude/infra_red
+            /phx/marvicAltitude/lidar
+            /phx/marvicAltitude/sonar
+            /phx/marvicRC/rc_input
+            /phx/marvicRC/status
+            /phx/marvicServo/servo_cmd
+            /phx/rc_computer
+        -->
+
+        <node name="FlightLogger_serial_interfaces" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_serial_interfaces /initialpose /phx/altitude /phx/fc/altitude /phx/fc/attitude /phx/fc/gps_home /phx/fc/gps_way_point /phx/fc/motor /phx/fc/motor_set /phx/fc/pid_in_use /phx/fc/pid_set /phx/fc/rc /phx/fc/rc_pilot /phx/fc/status /phx/gps /phx/gps_way_point /phx/imu /phx/led/led_single /phx/led/led_strip_0 /phx/led/led_strip_1 /phx/led/led_strip_2 /phx/led/led_strip_3 /phx/marvicAltitude/altitude /phx/marvicAltitude/barometer /phx/marvicAltitude/infra_red /phx/marvicAltitude/lidar /phx/marvicAltitude/sonar /phx/marvicRC/rc_input /phx/marvicRC/status /phx/marvicServo/servo_cmd /phx/rc_computer" machine="phoenix" />
+
+</launch>

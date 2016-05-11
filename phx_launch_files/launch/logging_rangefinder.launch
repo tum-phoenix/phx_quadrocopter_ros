@@ -1,0 +1,14 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <!-- logged topics:
+            /LaserScannerLAN/parameter_descriptions
+            /LaserScannerLAN/parameter_updates
+            /scan
+            /clock
+            /diagnostics
+        -->
+
+        <node name="FlightLogger_rangefinder" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_rangefinder /LaserScannerLAN/parameter_descriptions /LaserScannerLAN/parameter_updates /scan /clock /diagnostics" machine="phoenix" />
+
+</launch>
