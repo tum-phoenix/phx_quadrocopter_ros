@@ -15,7 +15,7 @@ def callback_LaserScan(new_LaserScan=LaserScan()):
     cost[data < 2] = 1.
 
     # smooth sharp edges
-    kernel = np.zeros(40)
+    kernel = np.zeros(15)
     kernel[5:-5] = 1
     kernel /= np.sum(kernel)
 
@@ -23,11 +23,11 @@ def callback_LaserScan(new_LaserScan=LaserScan()):
 
     cost[data < 5] = convolved_cost[data < 5]
 
-    cost *= 5
+    cost *= 1
     new_LaserScan.ranges = cost
     pub_cost_range.publish(new_LaserScan)
 
-    print 'published data', np.mean(cost)
+    print 'published data 2', np.mean(cost)
 
 
 
