@@ -66,6 +66,8 @@ class LandingNode():
 
         self.pub.publish(joy_msg)
 
+        print 'pitch message:', joy_msg
+
 
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
