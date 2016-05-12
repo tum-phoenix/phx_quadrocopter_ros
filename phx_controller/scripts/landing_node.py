@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import rospy
 from phx_uart_msp_bridge.msg import Attitude
@@ -68,14 +69,8 @@ class LandingNode():
 
         print 'pitch message:', joy_msg
 
-
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
-
-
-
-
-
 
 # if self.input_rc[4] > 1500:
 #     self.setPoint = altitude_msg.estimated_altitude
