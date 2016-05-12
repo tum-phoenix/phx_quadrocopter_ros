@@ -72,6 +72,13 @@ class LandingNode():
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
 
+if __name__ == '__main__':
+    try:
+        controller_node = AltitudeHoldNode()
+        controller_node.run()
+    except rospy.ROSInterruptException:
+        pass
+
 # if self.input_rc[4] > 1500:
 #     self.setPoint = altitude_msg.estimated_altitude
 #     self.controlCommand = self.input_rc[3]
