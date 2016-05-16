@@ -63,6 +63,7 @@ find_package(catkin REQUIRED COMPONENTS
    Altitude.msg
    Attitude.msg
    Autonomous.msg
+   AutoPilotCmd.msg
    LEDstrip.msg
    LED.msg
    PID.msg
