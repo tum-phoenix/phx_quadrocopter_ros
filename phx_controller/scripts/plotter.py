@@ -16,7 +16,7 @@ class Plotter():
         self.i = 0
         self.heights = [0]
         self.graph_width = 100
-        self.graph_height = 2;
+        self.graph_height = 2
 
     def run(self):
         while not rospy.is_shutdown():
@@ -30,7 +30,7 @@ class Plotter():
         if(throttle > self.graph_height):
             self.graph_height *= 2
 
-        if(self.heights.len() > self.graph_width):
+        if(len(self.heights) > self.graph_width):
             self.graph_width *= 2
 
         plt.plot(self.heights)
