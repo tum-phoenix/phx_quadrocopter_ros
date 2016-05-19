@@ -15,7 +15,7 @@ class GPSHoldNode():
         self.currentState = Imu()
         #current position in the map frame
         self.map_position = Point()
-        self.target = Point(10, 10, 0)
+        self.target = Point(1, 1, 0)
 
         self.controlCommand_pitch = 1500
         self.controlCommand_roll = 1500
@@ -87,24 +87,24 @@ class GPSHoldNode():
             self.map_position = pose_msg.pose.position
 
             #error in x direction (pitch)
-            self.i_sum_position_x += self.target.x - self.map_position.x
+            self.i_sum_position_x += self.target.x - self.map_position.y
             if abs(self.i_sum_position_x) >= self.i_stop_position:
                 self.i_sum_position_x = self.i_stop_position
 
             control_i_position_x = self.i_sum_position_x * self.i_position
-            control_p_position_x = (self.target.x - self.map_position.x) * self.p_position
+            control_p_position_x = (self.target.x - self.map_position.y) * self.p_position
             control_d_position_x = (self.set_d_position - self.currentState.angular_velocity.y) * self.d_position
             unclipped = 1500 + control_p_position_x + control_d_position_x
             self.controlCommand_pitch = np.clip(unclipped, 1000, 2000)
             print 'control_pitch', self.controlCommand_pitch, '\tcontrol_p', control_p_position_x, '\tcontrol_d', control_d_position_x, '\tcontrol_i', control_i_position_x
 
             #error in y direction (roll)
-            self.i_sum_position_y += self.target.y - self.map_position.y
+            self.i_sum_position_y += self.target.y - self.map_position.x
             if abs(self.i_sum_position_y) >= self.i_stop_position:
                 self.i_sum_position_y = self.i_stop_position
 
             control_i_position_y = self.i_sum_position_y * self.i_position
-            control_p_position_y = (self.target.y - self.map_position.y) * self.p_position
+            control_p_position_y = (self.target.y - self.map_position.x) * self.p_position
             control_d_position_y = (self.set_d_position - self.currentState.angular_velocity.x) * self.d_position
             unclipped = 1500 + control_p_position_y + control_d_position_y + control_i_position_y
             self.controlCommand_roll = np.clip(unclipped, 1000, 2000)
