@@ -10,6 +10,9 @@ class Plotter():
         rospy.init_node('plotter')
         self.sub = rospy.Subscriber('/phx/fc/altitude_hold', RemoteControl, self.altitudeCallback)
 
+        self.freq = 100  # Hz
+        self.r = rospy.Rate(self.freq)
+
         self.i = 0
         self.heights = [0]
         self.graph_width = 100
