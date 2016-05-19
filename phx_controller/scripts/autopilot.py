@@ -1,47 +1,62 @@
 #!/usr/bin/env python
 import rospy
 import numpy as np
-#from sensor_msgs.msg import Joy
 from phx_uart_msp_bridge.msg import RemoteControl
-from geometry_msgs.msg import Twist
+from phx_uart_msp_bridge.msg import AutoPilotCmd
+
 
 class Autopilot:
-    def __init__(self):
+    """
+    The Autopilot fuses the incoming cmd_vel commands from different nodes like altitude hold node, gps position
+    planner node and collision prevention to one outgoing command for the flight controller.
 
+    the cmd_vel topic is used with
+    """
+    def __init__(self):
         rospy.init_node('Autopilot_node')
-        self.twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.callback_twist)
+        self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
 
-
         self.current_pose = RemoteControl()
-        self.rate = rospy.Rate(20)
+        self.rate = rospy.Rate(30)
 
-    def callback_twist(self, twist_msg=Twist()):
+    def callback_input(self, input_msg=AutoPilotCmd()):
+        from_node = input_msg.node_identifier
+        priority = input_msg.priority
 
-        linear_x = twist_msg.linear.x
-        linear_y = twist_msg.linear.y
-        angular_z = twist_msg.angular.z
+        linear_x = input_msg.cmd.linear.x           # forward backward      [-1; 1]
+        linear_y = input_msg.cmd.linear.y           # left right            [-1; 1]
+        linear_z = input_msg.cmd.linear.z           # up down               [-1; 1]
+        angular_z = input_msg.cmd.angular.z         # rotation heading      [-1; 1]
 
-        linear_x = np.clip(linear_x,-1,1)
-        self.current_pose.pitch= 1500 + linear_x*200
-        linear_y = np.clip(linear_y,-1,1)
-        self.current_pose.roll= 1500 + linear_y*200
-        angular_z = np.clip(angular_z,-0.2,0.2)
-        self.current_pose.yaw = 1500 + angular_z*500
-        self.current_pose.throttle = 1500
+        if linear_x != 0:
+            linear_x = np.clip(linear_x, -1, 1)
+            self.current_pose.pitch = 1500 + linear_x*200
 
-        rc_msg=RemoteControl()
+        if linear_y != 0:
+            linear_y = np.clip(linear_y, -1, 1)
+            self.current_pose.roll = 1500 + linear_y*200
+
+        if linear_z != 0:
+            linear_z = np.clip(linear_z, -1, 1)
+            self.current_pose.throttle = 1500 + linear_z*500
+
+        if angular_z != 0:
+            angular_z = np.clip(angular_z, -0.2, 0.2)
+            self.current_pose.yaw = 1500 + angular_z*500
+
+        # publish new mixed remote control to flight controller
+        rc_msg = RemoteControl()
         rc_msg.pitch = self.current_pose.pitch
         rc_msg.roll = self.current_pose.roll
         rc_msg.yaw = self.current_pose.yaw
         rc_msg.throttle = self.current_pose.throttle
-        rc_msg.aux1=1000
-        rc_msg.aux2=1900
-        rc_msg.aux3=1900
-        rc_msg.aux4= int(1000 + np.random.random()*1000)
+        rc_msg.aux1 = 1000
+        rc_msg.aux2 = 1900
+        rc_msg.aux3 = 1900
+        rc_msg.aux4 = int(1000 + np.random.random()*1000)
 
         self.rc_pub.publish(rc_msg)
-
 
     def run(self):
         while not rospy.is_shutdown():
