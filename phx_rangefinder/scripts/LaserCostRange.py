@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+
 import rospy
 from sensor_msgs.msg import LaserScan
 
@@ -23,7 +24,7 @@ def callback_LaserScan(new_LaserScan=LaserScan()):
 
     cost[data < 5] = convolved_cost[data < 5]
 
-    cost *= 1
+    cost *= 5
     new_LaserScan.ranges = cost
     pub_cost_range.publish(new_LaserScan)
 
