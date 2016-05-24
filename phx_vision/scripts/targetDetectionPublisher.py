@@ -22,21 +22,22 @@ from cv_bridge import CvBridge, CvBridgeError
 class image_converter:
 
   def __init__(self):
-      if(os.uname()[4][:3] == 'arm'):
+    self.counter = 0
+    if(os.uname()[4][:3] == 'naarm'):
         self.runningOnPhoenix = True
-    if(!self.runningOnPhoenix)
+    else:
+	self.runningOnPhoenix = False
+    if(not self.runningOnPhoenix):
         cv2.namedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
     self.br = tf2_ros.TransformBroadcaster()
     self.t = geometry_msgs.msg.TransformStamped()
-  
-  
 
   def callback(self, data):
-      
 
     self.t.header.stamp = rospy.Time.now()
+    self.t.header.seq = self.counter
     self.t.header.frame_id = "camera"
     self.t.transform.translation.x = 0.0
     self.t.transform.translation.y = 0.0
@@ -56,7 +57,7 @@ class image_converter:
 
     # convert the frame to grayscale, blur it, and detect edges
     #gray = cv2.cvtColor(resizedGreyImage, cv2.COLOR_BGR2GRAY)
-    if(!self.runningOnPhoenix)
+    if (not self.runningOnPhoenix):
         cv2.imshow("Frame", frame)
 
     blurred = cv2.GaussianBlur(frame, (7, 7), 0)
@@ -169,8 +170,9 @@ class image_converter:
                 self.t.transform.translation.y = dist_y
                 self.t.transform.translation.z = dist_camera
                 self.br.sendTransform(self.t)
+		self.counter += 1
 
-    if(!self.runningOnPhoenix):
+    if (not self.runningOnPhoenix):
         # show the frame and record if a key is pressed
         cv2.imshow("Frame", frame)
         cv2.waitKey(1000)
