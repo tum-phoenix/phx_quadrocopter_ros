@@ -55,8 +55,9 @@ class image_converter:
     blurred = cv2.GaussianBlur(frame, (7, 7), 0)
     edged = cv2.Canny(blurred, 50, 150)
     
-    knownWidth = 100.0 #mm
-    focalLength = 900  #Test
+    knownWidth = 0.033 #m
+    focalLength_x = 335.874937  #Test
+    focalLength_y = 335.599836
     
     # find contours in the edge map
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
@@ -144,16 +145,16 @@ class image_converter:
                             0.5, (255, 255, 255), 2)
                             
                 #Distance to Camera
-                marker = cv2.minAreaRect(Target_Contour)
+                marker = cv2.minAreaRect(approx)
                 perWidth = marker[1][0]
-                dist_camera = (knownWidth * focalLength)/perWidth
+                dist_camera = (knownWidth * focalLength_x)/perWidth
                 
                 #dist_x / dist_y
                 dist_x_p = 0.5*frame.shape[1] - cX # Distance to Center (x-direction) in pixel
                 dist_y_p = cY - 0.5*frame.shape[0]
                 
-                dist_x= (dist_camera * dist_x_p)/focalLength
-                dist_y= (dist_camera * dist_y_p)/focalLength
+                dist_x= (dist_camera * dist_x_p)/focalLength_x
+                dist_y= (dist_camera * dist_y_p)/focalLength_y
                 
                             
                             
