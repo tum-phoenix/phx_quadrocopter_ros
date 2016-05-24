@@ -10,7 +10,9 @@ roslib.load_manifest('phx_vision')
 import sys
 import rospy
 import cv2
+import tf2_ros
 import numpy as np
+import geometry_msgs.msg
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -21,9 +23,24 @@ class image_converter:
     cv2.namedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
+    br = tf2_ros.TransformBroadcaster()
+    t = geometry_msgs.msg.TransformStamped()
 
   def callback(self, data):
-    print("Got image callback")
+      
+
+    t.header.stamp = rospy.Time.now()
+    t.header.frame_id = "camera"
+    t.transform.translation.x = msg.x
+    t.transform.translation.y = msg.y
+    t.transform.translation.z = 0.0
+    q = tf.transformations.quaternion_from_euler(0, 0, 0)
+    t.transform.rotation.x = q[0]
+    t.transform.rotation.y = q[1]
+    t.transform.rotation.z = q[2]
+    t.transform.rotation.w = q[3]
+
+
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "mono8")
       frame = cv_image
@@ -50,6 +67,8 @@ class image_converter:
           
         if len(approx)==3:
             shape = "Triangle"
+            t.child_frame_id = "Triangle"
+
     
         elif len(approx)==4:
             # compute the bounding box of the contour and use the
@@ -59,19 +78,29 @@ class image_converter:
     
             # a square will have an aspect ratio that is approximately
             # equal to one, otherwise, the shape is a rectangle
-            shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+            shape = "Square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+            t.child_frame_id = "Square"
+
                        
         elif len(approx)==5:
             shape = "Pentagon"
+            t.child_frame_id = "Pentagon"
+
             
         elif len(approx)>5 and len(approx)<14:
             shape = "Heart"
+            t.child_frame_id = "Heart"
+
         
         elif len(approx)>=14 and len(approx)<30:
             shape = "Circle"
+            t.child_frame_id = "Circle"
+
             
         elif len(approx)>=30:
             shape = "Star"
+            t.child_frame_id = "Star"
+
     
         # ensure that the approximated contour is "roughly" rectangular
         if len(approx) >= 3 and len(approx) <= 30:
@@ -109,6 +138,11 @@ class image_converter:
                 #draw the detected shape type on the frame            
                 cv2.putText(frame, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 
                             0.5, (255, 255, 255), 2)
+                t.transform.translation.x = cX
+                t.transform.translation.y = cY
+                t.transform.translation.z = 0.0
+                br.sendTransform(t)
+
                 
     # show the frame and record if a key is pressed
     cv2.imshow("Frame", frame)

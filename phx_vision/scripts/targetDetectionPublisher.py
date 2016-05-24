@@ -7,6 +7,7 @@ Created on May 10, 2016
 #!/usr/bin/env python
 import roslib
 roslib.load_manifest('phx_vision')
+import os
 import sys
 import rospy
 import cv2
@@ -21,11 +22,16 @@ from cv_bridge import CvBridge, CvBridgeError
 class image_converter:
 
   def __init__(self):
-    #cv2.namedWindow("Image window", 1)
+      if(os.uname()[4][:3] == 'arm'):
+        self.runningOnPhoenix = True
+    if(!self.runningOnPhoenix)
+        cv2.namedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
     self.br = tf2_ros.TransformBroadcaster()
     self.t = geometry_msgs.msg.TransformStamped()
+  
+  
 
   def callback(self, data):
       
@@ -50,7 +56,8 @@ class image_converter:
 
     # convert the frame to grayscale, blur it, and detect edges
     #gray = cv2.cvtColor(resizedGreyImage, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow("Frame", frame)
+    if(!self.runningOnPhoenix)
+        cv2.imshow("Frame", frame)
 
     blurred = cv2.GaussianBlur(frame, (7, 7), 0)
     edged = cv2.Canny(blurred, 50, 150)
@@ -163,17 +170,19 @@ class image_converter:
                 self.t.transform.translation.z = dist_camera
                 self.br.sendTransform(self.t)
 
-                
-    # show the frame and record if a key is pressed
-    #cv2.imshow("Frame", frame)
-    #cv2.waitKey(1000)
-        
-    #optional:
-    #cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
-    
-    # cleanup the camera and close any open windows
-    #cv2.destroyAllWindows()
- 
+    if(!self.runningOnPhoenix):
+        # show the frame and record if a key is pressed
+        cv2.imshow("Frame", frame)
+        cv2.waitKey(1000)
+
+        #optional:
+        #cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
+
+        # cleanup the camera and close any open windows
+        cv2.destroyAllWindows()
+
+
+
 
 def main(args):
   ic = image_converter()
