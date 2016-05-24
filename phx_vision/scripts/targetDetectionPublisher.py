@@ -55,6 +55,9 @@ class image_converter:
     blurred = cv2.GaussianBlur(frame, (7, 7), 0)
     edged = cv2.Canny(blurred, 50, 150)
     
+    knownWidth = 100.0 #mm
+    focalLength = 900  #Test
+    
     # find contours in the edge map
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -139,9 +142,24 @@ class image_converter:
                 #draw the detected shape type on the frame            
                 cv2.putText(frame, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 
                             0.5, (255, 255, 255), 2)
-                self.t.transform.translation.x = cX
-                self.t.transform.translation.y = cY
-                self.t.transform.translation.z = 0.0
+                            
+                #Distance to Camera
+                marker = cv2.minAreaRect(Target_Contour)
+                perWidth = marker[1][0]
+                dist_camera = (knownWidth * focalLength)/perWidth
+                
+                #dist_x / dist_y
+                dist_x_p = 0.5*frame.shape[1] - cX # Distance to Center (x-direction) in pixel
+                dist_y_p = cY - 0.5*frame.shape[0]
+                
+                dist_x= (dist_camera * dist_x_p)/focalLength
+                dist_y= (dist_camera * dist_y_p)/focalLength
+                
+                            
+                            
+                self.t.transform.translation.x = dist_x
+                self.t.transform.translation.y = dist_y
+                self.t.transform.translation.z = dist_camera
                 self.br.sendTransform(self.t)
 
                 
