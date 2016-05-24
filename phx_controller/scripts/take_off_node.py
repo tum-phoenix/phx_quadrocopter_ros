@@ -1,6 +1,7 @@
 #!usr/bin/env python
 import numpy as np
 import rospy
+import time
 from altitude_hold_node import AltitudeHoldNode
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import RemoteControl
@@ -13,8 +14,9 @@ class TakeOffNode():
 		self.altitude_pub = rospy.Publisher('/phx/fc/altitude_hold', RemoteControl, queue_size=1)
 		self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
 
-		self.throttle = 2000
-		self.finish_take_off = 0.1
+		self.throttle = 1000
+		self.finish_take_off = 1
+		self.flag = 0
 
 		self.freq = 100
 		self.r = rospy.Rate(self.freq)
@@ -25,7 +27,8 @@ class TakeOffNode():
 
 	def altitudeCallback(self, altitude_msg):
         	print("Altitude Callback")
-		
+
+
 		joy_msg = RemoteControl()
 
 		joy_msg.pitch = self.input_rc[0]
@@ -41,13 +44,22 @@ class TakeOffNode():
 
 		if altitude_msg.estimated_altitude > self.finish_take_off:
 			print "Take-off finished"
-			rospy.signal_shutdown("Done.")
-			#After finishing the process, altitude controller should be launched.
+
+			
 		else:
 			print "Take-off in progress"
+			if self.throttle < 2000 and self.flag == 0:
+				if altitude_msg.estimated_altitude < 0.1:
+					self.throttle = self.throttle + 50
+					time.sleep(0.1)
+				else:
+					self.throttle = self.throttle - 75
+					self.flag = 1
+
+
+			print self.throttle
 
 		print 'Throttle:', joy_msg.throttle, '\t Altitude:', altitude_msg.estimated_altitude
-
 
 if __name__ == '__main__':
 	try:
