@@ -17,10 +17,10 @@
 
 	<!-- Mapping using Hector-->
         <!-- for indoor use -->
-        <!-- <include file="$(find phx_launch_files)/launch/hector_mapping.launch" /> -->
+        <include file="$(find phx_launch_files)/launch/hector_mapping.launch" />
 
         <!-- for outdoor use -->
-        <include file="$(find phx_launch_files)/launch/hector_mapping_outdoor.launch" />
+        <!-- <include file="$(find phx_launch_files)/launch/hector_mapping_outdoor.launch" /> -->
 
 
 	<!-- Cost Map -->
