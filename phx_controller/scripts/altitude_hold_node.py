@@ -46,8 +46,10 @@ class AltitudeHoldNode():
             self.controlCommand = self.input_rc[3]
 
         self.sum_i += self.setPoint - altitude_msg.estimated_altitude
-        if abs(self.sum_i) >= self.i_stop:
+        if self.sum_i >= self.i_stop:
             self.sum_i = self.i_stop
+        elif self.sum_i <= -self.i_stop:
+            self.sum_i = -self.i_stop
 
         controlCommand_p = (self.setPoint - altitude_msg.estimated_altitude) * self.p
         controlCommand_d = (self.setPoint_d - (altitude_msg.estimated_altitude - self.previousAltitude) * 100) * self.d
