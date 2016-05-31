@@ -10,13 +10,13 @@ from sensor_msgs.msg import Joy
 class GPSHoldNode():
     def __init__(self):
         rospy.init_node('map_position_hold')
-        self.rate = 100
+        self.rate = 10
         self.r = rospy.Rate(self.rate)
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
-        self.target_pos = np.ones(3)
+        self.target_pos = np.array([1,1,0])
         self.copter_pos = np.zeros(3)
         self.copter_rot = np.zeros(3)
 
@@ -51,6 +51,7 @@ class GPSHoldNode():
                           trans.transform.rotation.y,
                           trans.transform.rotation.z,
                           trans.transform.rotation.w)
+            print 'tf'
             euler = tf.transformations.euler_from_quaternion(quaternion)
             self.copter_rot[0] = euler[0]   # pitch
             self.copter_rot[1] = euler[1]   # roll

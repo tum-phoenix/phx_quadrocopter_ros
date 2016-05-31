@@ -23,7 +23,7 @@
             <remap from="camera_info" to="/camera_info" />
     </node>
 
-    <node name="TargetDetector" pkg="phx_vision" type="targetDetectionPublisher.py" />
+    <node name="TargetDetector" pkg="phx_vision" type="targetDetectionPublisher" />
 
     <!-- <node name="LaserScanner" pkg="urg_node" type="urg_node" /> -->
 
