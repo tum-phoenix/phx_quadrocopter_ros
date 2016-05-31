@@ -1,10 +1,11 @@
+#!/usr/bin/env python
+
 '''
 Created on May 10, 2016
 
 @author: mykyta_denysov
 '''
 
-#!/usr/bin/env python
 import roslib
 roslib.load_manifest('phx_vision')
 import os

@@ -8,6 +8,7 @@
 
 // predefine callback function names
 void imu_callback(const sensor_msgs::Imu::ConstPtr&);
+void attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr&);
 
 // define variables used throughout the whole script
 boost::shared_ptr<tf2_ros::TransformBroadcaster> TF_publisher;

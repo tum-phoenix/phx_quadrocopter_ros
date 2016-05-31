@@ -49,12 +49,9 @@ class TakeOffNode():
 		else:
 			print "Take-off in progress"
 			if self.throttle < 2000 and self.flag == 0:
-				if altitude_msg.estimated_altitude < 0.1:
-					self.throttle = self.throttle + 50
+				if altitude_msg.estimated_altitude < 0.2:
+					self.throttle = self.throttle + 10
 					time.sleep(0.1)
-				else:
-					self.throttle = self.throttle - 75
-					self.flag = 1
 
 
 			print self.throttle
