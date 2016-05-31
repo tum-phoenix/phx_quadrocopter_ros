@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np          # mathematics
 import math
+import time
 
 import rospy                # ROS interface
 import tf2_ros              # ROS transformation support
@@ -9,6 +10,16 @@ import tf
 # ROS message types used throughout this script
 import geometry_msgs.msg
 import sensor_msgs.msg
+
+import numpy as np
+import numpy.linalg as la
+
+
+def py_ang(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'    """
+    cosang = np.dot(v1, v2)
+    sinang = la.norm(np.cross(v1, v2))
+    return np.arctan2(sinang, cosang)
 
 
 class naive_gps_controller:
@@ -29,6 +40,18 @@ class naive_gps_controller:
         self.ros_subscribe_cost_map = rospy.Subscriber('/cost_ranges',
                                                        sensor_msgs.msg.LaserScan,
                                                        self.receive_new_cost_scan)
+
+        # calc speed
+        self.prev_position = np.zeros(3)
+        self.prev_time_stamp = time.time()
+        self.prev_velocities = [0, 0, 0, 0, 0]
+
+        # controller variables
+        self.p = 1
+        self.i = 1
+        self.sum_i_x = 0
+        self.sum_i_y = 0
+        self.i_cutoff = 10
 
     def receive_new_target(self, input_point):
         # print 'new point:', input_point
@@ -56,31 +79,61 @@ class naive_gps_controller:
             self.copter_rot[2] = euler[2]   # yaw
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             pass
+
+        if self.copter_pos is not self.prev_position:
+            distance = np.sqrt( np.sum( np.power(self.copter_pos - self.prev_position, 2)))
+            print 'distance', distance
+            dt = time.time() - self.prev_time_stamp
+            vel = distance / dt
+            self.prev_time_stamp = time.time()
+            self.prev_position = np.copy(self.copter_pos)
+            self.prev_velocities = self.prev_velocities[1:]
+            self.prev_velocities.append(vel)
+            print 'velocity', np.mean(self.prev_velocities)
+
         return self.copter_pos
 
     def calc_directions(self):
-        dx = self.target_pos[0] - self.copter_pos[0]
-        dy = self.copter_pos[0] - self.copter_pos[1]
+        # dx = self.target_pos[0] - self.copter_pos[0]
+        # dy = self.copter_pos[0] - self.copter_pos[1]
+        # dx = 2
+        # dy = 1
+        # vector_map = np.array([dx, dy])
+        #
+        # magnetometer = - np.pi * 0/180
+        # angle = magnetometer + np.pi * 90/180 # self.copter_rot[2]
+        # vector_copter = np.array([np.cos(angle), np.sin(angle)])
+        # rot_matrix = np.array([[np.cos(angle), -np.sin(angle)],
+        #                       [np.sin(angle), np.cos(angle)]])
+        # vector_copter = np.dot(rot_matrix, vector_map)
 
-        dx = 2
-        dy = 1
-        vector_map = np.array([dx, dy])
+        self.target_pos = np.array([-2., 1., 0.])
+        #self.copter_pos = np.array([0., 0., 0.])
 
-        angle = np.pi * 90/180 # self.copter_rot[2]
-        rot_matrix = np.array([[np.cos(angle), -np.sin(angle)],
-                               [np.sin(angle), np.cos(angle)]])
+        self.sum_i_x += self.target_pos[0] - self.copter_pos[0]
+        self.sum_i_y += self.target_pos[1] - self.copter_pos[1]
+        if abs(self.sum_i_x) >= self.i_cutoff:
+            self.sum_i_x = self.sum_i_x / abs(self.sum_i_x) * self.i_cutoff
+        if abs(self.sum_i_y) >= self.i_cutoff:
+            self.sum_i_y = self.sum_i_y / abs(self.sum_i_y) * self.i_cutoff
 
-        vector_copter = np.dot(rot_matrix, vector_map)
+        controlCommand_p_x = (self.target_pos[0] - self.copter_pos[0]) * self.p
+        controlCommand_i_x = self.sum_i_x * self.i
+        # controlCommand_d_x = (set_d - (self.copter_pos[0] - self.previousAltitude)) * self.d
 
-        print 'angle', angle
-        print 'vector map', vector_map
-        print 'vector copter', vector_copter
+        controlCommand_p_y = (self.target_pos[1] - self.copter_pos[1]) * self.p
+        controlCommand_i_y = self.sum_i_y * self.i
+        # controlCommand_d_y = (set_d - (self.copter_pos[1] - self.previousAltitude)) * self.d
 
-# initialize node
+        controlCommand_x = controlCommand_p_x + controlCommand_i_x
+        controlCommand_y = controlCommand_p_y + controlCommand_i_y
+        print 'controlCommand_x', controlCommand_p_x, controlCommand_i_x, '\tcontrolCommand_y', controlCommand_p_y, controlCommand_i_y
+
+# initialize node|
 rospy.init_node('position_hold_node')
 
 # initialize 'speed'-limit for endless loop
-r = rospy.Rate(1)
+r = rospy.Rate(10)
 
 controller = naive_gps_controller()
 
