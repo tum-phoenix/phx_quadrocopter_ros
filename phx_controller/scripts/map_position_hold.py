@@ -51,7 +51,6 @@ class GPSHoldNode():
                           trans.transform.rotation.y,
                           trans.transform.rotation.z,
                           trans.transform.rotation.w)
-            print 'tf'
             euler = tf.transformations.euler_from_quaternion(quaternion)
             self.copter_rot[0] = euler[0]   # pitch
             self.copter_rot[1] = euler[1]   # roll
@@ -99,7 +98,6 @@ class GPSHoldNode():
 
             # calculate angle to target
             angle = np.arctan(target_vector[1]/target_vector[0]) + self.copter_rot[2]
-            print 'angle: ', angle
 
             rotation_z = np.array([[np.cos(angle), np.sin(angle), 0],
                                 [-np.sin(angle), np.cos(angle), 0],
@@ -111,7 +109,7 @@ class GPSHoldNode():
 
             # convert to pitch/roll commands with scaling factor for the PID controller
             lower_speed, upper_speed = -1*pid_result , 1*pid_result
-            ratio= np.interp(ratio,[-1,1],[lower_speed,upper_speed])
+            ratio = np.interp(ratio,[-1,1],[lower_speed,upper_speed])
             print 'ratio: ', ratio
 
             # override current rc
