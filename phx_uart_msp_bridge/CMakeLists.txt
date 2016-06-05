@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
    Servo.msg
    Battery.msg
    Cycletime.msg
+   Diagnostics.msg
    Status.msg
    Altitude.msg
    Attitude.msg
