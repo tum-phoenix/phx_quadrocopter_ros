@@ -30,7 +30,6 @@ class LandingNode():
         self.linear_acceleration_z = 0.0
 
         self.controlCommand = 1500
-        self.asoll
 
     def altitudeCallback(self, altitude_msg):
         self.altitude = altitude_msg.estimated_altitude
