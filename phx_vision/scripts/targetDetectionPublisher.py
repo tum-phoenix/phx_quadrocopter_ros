@@ -175,7 +175,7 @@ class image_converter:
 		self.counter += 1
     
     try:
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
+        self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, "mono8"))
     except CvBridgeError as e:
         print(e)
         
