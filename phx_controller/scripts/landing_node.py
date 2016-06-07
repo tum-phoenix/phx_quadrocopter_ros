@@ -5,6 +5,9 @@ from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import RemoteControl
 from sensor_msgs.msg import Imu
 
+#If we want our code to work properly we have to run another class: AltitudeHoldNode()
+#It should be working before our device reaches the altitude of 1m
+
 
 class LandingNode():
     def __init__(self):
