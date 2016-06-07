@@ -46,6 +46,8 @@ class LandingNode():
             un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
             self.controlCommand = np.clip(un_cliped, 1000, 2000)
 
+            print(self.controlCommand)
+
         '''
         if(self.altitude < self.altitude_start):
                 if(self.linear_acceleration_z > 0.1):
