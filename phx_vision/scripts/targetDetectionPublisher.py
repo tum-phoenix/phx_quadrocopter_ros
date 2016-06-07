@@ -121,7 +121,7 @@ class image_converter:
         elif len(approx)>=4 and len(approx)<6 and V_area_rect>0.93 and V_area_rect<1.05:
             # compute the bounding box of the contour and use the
             # bounding box to compute the aspect ratio
-            shape = "Square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+            shape = "Square"
             self.t.child_frame_id = "Square"
             list_id = 1
 
