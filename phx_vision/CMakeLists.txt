@@ -9,6 +9,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   sensor_msgs
   cv_bridge
+  geometry_msgs
+  diagnostic_msgs
+  message_generation
+  tf2_ros
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -47,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
+   Detection.msg
    TargetDetections.msg
 )
 
@@ -65,10 +71,11 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -82,7 +89,7 @@ add_message_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phoenix_controller
-#  CATKIN_DEPENDS  rospy sensor_msgs
+   CATKIN_DEPENDS  rospy geometry_msgs message_runtime tf cv_bridge
 #  DEPENDS system_lib
 )
 

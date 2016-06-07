@@ -1,2 +1,2 @@
 Header header
-Detection detections[]
+Detection[] detections

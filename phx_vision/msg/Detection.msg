@@ -1,4 +1,4 @@
 Header header
-String type
-Pose pose
+string type
+geometry_msgs/Pose pose
 
