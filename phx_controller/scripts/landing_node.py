@@ -8,7 +8,7 @@ from sensor_msgs.msg import Imu
 
 class LandingNode():
     def __init__(self):
-        rospy.init_node('altitude_hold_controller')
+        rospy.init_node('landing_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
@@ -58,7 +58,7 @@ class LandingNode():
 
 if __name__ == '__main__':
     try:
-        controller_node = AltitudeHoldNode()
+        controller_node = LandingNode()
         controller_node.run()
     except rospy.ROSInterruptException:
         pass
