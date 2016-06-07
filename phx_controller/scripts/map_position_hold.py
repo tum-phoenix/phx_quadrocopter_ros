@@ -3,7 +3,7 @@ import numpy as np
 import tf
 import tf2_ros
 import rospy
-from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
 from sensor_msgs.msg import Joy
 
 
@@ -16,7 +16,7 @@ class GPSHoldNode():
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
-        self.target_pos = np.array([1,1,0])
+        self.target_pos = np.array([1, 1, 0])
         self.copter_pos = np.zeros(3)
         self.copter_rot = np.zeros(3)
 
@@ -27,6 +27,7 @@ class GPSHoldNode():
         self.i_sum = 0
         self.i_limit = 100
         self.d_gain = 1
+        self.estimated_velocity = 0
 
         self.rc_input = RemoteControl()
         self.rc_input.pitch = 1500
@@ -40,6 +41,7 @@ class GPSHoldNode():
 
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
         self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
+        self.diag_pub = rospy.Publisher('/diagnostics', Diagnostics, queue_size=1)
 
     def get_cur_pos(self):
         try:
@@ -87,9 +89,10 @@ class GPSHoldNode():
             elif self.i_sum <= -self.i_limit:
                 self.i_sum = -self.i_limit
 
-            estimated_velocity = (previous_error - self.error) * self.rate
+            if not previous_error == self.error:
+                self.estimated_velocity = (previous_error - self.error) * self.rate
 
-            control_d = estimated_velocity * self.d_gain
+            control_d = self.estimated_velocity * self.d_gain
             control_p = self.error * self.p_gain
             control_i = self.i_sum * self.i_gain
 
@@ -104,21 +107,31 @@ class GPSHoldNode():
                                 [0, 0, 1]])
 
             # determine ratio of pitch & roll, when the angle is 0 (copter points to target), roll = 0.
-            ratio = np.array([1,0,0])
+            ratio = np.array([1, 0, 0])
             ratio = rotation_z.dot(ratio)
 
             # convert to pitch/roll commands with scaling factor for the PID controller
             lower_speed, upper_speed = -1*pid_result , 1*pid_result
-            ratio = np.interp(ratio,[-1,1],[lower_speed,upper_speed])
+            ratio = np.interp(ratio,[-1, 1],[lower_speed,upper_speed])
             print 'ratio: ', ratio
 
             # override current rc
             rc_message = self.rc_input
             rc_message.pitch = 1500 + ratio[0]
             rc_message.roll = 1500 + ratio [1]
+            # clip results
+            np.clip(rc_message.pitch, 1000, 2000)
+            np.clip(rc_message.roll, 1000, 2000)
             # use altitude_hold_command
             # rc_message.throttle = self.controlCommand_throttle
             self.cmd_pub.publish(rc_message)
+
+            # plot PID results
+            plot = Diagnostics()
+            plot.val_a0 = control_p
+            plot.val_a1 = control_i
+            plot.val_a2 = control_d
+            self.diag_pub.publish(plot)
 
             self.r.sleep()
 
