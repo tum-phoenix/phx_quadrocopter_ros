@@ -172,19 +172,24 @@ class image_converter:
                 self.t.transform.translation.z = dist_camera
                 self.br.sendTransform(self.t)
 		self.counter += 1
-
+    
+    try:
+        self.bridge.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
+    except CvBridgeError as e:
+        print(e)
+        
     if (not self.runningOnPhoenix):
         # show the frame and record if a key is pressed
         cv2.imshow("Frame", frame)
         cv2.waitKey(1000)
-
+        
         #optional:
         #cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
 
         # cleanup the camera and close any open windows
         cv2.destroyAllWindows()
 
-
+        
 
 
 def main(args):
