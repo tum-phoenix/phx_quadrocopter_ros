@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import rospy
-from phx_uart_msp_bridge.msg import Attitude
+from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import RemoteControl
 from sensor_msgs.msg import Imu
 
