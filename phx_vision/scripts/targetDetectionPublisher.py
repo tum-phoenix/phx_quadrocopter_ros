@@ -32,6 +32,7 @@ class image_converter:
         cv2.namedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
+    self.image_pub = rospy.Publisher("image_topic_2",Image)
     self.br = tf2_ros.TransformBroadcaster()
     self.t = geometry_msgs.msg.TransformStamped()
 
@@ -174,7 +175,7 @@ class image_converter:
 		self.counter += 1
     
     try:
-        self.bridge.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
+        self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
     except CvBridgeError as e:
         print(e)
         
