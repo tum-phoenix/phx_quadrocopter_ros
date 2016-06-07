@@ -17,10 +17,9 @@ class LandingNode():
 
         self.p = 1
         self.d = 5
-        self.setPoint_d = 0
-        self.setPoint = 0
+        self.setPoint_d = 9.81
+        self.setPoint = 1
 
-        self.controlCommand = 1500
 
         self.freq = 100  # Hz
         self.r = rospy.Rate(self.freq)
@@ -45,8 +44,8 @@ class LandingNode():
             un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
             self.controlCommand = np.clip(un_cliped, 1000, 2000)
 
-            print(self.controlCommand)
-
+            print(self.controlCommand, self.altitude, self.linear_acceleration_z)
+	    self.r.sleep()
         '''
         if(self.altitude < self.altitude_start):
                 if(self.linear_acceleration_z > 0.1):
