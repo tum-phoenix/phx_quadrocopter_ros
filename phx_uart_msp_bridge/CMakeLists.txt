@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   geometry_msgs
+  std_msgs
   diagnostic_msgs
   message_generation
   tf
@@ -92,6 +93,8 @@ find_package(catkin REQUIRED COMPONENTS
 generate_messages(
    DEPENDENCIES
    sensor_msgs
+   geometry_msgs
+   diagnostic_msgs
    std_msgs
  )
 
@@ -107,7 +110,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phx_uart_msp_bridge
-   CATKIN_DEPENDS  rospy sensor_msgs geometry_msgs diagnostic_msgs message_runtime tf
+   CATKIN_DEPENDS  rospy std_msgs sensor_msgs geometry_msgs diagnostic_msgs message_runtime tf
 #  DEPENDS system_lib
 )
 
@@ -138,6 +141,7 @@ add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fu
 add_executable(phx_tf_copter_to_copter_stabilized src/transform_copter_stabilized_to_copter.cpp)
 
 add_dependencies(phx_uart_msp_bridge_node_naze ${PROJECT_NAME}_gencpp)
+add_dependencies(phx_tf_copter_to_copter_stabilized ${PROJECT_NAME}_gencpp)
 
 
 target_link_libraries(phx_uart_msp_bridge_node_naze
@@ -165,4 +169,8 @@ target_link_libraries(phx_tf_copter_to_copter_stabilized
 target_link_libraries(phx_uart_msp_bridge_node_fully360
    ${catkin_LIBRARIES}
    phx_serial_com
+)
+
+target_link_libraries(phx_tf_copter_to_copter_stabilized
+   ${catkin_LIBRARIES}
 )
