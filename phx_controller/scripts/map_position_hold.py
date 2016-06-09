@@ -134,6 +134,7 @@ class GPSHoldNode():
 
             # plot PID results
             plot = Diagnostics()
+            plot.header.stamp.secs = rospy.get_time()
             plot.val_a0 = control_p
             plot.val_a1 = control_i
             plot.val_a2 = control_d
