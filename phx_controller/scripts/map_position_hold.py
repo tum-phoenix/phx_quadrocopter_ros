@@ -5,6 +5,7 @@ import tf2_ros
 import rospy
 from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
 from sensor_msgs.msg import Joy
+import time
 
 
 class GPSHoldNode():
@@ -42,6 +43,9 @@ class GPSHoldNode():
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
         self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
+
+        self.prev_time = 0
+
 
     def get_cur_pos(self):
         try:
@@ -83,6 +87,7 @@ class GPSHoldNode():
             previous_error = self.error
             # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
             self.error = np.linalg.norm(target_vector)
+            t_error = time.time()
             self.i_sum += self.error
             if self.i_sum >= self.i_limit:
                 self.i_sum = self.i_limit
@@ -90,7 +95,8 @@ class GPSHoldNode():
                 self.i_sum = -self.i_limit
 
             if not previous_error == self.error:
-                self.estimated_velocity = (previous_error - self.error) * self.rate
+                self.estimated_velocity = (previous_error - self.error) / (t_error - self.prev_time)
+                self.prev_time = time.time()
 
             control_d = self.estimated_velocity * self.d_gain
             control_p = self.error * self.p_gain
@@ -128,6 +134,7 @@ class GPSHoldNode():
 
             # plot PID results
             plot = Diagnostics()
+            plot.header.stamp.secs = rospy.get_time()
             plot.val_a0 = control_p
             plot.val_a1 = control_i
             plot.val_a2 = control_d
