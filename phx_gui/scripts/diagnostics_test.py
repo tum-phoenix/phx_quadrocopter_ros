@@ -7,7 +7,7 @@ from phx_uart_msp_bridge.msg import Diagnostics
 
 rospy.init_node('diagnostics_gui_test')
 
-ros_publish_diagnostics = rospy.Publisher('/diagnostics', Diagnostics, queue_size=1)
+ros_publish_diagnostics = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
 
 # initialize 'speed'-limit for endless loop
 r = rospy.Rate(1)

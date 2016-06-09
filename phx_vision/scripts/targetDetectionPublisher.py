@@ -16,7 +16,6 @@ import tf
 import tf2_ros
 import numpy as np
 import geometry_msgs.msg
-import imutils
 import math
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
@@ -38,18 +37,21 @@ class image_converter:
         self.br = tf2_ros.TransformBroadcaster()
         self.t = geometry_msgs.msg.TransformStamped()
 
-        pts = [[None], [None], [None], [None], [None], [None]]
-        Pnt_nxt = [[None], [None], [None], [None], [None], [None]]
-        past_pts = 3
-        maxLength = past_pts + 2
-        counter = 0
-        (dX, dY) = (0, 0)
-        knownWidth = 0.033  # m
-        focalLength_x = 335.874937  # Test
-        focalLength_y = 335.599836
+        self.pts = [[None], [None], [None], [None], [None], [None]]
+        self.Pnt_nxt = [[None], [None], [None], [None], [None], [None]]
+        self.past_pts = 3
+        self.maxLength = self.past_pts + 2
+        self.counter = 0
+        self.dX, self.dY = 0, 0
+        self.knownWidth = 0.033  # m
+        self.focalLength_x = 335.874937  # Test
+        self.focalLength_y = 335.599836
+
+        self.dist_x = 0
+        self.dist_y = 0
+        self.dist_camera = 0
 
     def callback(self, data):
-
         self.t.header.stamp = rospy.Time.now()
         self.t.header.seq = self.counter
         self.t.header.frame_id = "camera"
@@ -83,8 +85,8 @@ class image_converter:
         cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-        expected_Width_low = (focalLength_y * knownWidth) / (heigth + precision_heigth)
-        expected_Width_high = (focalLength_y * knownWidth) / (heigth - precision_heigth)
+        expected_Width_low = (self.focalLength_y * self.knownWidth) / (heigth + precision_heigth)
+        expected_Width_high = (self.focalLength_y * self.knownWidth) / (heigth - precision_heigth)
 
         # loop over the contours
         for c in cnts:
@@ -188,9 +190,9 @@ class image_converter:
                     cv2.line(frame, (cX, startY), (cX, endY), (0, 0, 255), 3)
                     center = (cX, cY)
 
-                    if Pnt_nxt[list_id][0] is not None:
-                        cX_est = Pnt_nxt[list_id][0]
-                        cY_est = Pnt_nxt[list_id][1]
+                    if self.Pnt_nxt[list_id][0] is not None:
+                        cX_est = self.Pnt_nxt[list_id][0]
+                        cY_est = self.Pnt_nxt[list_id][1]
                         (startX, endX) = (int(cX_est - (w * 0.03)), int(cX_est + (w * 0.03)))
                         (startY, endY) = (int(cY_est - (h * 0.03)), int(cY_est + (h * 0.03)))
                         cv2.line(frame, (startX, cY_est), (endX, cY_est), (0, 255, 0), 1)
@@ -200,9 +202,9 @@ class image_converter:
                     # print(cX-cX_est,cY-cY_est)
 
 
-                    pts[list_id].insert(0, center)
-                    if len(pts[list_id]) > maxLength:
-                        pts[list_id] = pts[list_id][:maxLength]
+                    self.pts[list_id].insert(0, center)
+                    if len(self.pts[list_id]) > self.maxLength:
+                        self.pts[list_id] = self.pts[list_id][:self.maxLength]
 
                     # draw the detected shape type on the frame
                     cv2.putText(frame, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
@@ -210,45 +212,45 @@ class image_converter:
                     # Distance to Camera
 
 
-                    dist_z = (knownWidth * focalLength_x) / perWidth
+                    dist_z = (self.knownWidth * self.focalLength_x) / perWidth
 
-                    # dist_x / dist_y
-                    dist_x_p = 0.5 * frame.shape[1] - cX  # Distance to Center (x-direction) in pixel
-                    dist_y_p = cY - 0.5 * frame.shape[0]
+                    # self.dist_x / self.dist_y
+                    self.dist_x_p = 0.5 * frame.shape[1] - cX  # Distance to Center (x-direction) in pixel
+                    self.dist_y_p = cY - 0.5 * frame.shape[0]
 
-                    dist_x = (dist_z * dist_x_p) / focalLength_x
-                    dist_y = (dist_z * dist_y_p) / focalLength_y
+                    self.dist_x = (dist_z * self.dist_x_p) / self.focalLength_x
+                    self.dist_y = (dist_z * self.dist_y_p) / self.focalLength_y
 
                     cv2.putText(frame, "d_z %.0f mm" % (dist_z), (cX + 5, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
-                    cv2.putText(frame, "d_y %.0f mm" % (dist_x), (cX + 5, cY - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_y %.0f mm" % (self.dist_x), (cX + 5, cY - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
-                    cv2.putText(frame, "d_x %.0f mm" % (dist_y), (cX + 5, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_x %.0f mm" % (self.dist_y), (cX + 5, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
 
         # loop over Objects (list_id)
         for j in range(0, 5):
             # loop over the set of tracked points
-            for i in np.arange(1, len(pts[j])):
+            for i in np.arange(1, len(self.pts[j])):
                 # if either of the tracked points are None, ignore
                 # them
-                if pts[j][i - 1] is None or pts[j][i] is None:
+                if self.pts[j][i - 1] is None or self.pts[j][i] is None:
                     continue
 
                 # check to see if enough points have been accumulated in
                 # the buffer
-                if counter >= past_pts and i == past_pts and pts[j][i - past_pts] is not None:
+                if self.counter >= self.past_pts and i == self.past_pts and self.pts[j][i - self.past_pts] is not None:
                     # compute the difference between the x and y
                     # coordinates and re-initialize the direction
                     # text variables
-                    dX = pts[j][past_pts][0] - pts[j][0][0]
-                    dY = pts[j][past_pts][1] - pts[j][0][1]
-                    X_now = pts[j][0][0]
-                    Y_now = pts[j][0][1]
-                    X_next = X_now - int((1 / float(past_pts)) * dX)
-                    Y_next = Y_now - int((1 / float(past_pts)) * dY)
+                    self.dX = self.pts[j][self.past_pts][0] - self.pts[j][0][0]
+                    self.dY = self.pts[j][self.past_pts][1] - self.pts[j][0][1]
+                    X_now = self.pts[j][0][0]
+                    Y_now = self.pts[j][0][1]
+                    X_next = X_now - int((1 / float(self.past_pts)) * self.dX)
+                    Y_next = Y_now - int((1 / float(self.past_pts)) * self.dY)
 
-                    Pnt_nxt[j] = (X_next, Y_next)
+                    self.Pnt_nxt[j] = (X_next, Y_next)
 
         # draw direction of motion
         # cv2.line(frame, (X_now,Y_now), (X_next,Y_next), (0, 255, 0), 2)
@@ -260,30 +262,30 @@ class image_converter:
 
 
         # draw the status text on the frame
-        cv2.putText(frame, status, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+        cv2.putText(frame, 'status', (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (0, 0, 255), 2)
 
-        self.t.transform.translation.x = dist_x
-        self.t.transform.translation.y = dist_y
-        self.t.transform.translation.z = dist_camera
+        self.t.transform.translation.x = self.dist_x
+        self.t.transform.translation.y = self.dist_y
+        self.t.transform.translation.z = self.dist_camera
         self.br.sendTransform(self.t)
         self.counter += 1
 
-    try:
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, "mono8"))
-    except CvBridgeError as e:
-        print(e)
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, "mono8"))
+        except CvBridgeError as e:
+            print(e)
 
-    if (not self.runningOnPhoenix):
-        # show the frame and record if a key is pressed
-        cv2.imshow("Frame", frame)
-        cv2.waitKey(1000)
+        if (not self.runningOnPhoenix):
+            # show the frame and record if a key is pressed
+            cv2.imshow("Frame", frame)
+            cv2.waitKey(1000)
 
-        # optional:
-        # cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
+            # optional:
+            # cv2.drawContours(image, [approx], -1, (0, 255, 0), 4)
 
-        # cleanup the camera and close any open windows
-        cv2.destroyAllWindows()
+            # cleanup the camera and close any open windows
+            cv2.destroyAllWindows()
 
 
 def main(args):

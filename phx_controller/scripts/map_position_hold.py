@@ -41,7 +41,7 @@ class GPSHoldNode():
 
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
         self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
-        self.diag_pub = rospy.Publisher('/diagnostics', Diagnostics, queue_size=1)
+        self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
 
     def get_cur_pos(self):
         try:

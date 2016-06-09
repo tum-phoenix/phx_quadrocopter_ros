@@ -168,7 +168,7 @@ def update_from_diagnostics_channel(input_diagnostics):
 
 rospy.init_node('diagnostics_gui')
 
-ros_subscribe_cur_servo_cmd = rospy.Subscriber('/diagnostics', Diagnostics, update_from_diagnostics_channel)
+ros_subscribe_cur_servo_cmd = rospy.Subscriber('/diag_out', Diagnostics, update_from_diagnostics_channel)
 
 
 QtGui.QApplication.instance().exec_()
