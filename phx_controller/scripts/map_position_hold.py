@@ -138,6 +138,8 @@ class GPSHoldNode():
             plot.val_a0 = control_p
             plot.val_a1 = control_i
             plot.val_a2 = control_d
+            plot.val_b0 = target_vector[0]
+            plot.val_b1 = target_vector[1]
             self.diag_pub.publish(plot)
 
             self.r.sleep()
