@@ -67,7 +67,7 @@ class AttitudeHoldNode():
 
         self.pub.publish(joy_msg)
 
-        print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i
+        print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
 
 
     def imuCallback(self, imu_msg):
