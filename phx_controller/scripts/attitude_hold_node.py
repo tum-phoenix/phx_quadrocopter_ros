@@ -10,7 +10,7 @@ class AttitudeHoldNode():
     def __init__(self):
         rospy.init_node('attitude_hold_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
-        self.sub_imu = rospy.Subscriber('/phx/imu', Joy, self.imuCallback)
+        self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, self.attitudeCallback)
         self.pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
 
@@ -31,8 +31,8 @@ class AttitudeHoldNode():
         self.pitch_sum_i = 0
         self.pitch_i_stop = 100
 
-        self.roll_p = 1
-        self.roll_d = 4
+        self.roll_p = 0.01
+        self.roll_d = 1
         self.roll_setPoint_d = 0
         self.roll_i = 0
         self.roll_sum_i = 0
@@ -101,8 +101,8 @@ class AttitudeHoldNode():
         self.pub.publish(joy_msg)
 
         #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
-        #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
-        print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
+        print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
+        #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
 
 
     def imuCallback(self, imu_msg):
