@@ -1,3 +1,4 @@
+import numpy as np
 class PIDController():
     def __init__(self, controlCommand, setPoint_p,p,d,i,setPoint_d, i_stop):
         self.set_point = setPoint_p
@@ -23,6 +24,7 @@ class PIDController():
         controlCommand_d = (self.setPoint_d - current_d) * self.d
         controlCommand_i = self.sum_i * self.i
         unclipped =  self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
-        return unclipped
+        self.controlCommand = np.clip(unclipped,1000,2000)
+        return self.controlCommand
 
 
