@@ -34,7 +34,7 @@ class AttitudeHoldNode():
         self.roll_p = 1
         self.roll_d = 4
         self.roll_setPoint_d = 0
-        self.roll_i = 1
+        self.roll_i = 0
         self.roll_sum_i = 0
         self.roll_i_stop = 100
 
