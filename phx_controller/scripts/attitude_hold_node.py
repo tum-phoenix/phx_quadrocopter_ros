@@ -68,21 +68,35 @@ class AttitudeHoldNode():
         elif self.roll_sum_i <= -self.roll_i_stop:
             self.roll_sum_i = -self.roll_i_stop
         roll_controlCommand_p = (self.set_roll - attitude_msg.roll) * self.roll_p
-        roll_controlCommand_d = (self.roll_setPoint_d - self.imu.angular_velocity.y) * self.roll_d
+        roll_controlCommand_d = (self.roll_setPoint_d - self.imu.angular_velocity.x) * self.roll_d
         roll_controlCommand_i = self.roll_sum_i * self.roll_i
         un_cliped = self.controlCommand_roll + roll_controlCommand_p + roll_controlCommand_d + roll_controlCommand_i
         self.controlCommand_roll = np.clip(un_cliped, 1000, 2000)
+
+        self.yaw_sum_i += self.set_yaw - attitude_msg.yaw
+
+        if self.yaw_sum_i >= self.yaw_i_stop:
+            self.yaw_sum_i = self.yaw_i_stop
+        elif self.yaw_sum_i <= -self.yaw_i_stop:
+            self.yaw_sum_i = -self.yaw_i_stop
+        yaw_controlCommand_p = (self.set_yaw - attitude_msg.yaw) * self.yaw_p
+        yaw_controlCommand_d = (self.yaw_setPoint_d - self.imu.angular_velocity.z) * self.yaw_d
+        yaw_controlCommand_i = self.yaw_sum_i * self.yaw_i
+        un_cliped = self.controlCommand_yaw + yaw_controlCommand_p + yaw_controlCommand_d + yaw_controlCommand_i
+        self.controlCommand_yaw = np.clip(un_cliped, 1000, 2000)
 
 
         joy_msg = RemoteControl()
         joy_msg.pitch = self.controlCommand_pitch
         joy_msg.roll = self.controlCommand_roll
+        joy_msg.yaw = self.controlCommand_yaw
 
         self.pub.publish(joy_msg)
 
         #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
+        #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
+        print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
 
-        print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
 
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
