@@ -73,6 +73,7 @@ find_package(catkin REQUIRED COMPONENTS
    WayPoint.msg
    WayPoints.msg
    Management.msg
+   BooleanMap.msg
  )
 
 ## Generate services in the 'srv' folder
