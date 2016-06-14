@@ -38,6 +38,13 @@ class AttitudeHoldNode():
         self.roll_sum_i = 0
         self.roll_i_stop = 100
 
+        self.yaw_p = 1
+        self.yaw_d = 4
+        self.yaw_setPoint_d = 0
+        self.yaw_i = 0
+        self.yaw_sum_i = 0
+        self.yaw_i_stop = 100
+
         self.controlCommand_pitch = 1500
         self.controlCommand_roll = 1500
         self.controlCommand_yaw = 1500
