@@ -61,14 +61,28 @@ class AttitudeHoldNode():
         un_cliped = self.controlCommand_pitch + pitch_controlCommand_p + pitch_controlCommand_d + pitch_controlCommand_i
         self.controlCommand_pitch = np.clip(un_cliped, 1000, 2000)
 
+        self.roll_sum_i += self.set_roll - attitude_msg.roll
+
+        if self.roll_sum_i >= self.roll_i_stop:
+            self.roll_sum_i = self.roll_i_stop
+        elif self.roll_sum_i <= -self.roll_i_stop:
+            self.roll_sum_i = -self.roll_i_stop
+        roll_controlCommand_p = (self.set_roll - attitude_msg.roll) * self.roll_p
+        roll_controlCommand_d = (self.roll_setPoint_d - self.imu.angular_velocity.y) * self.roll_d
+        roll_controlCommand_i = self.roll_sum_i * self.roll_i
+        un_cliped = self.controlCommand_roll + roll_controlCommand_p + roll_controlCommand_d + roll_controlCommand_i
+        self.controlCommand_roll = np.clip(un_cliped, 1000, 2000)
+
 
         joy_msg = RemoteControl()
         joy_msg.pitch = self.controlCommand_pitch
+        joy_msg.roll = self.controlCommand_roll
 
         self.pub.publish(joy_msg)
 
-        print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
+        #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
 
+        print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
 
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
