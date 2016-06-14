@@ -78,8 +78,8 @@ class image_converter:
         blurred = cv2.GaussianBlur(frame, (7, 7), 0)
         edged = cv2.Canny(blurred, 50, 150)
 
-        heigth = 300  # mm
-        precision_heigth = 30  # Hoehenangabe auf 3 cm genau
+        heigth = 0.200  # mm
+        precision_heigth = 0.030  # Hoehenangabe auf 3 cm genau
 
         # find contours in the edge map
         cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
