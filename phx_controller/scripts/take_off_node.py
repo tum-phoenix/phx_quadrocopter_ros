@@ -37,12 +37,12 @@ class TakeOffNode():
 #Following two functions read altitude and acceleration from the sensors
 
 	def altCallback(self, alt_msg):
-		#self.altitude = alt_msg.estimated_altitude
-		self.altitude = 0.2
+		self.altitude = alt_msg.estimated_altitude
+		#self.altitude = 0.2
 
 	def imuCallback(self, imu_msg):
-		#self.linear_acceleration_z = imu_msg.linear_acceleration.z
-		self.linear_acceleration_z = 8
+		self.linear_acceleration_z = imu_msg.linear_acceleration.z
+		#self.linear_acceleration_z = 8
 
 	def run(self):
 		while not rospy.is_shutdown():

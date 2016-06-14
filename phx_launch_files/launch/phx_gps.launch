@@ -2,15 +2,17 @@
     <machine name="phoenix" address="localhost" />
 
     <!-- GPS -->
+    <!--
         <node name="gps_way_point_controller_node" pkg="phx_controller" type="gps_way_point_controller.py" output="screen" machine="phoenix" />
+    -->
 
-        <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
-            <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
-            <param name="yaw_offset" value="1.5707963"/> <!-- yaw offset for zero point not facing east but north  -->
-            <remap from="/imu/data" to="/phx/imu" />
-            <remap from="/gps/fix" to="/phx/gps" />
-            <remap from="/odometry/filtered" to="/your/robot_localization/output/topic" />
-        </node>
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+        <param name="magnetic_declination_radians" value="0.0491601131"/> <!-- mag declination for munich  -->
+        <param name="yaw_offset" value="1.5707963"/> <!-- yaw offset for zero point not facing east but north  -->
+        <remap from="/imu/data" to="/phx/imu" />
+        <remap from="/gps/fix" to="/phx/gps" />
+        <remap from="/odometry/filtered" to="/your/robot_localization/output/topic" />
+    </node>
 
 </launch>
 
