@@ -20,8 +20,10 @@ from geometry_msgs.msg import Twist
 class OpticalFlow:
 
     def __init__(self):
-        self.firstFrame = True
-        if(os.uname()[4][:3] == 'nonaarm'):
+        self.prev = None
+        self.img = None
+        self.flow = None
+        if(os.uname()[4][:3] == 'naarm'):
             self.runningOnPhoenix = True
         else:
             self.runningOnPhoenix = False
@@ -40,30 +42,28 @@ class OpticalFlow:
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "mono8")
             
-            if (self.firstFrame):
+            if (self.prev is None):
                 self.prev = cv2.resize(cv_image, (0,0), fx=0.125, fy=0.125)
-		self.firstFrame = False
-		return
+                self.img = self.prev
+            
+            self.img = cv2.resize(cv_image, (0,0), fx=0.125, fy=0.125)
+	    self.flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, 0.5, 3, 15, 3, 5, 1.2, 0)
+            self.prev = self.img
+            
+            if (self.runningOnPhoenix):
+                try:
+                    print("Tryiign to pub")
+                    self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.draw_flow(self.img, self.flow), "mono8"))
+                except CvBridgeError as e:
+                    print(e)
             else:
-                self.img = cv2.resize(cv_image, (0,0), fx=0.125, fy=0.125)
-                
-           	flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-            	self.prev = self.img
-                
-            	if (self.runningOnPhoenix):
-                	try:
-                    		self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.draw_flow(self.img, flow), "mono8"))
-                	except CvBridgeError as e:
-                    		print(e)
-            	else:
-                	cv2.imshow('flow', self.draw_flow(self.img, flow))
-            
-            
-            	fx, fy = flow
-            	self.twist.linear.x = fx
-            	self.twist.linear.y = fy
+                cv2.imshow('flow', self.draw_flow(self.img, self.flow))
 
-            	self.twist_pub.publish(self.twist)
+            fx = np.median(self.flow[:,:,0])
+            fy = np.median(self.flow[:,:,1])
+            self.twist.linear.x = fx
+            self.twist.linear.y = fy
+            self.twist_pub.publish(self.twist)
                 
         except CvBridgeError as e:
             print(e)
@@ -91,3 +91,4 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
+
