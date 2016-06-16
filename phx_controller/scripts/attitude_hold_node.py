@@ -39,7 +39,7 @@ class AttitudeHoldNode():
         self.roll_sum_i = 0
         self.roll_i_stop = 100
 
-        #self.yawController = PIDController(1500, 0,0.01,1,0,0,100)
+        self.yawController = PIDController(1500, 0,0.01,1,0,0,100,0)
         '''
         self.yaw_p = 0.01
         self.yaw_d = 1
@@ -84,10 +84,10 @@ class AttitudeHoldNode():
         un_cliped = self.controlCommand_roll + roll_controlCommand_p + roll_controlCommand_d + roll_controlCommand_i
         self.controlCommand_roll = np.clip(un_cliped, 1000, 2000)
 
-        #unclipped = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
-        #controlCommand_yaw = np.clip(unclipped, 1000, 2000)
+        controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
 
-	self.yaw_sum_i += self.set_yaw - attitude_msg.yaw
+        '''
+	    self.yaw_sum_i += self.set_yaw - attitude_msg.yaw
 	
         if self.yaw_sum_i >= self.yaw_i_stop:
             self.yaw_sum_i = self.yaw_i_stop
@@ -97,8 +97,7 @@ class AttitudeHoldNode():
         yaw_controlCommand_d = (self.yaw_setPoint_d - self.imu.angular_velocity.z) * self.yaw_d
         yaw_controlCommand_i = self.yaw_sum_i * self.yaw_i
         un_cliped = self.controlCommand_yaw + yaw_controlCommand_p + yaw_controlCommand_d + yaw_controlCommand_i
-        self.controlCommand_yaw = np.clip(un_cliped, 1000, 2000)
-
+        self.controlCommand_yaw = np.clip(un_cliped, 1000, 2000)'''
 
         joy_msg = RemoteControl()
         joy_msg.pitch = self.controlCommand_pitch
@@ -110,8 +109,8 @@ class AttitudeHoldNode():
         #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
         #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
         #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
-	#print controlCommand_yaw
-	print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
+	print controlCommand_yaw
+	#print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
 	
 
     def imuCallback(self, imu_msg):
