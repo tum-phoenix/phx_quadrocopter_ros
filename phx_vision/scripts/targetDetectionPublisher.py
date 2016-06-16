@@ -32,7 +32,7 @@ class image_converter:
         if (not self.runningOnPhoenix):
             cv2.namedWindow("Image window", 1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
+        self.image_sub = rospy.Subscriber("image_rect", Image, self.callback)
         self.image_pub = rospy.Publisher("image_topic_2", Image)
         self.br = tf2_ros.TransformBroadcaster()
         self.t = geometry_msgs.msg.TransformStamped()
@@ -224,11 +224,11 @@ class image_converter:
                     self.dist_x = (dist_z * self.dist_x_p) / self.focalLength_x
                     self.dist_y = (dist_z * self.dist_y_p) / self.focalLength_y
 
-                    cv2.putText(frame, "d_z %.0f mm" % (dist_z), (cX + 5, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_z %.5f m" % (dist_z), (cX + 5, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
-                    cv2.putText(frame, "d_y %.0f mm" % (self.dist_x), (cX + 5, cY - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_y %.5f m" % (self.dist_x), (cX + 5, cY - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
-                    cv2.putText(frame, "d_x %.0f mm" % (self.dist_y), (cX + 5, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_x %.5f m" % (self.dist_y), (cX + 5, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
 
         # loop over Objects (list_id)
