@@ -56,9 +56,9 @@ class AttitudeHoldNode():
         #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
         #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
         #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
-	    print controlCommand_yaw, ', ', controlCommand_roll, ',' , controlCommand_pitch
+        print controlCommand_yaw, controlCommand_roll, controlCommand_pitch
         #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
-	
+
 
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
 
 
-                # if self.input_rc[4] > 1500:
+        # if self.input_rc[4] > 1500:
 #     self.setPoint = altitude_msg.estimated_altitude
 #     self.controlCommand = self.input_rc[3]
 #
