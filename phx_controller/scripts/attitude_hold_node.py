@@ -21,33 +21,11 @@ class AttitudeHoldNode():
         self.r = rospy.Rate(self.freq)
 
         self.currentPose = Attitude()
-        self.set_pitch = 0
-        self.set_roll = 0
-        self.set_yaw = 0
-
-        self.pitch_p = 1
-        self.pitch_d = 4
-        self.pitch_setPoint_d = 0
-        self.pitch_i = 0
-        self.pitch_sum_i = 0
-        self.pitch_i_stop = 100
-
-        self.roll_p = 0.01
-        self.roll_d = 1
-        self.roll_setPoint_d = 0
-        self.roll_i = 0
-        self.roll_sum_i = 0
-        self.roll_i_stop = 100
 
         self.yawController = PIDController(1500, 0,0.01,1,0,0,100,0)
-        '''
-        self.yaw_p = 0.01
-        self.yaw_d = 1
-        self.yaw_setPoint_d = 0
-        self.yaw_i = 0
-        self.yaw_sum_i = 0
-        self.yaw_i_stop = 100
-        '''
+        self.pitchController = PIDController(1500, 0, 0.01, 1, 0, 0, 100, 0)
+        self.rollController = PIDController(1500, 0, 0.01, 1, 0, 0, 100, 0)
+
 
         self.controlCommand_pitch = 1500
         self.controlCommand_roll = 1500
@@ -60,48 +38,17 @@ class AttitudeHoldNode():
     def attitudeCallback(self, attitude_msg):
         self.currentPose = attitude_msg
 
-        self.pitch_sum_i += self.set_pitch - attitude_msg.pitch
+        controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
 
-        if self.pitch_sum_i >= self.pitch_i_stop:
-            self.pitch_sum_i = self.pitch_i_stop
-        elif self.pitch_sum_i <= -self.pitch_i_stop:
-            self.pitch_sum_i = -self.pitch_i_stop
-        pitch_controlCommand_p = (self.set_pitch - attitude_msg.pitch) * self.pitch_p
-        pitch_controlCommand_d = (self.pitch_setPoint_d - self.imu.angular_velocity.y) * self.pitch_d
-        pitch_controlCommand_i = self.pitch_sum_i * self.pitch_i
-        un_cliped = self.controlCommand_pitch + pitch_controlCommand_p + pitch_controlCommand_d + pitch_controlCommand_i
-        self.controlCommand_pitch = np.clip(un_cliped, 1000, 2000)
+        controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.x)
 
-        self.roll_sum_i += self.set_roll - attitude_msg.roll
+        controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.z)
 
-        if self.roll_sum_i >= self.roll_i_stop:
-            self.roll_sum_i = self.roll_i_stop
-        elif self.roll_sum_i <= -self.roll_i_stop:
-            self.roll_sum_i = -self.roll_i_stop
-        roll_controlCommand_p = (self.set_roll - attitude_msg.roll) * self.roll_p
-        roll_controlCommand_d = (self.roll_setPoint_d - self.imu.angular_velocity.x) * self.roll_d
-        roll_controlCommand_i = self.roll_sum_i * self.roll_i
-        un_cliped = self.controlCommand_roll + roll_controlCommand_p + roll_controlCommand_d + roll_controlCommand_i
-        self.controlCommand_roll = np.clip(un_cliped, 1000, 2000)
 
-        controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
-
-        '''
-	    self.yaw_sum_i += self.set_yaw - attitude_msg.yaw
-	
-        if self.yaw_sum_i >= self.yaw_i_stop:
-            self.yaw_sum_i = self.yaw_i_stop
-        elif self.yaw_sum_i <= -self.yaw_i_stop:
-            self.yaw_sum_i = -self.yaw_i_stop
-        yaw_controlCommand_p = (self.set_yaw - attitude_msg.yaw) * self.yaw_p
-        yaw_controlCommand_d = (self.yaw_setPoint_d - self.imu.angular_velocity.z) * self.yaw_d
-        yaw_controlCommand_i = self.yaw_sum_i * self.yaw_i
-        un_cliped = self.controlCommand_yaw + yaw_controlCommand_p + yaw_controlCommand_d + yaw_controlCommand_i
-        self.controlCommand_yaw = np.clip(un_cliped, 1000, 2000)'''
 
         joy_msg = RemoteControl()
-        joy_msg.pitch = self.controlCommand_pitch
-        joy_msg.roll = self.controlCommand_roll
+        joy_msg.pitch = controlCommand_pitch
+        joy_msg.roll = controlCommand_roll
         joy_msg.yaw = controlCommand_yaw
 
         self.pub.publish(joy_msg)
@@ -109,8 +56,8 @@ class AttitudeHoldNode():
         #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
         #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
         #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
-	print controlCommand_yaw
-	#print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
+	    print controlCommand_yaw, ', ', controlCommand_roll, ',' , controlCommand_pitch
+        #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
 	
 
     def imuCallback(self, imu_msg):
