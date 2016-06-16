@@ -150,8 +150,11 @@ class image_converter:
                 self.t.child_frame_id = "Star"
                 list_id = 5
 
+            else: 
+                list_id = None
+
             # ensure that the approximated contour is "roughly" rectangular
-            if len(approx) >= 3 and len(approx) <= 30:
+            if list_id is not None:
                 # compute the bounding box of the approximated contour and
                 # use the bounding box to compute the aspect ratio
                 (x, y, w, h) = cv2.boundingRect(approx)
