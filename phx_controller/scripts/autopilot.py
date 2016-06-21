@@ -14,7 +14,7 @@ class Autopilot:
     """
     def __init__(self):
         rospy.init_node('Autopilot_node')
-        self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
+        #self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.rc_test = rospy.Publisher('/phx/test', RemoteControl, queue_size=1)
 
