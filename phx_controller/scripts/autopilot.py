@@ -37,7 +37,7 @@ class Autopilot:
 
         self.current_pose = RemoteControl()
         self.rate = rospy.Rate(30)
-    '''
+
     def callback_input(self, input_msg=AutoPilotCmd()):
         from_node = input_msg.node_identifier
         priority = input_msg.priority
@@ -75,7 +75,7 @@ class Autopilot:
         rc_msg.aux4 = int(1000 + np.random.random()*1000)
 
         self.rc_pub.publish(rc_msg)
-    '''
+
     def run(self):
         while not rospy.is_shutdown():
 
