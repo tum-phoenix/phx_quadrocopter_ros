@@ -17,8 +17,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 
-class OpticalFlow:
 
+class OpticalFlow:
     def __init__(self):
         self.prev = None
         self.img = None
@@ -27,7 +27,7 @@ class OpticalFlow:
             self.runningOnPhoenix = True
         else:
             self.runningOnPhoenix = False
-        if(not self.runningOnPhoenix):
+        if not self.runningOnPhoenix:
             cv2.namedWindow("flow", 1)
             
         self.bridge = CvBridge()
@@ -36,21 +36,18 @@ class OpticalFlow:
         self.image_pub = rospy.Publisher("flowImage", Image, queue_size = 1)
         self.twist = Twist()
 
-
     def callback(self, data):
-
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "mono8")
             
-            if (self.prev is None):
-                self.prev = cv2.resize(cv_image, (0,0), fx=0.125, fy=0.125)
+            if self.prev is None:
+                self.prev = cv2.resize(cv_image, (0, 0), fx=0.125, fy=0.125)
                 self.img = self.prev
             
-            self.img = cv2.resize(cv_image, (0,0), fx=0.125, fy=0.125)
-	    self.flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, 0.5, 3, 15, 3, 5, 1.2, 0)
+            self.img = cv2.resize(cv_image, (0, 0), fx=0.125, fy=0.125)
+            self.flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, 0.5, 3, 15, 3, 5, 1.2, 0)
             self.prev = self.img
-            
-            if (self.runningOnPhoenix):
+            if self.runningOnPhoenix:
                 try:
                     print("Tryiign to pub")
                     self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.draw_flow(self.img, self.flow), "mono8"))
@@ -59,8 +56,8 @@ class OpticalFlow:
             else:
                 cv2.imshow('flow', self.draw_flow(self.img, self.flow))
 
-            fx = np.median(self.flow[:,:,0])
-            fy = np.median(self.flow[:,:,1])
+            fx = np.median(self.flow[:, :, 0])
+            fy = np.median(self.flow[:, :, 1])
             self.twist.linear.x = fx
             self.twist.linear.y = fy
             self.twist_pub.publish(self.twist)
@@ -80,6 +77,7 @@ class OpticalFlow:
             cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
         return vis
 
+
 def main(args):
     of = OpticalFlow()
     rospy.init_node('OpticalFlow', anonymous=True)
@@ -88,6 +86,7 @@ def main(args):
     except KeyboardInterrupt:
         print ("Shutting down")
     cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main(sys.argv)
