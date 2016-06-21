@@ -46,34 +46,34 @@ class TakeOffNode():
     #self.linear_acceleration_z = 8
 
 
-def controllerCommandCallback(self, controller_msg):
-        self.enabled = controller_msg.enabled[self.node_identifier]
+    def controllerCommandCallback(self, controller_msg):
+            self.enabled = controller_msg.enabled[self.node_identifier]
 
-def run(self):
-    while not rospy.is_shutdown():
-        if self.enabled:
-            if(self.previousAltitude >= self.altitude):
-                self.i_sum += 1
-            else:
-                self.i_sum = 0
+    def run(self):
+        while not rospy.is_shutdown():
+            if self.enabled:
+                if(self.previousAltitude >= self.altitude):
+                    self.i_sum += 1
+                else:
+                    self.i_sum = 0
 
-        if self.i_sum >= self.i_stop:
-            self.i_sum = self.i_stop
-        elif self.i_sum <= -self.i_stop:
-            self.i_sum = -self.i_stop
+            if self.i_sum >= self.i_stop:
+                self.i_sum = self.i_stop
+            elif self.i_sum <= -self.i_stop:
+                self.i_sum = -self.i_stop
 
-        controlCommand_p = (self.setPoint_p - self.altitude) * self.p			#Wanted altitude - Current altitude
-        controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d	#Error: Wanted acceleration - Current Acceleration
-        controlCommand_i = self.i_sum * self.i
+            controlCommand_p = (self.setPoint_p - self.altitude) * self.p			#Wanted altitude - Current altitude
+            controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d	#Error: Wanted acceleration - Current Acceleration
+            controlCommand_i = self.i_sum * self.i
 
-        un_cliped = self.controlCommand + controlCommand_p + controlCommand_i + controlCommand_d
-        self.controlCommand = np.clip(un_cliped, 1000, 2000)
+            un_cliped = self.controlCommand + controlCommand_p + controlCommand_i + controlCommand_d
+            self.controlCommand = np.clip(un_cliped, 1000, 2000)
 
-        print "Throttle: ", self.controlCommand, "Altitude: ", self.altitude, "Previous Alt: ", self.previousAltitude,  "Acceleration: ", self.linear_acceleration_z
-        print "p: ", controlCommand_p, "d: ", controlCommand_d, "i: ", controlCommand_i
+            print "Throttle: ", self.controlCommand, "Altitude: ", self.altitude, "Previous Alt: ", self.previousAltitude,  "Acceleration: ", self.linear_acceleration_z
+            print "p: ", controlCommand_p, "d: ", controlCommand_d, "i: ", controlCommand_i
 
-        self.previousAltitude = self.altitude
-        self.r.sleep()
+            self.previousAltitude = self.altitude
+            self.r.sleep()
 
 #if altitude > setPoint_p launch AltitudeHoldNode()
 
