@@ -12,6 +12,7 @@ class AltitudeHoldNode():
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
+        self.autopilot_commands = rospy.Subscriber('/phx/autopilot_commands', AutoPilotCmd, self.autopilotCommandCallback)
 #        self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
@@ -34,8 +35,11 @@ class AltitudeHoldNode():
         while not rospy.is_shutdown():
             self.r.sleep()
 
+    def autopilotCommandCallback(self, autopilot_msg):
+        self.enabled = autopilot_msg.enabled
+
     def altitudeCallback(self, altitude_msg):
-        self.enabled:
+        if self.enabled:
             print("Altitude Callback")
             # set previousAltitude to current Altitude in first call
             if self.firstCall:

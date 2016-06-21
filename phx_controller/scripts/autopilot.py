@@ -16,7 +16,7 @@ class Autopilot:
         rospy.init_node('Autopilot_node')
         #self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
-        self.rc_test = rospy.Publisher('/phx/test', RemoteControl, queue_size=1)
+        self.autopilot_commands = rospy.Publisher('/phx/autopilot_commands', AutoPilotCmd, queue_size=1)
 
         self.current_pose = RemoteControl()
         self.rate = rospy.Rate(30)
@@ -62,8 +62,9 @@ class Autopilot:
     def run(self):
         while not rospy.is_shutdown():
             self.rate.sleep()
-            r = RemoteControl()
-            self.rc_test.publish(r)
+            command = AutoPilotCmd()
+            command.enabled = False
+            self.autopilot_commands.publish(command)
 
             print 'current pose \n', self.current_pose
 
