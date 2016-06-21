@@ -73,6 +73,7 @@ class Autopilot:
             self.rate.sleep()
             command = ControllerCmd()
             command.enabled = False
+	    command.node_identifier = 1
             self.controller_commands.publish(command)
 
             print 'current pose \n', self.current_pose
