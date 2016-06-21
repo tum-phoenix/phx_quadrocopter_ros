@@ -67,8 +67,7 @@ class GPSHoldNode():
         return self.copter_pos
 
     def controllerCommandCallback(self, controller_msg):
-        if controller_msg.node_identifier == self.node_identifier:
-            self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
 
     def rc_callback(self,rc_msg):
         self.rc_input[0] = rc_msg.axes[0]

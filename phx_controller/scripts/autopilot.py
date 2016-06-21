@@ -23,7 +23,15 @@ class Autopilot:
     """
     def __init__(self):
         rospy.init_node('Autopilot_node')
-        #self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
+        self.enabled_nodes = [False, False, False, False, False]
+        self.enabled_nodes[0] = input('altitude on? ')
+
+        self.enabled_nodes[1] = input('attitude on? ')
+        self.enabled_nodes[2] = input('landing on? ')
+        self.enabled_nodes[3] = input('starting on? ')
+        self.enabled_nodes[4] = input('map_position on? ')
+
+        self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.controller_commands = rospy.Publisher('/phx/controller_commands', ControllerCmd, queue_size=1)
 
@@ -70,13 +78,17 @@ class Autopilot:
     '''
     def run(self):
         while not rospy.is_shutdown():
-            self.rate.sleep()
+
+
+            #if self.mode == 1:
             command = ControllerCmd()
-            command.enabled = False
-	    command.node_identifier = 1
+            command.enabled =  self.enabled_nodes
+
             self.controller_commands.publish(command)
 
             print 'current pose \n', self.current_pose
+
+            self.rate.sleep()
 
 
 if __name__ == '__main__':

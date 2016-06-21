@@ -67,8 +67,7 @@ class AttitudeHoldNode():
         self.imu = imu_msg
 
     def controllerCommandCallback(self, controller_msg):
-        if controller_msg.node_identifer == self.node_identifer:
-            self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
 
 
 if __name__ == '__main__':

@@ -47,8 +47,7 @@ class TakeOffNode():
 
 
 def controllerCommandCallback(self, controller_msg):
-    if controller_msg.node_identifier == self.node_identifier:
-        self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
 
 def run(self):
     while not rospy.is_shutdown():
