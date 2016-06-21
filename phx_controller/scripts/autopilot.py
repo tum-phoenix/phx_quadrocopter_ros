@@ -82,7 +82,7 @@ class Autopilot:
 
             #if self.mode == 1:
             command = ControllerCmd()
-            command.enabled =  self.enabled_nodes
+            command.enabled = self.enabled_nodes
 
             self.controller_commands.publish(command)
 

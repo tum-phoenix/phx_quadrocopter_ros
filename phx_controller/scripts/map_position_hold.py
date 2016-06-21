@@ -4,6 +4,7 @@ import tf
 import tf2_ros
 import rospy
 from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
+from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 import time
 
@@ -44,6 +45,7 @@ class GPSHoldNode():
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
         self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
+        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
 
         self.prev_time = 0
 

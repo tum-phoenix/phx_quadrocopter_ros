@@ -5,6 +5,7 @@ import time
 from altitude_hold_node import AltitudeHoldNode
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import Imu
 
@@ -14,6 +15,7 @@ class TakeOffNode():
         self.node_identifier = 4
 
         self.sub_alt = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altCallback)
+        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
 
         self.p = 5	#PID controller
