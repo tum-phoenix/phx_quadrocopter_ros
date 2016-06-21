@@ -94,7 +94,11 @@ class GPSHoldNode():
                 # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
                 self.error = np.linalg.norm(target_vector)
                 t_error = time.time()
-                self.i_sum += self.error
+                factor = 10 # factor for i term reduction
+                if(self.error > 1):
+                    self.i_sum += self.error
+                else:
+                    self.i_sum -= self.error * factor
                 if self.i_sum >= self.i_limit:
                     self.i_sum = self.i_limit
                 elif self.i_sum <= -self.i_limit:
