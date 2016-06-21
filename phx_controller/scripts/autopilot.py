@@ -16,10 +16,11 @@ class Autopilot:
         rospy.init_node('Autopilot_node')
         self.autopilot_input_sub = rospy.Subscriber('/phx/autopilot/input', AutoPilotCmd, self.callback_input)
         self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
+        self.rc_test = rospy.Publisher('/phx/test', RemoteControl, queue_size=1)
 
         self.current_pose = RemoteControl()
         self.rate = rospy.Rate(30)
-
+    '''
     def callback_input(self, input_msg=AutoPilotCmd()):
         from_node = input_msg.node_identifier
         priority = input_msg.priority
@@ -57,10 +58,13 @@ class Autopilot:
         rc_msg.aux4 = int(1000 + np.random.random()*1000)
 
         self.rc_pub.publish(rc_msg)
-
+    '''
     def run(self):
         while not rospy.is_shutdown():
             self.rate.sleep()
+            r = RemoteControl()
+            self.rc_test.publish(r)
+
             print 'current pose \n', self.current_pose
 
 
