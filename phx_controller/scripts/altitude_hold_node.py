@@ -3,6 +3,7 @@ import numpy as np
 import rospy
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import AutoPilotCmd
+from phx_uart_msp_bridge.msg import RemoteControl
 from sensor_msgs.msg import Joy
 
 
@@ -61,21 +62,16 @@ class AltitudeHoldNode():
             controlCommand_i = self.sum_i * self.i
             un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
             self.controlCommand = np.clip(un_cliped, 1000, 2000)
-            joy_msg = AutoPilotCmd()
+            autopilot_command = AutoPilotCmd()
+            rc = RemoteControl()
+            rc.throttle = self.controlCommand
+            autopilot_command.rc = rc
 
             # Replay and override current rc
-            joy_msg.pitch = self.input_rc[0]
-            joy_msg.roll = self.input_rc[1]
-            joy_msg.yaw = self.input_rc[2]
-            joy_msg.throttle = self.controlCommand
-            joy_msg.aux1 = self.input_rc[4]
-            joy_msg.aux2 = self.input_rc[5]
-            joy_msg.aux3 = self.input_rc[6]
-            joy_msg.aux4 = self.input_rc[7]
 
             self.previousAltitude = altitude_msg.estimated_altitude
     #        self.rc_pub.publish(joy_msg)
-            self.altitude_pub.publish(joy_msg)
+            self.altitude_pub.publish(autopilot_command)
 
             print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude
             print 'controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i
