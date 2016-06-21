@@ -63,7 +63,7 @@ class AltitudeHoldNode():
             un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
             self.controlCommand = np.clip(un_cliped, 1000, 2000)
             autopilot_command = AutoPilotCmd()
-            autopilot_command.rc.throttle = self.controlCommand
+            autopilot_command.throttle = self.controlCommand
 
             # Replay and override current rc
 
