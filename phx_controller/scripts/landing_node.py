@@ -17,7 +17,7 @@ class LandingNode():
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
 
         self.pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
-
+        self.enabled = False
         self.p = 1
         self.d = 5
         self.setPoint_d = 9.81
@@ -39,16 +39,20 @@ class LandingNode():
     def imuCallback(self, imu_msg):
         self.linear_acceleration_z = imu_msg.linear_acceleration.z
 
+    def enableCallback(self, enable):
+        self.enabled = enable
+
     def run(self):
         while not rospy.is_shutdown():
-            controlCommand_p = (self.setPoint - self.altitude) * self.p
-            controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d
+            if self.enabled:
+                controlCommand_p = (self.setPoint - self.altitude) * self.p
+                controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d
 
-            un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
-            self.controlCommand = np.clip(un_cliped, 1000, 2000)
+                un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
+                self.controlCommand = np.clip(un_cliped, 1000, 2000)
 
-            print(self.controlCommand, self.altitude, self.linear_acceleration_z)
-	    self.r.sleep()
+                print(self.controlCommand, self.altitude, self.linear_acceleration_z)
+            self.r.sleep()
         '''
         if(self.altitude < self.altitude_start):
                 if(self.linear_acceleration_z > 0.1):
@@ -62,6 +66,7 @@ class LandingNode():
 if __name__ == '__main__':
     try:
         controller_node = LandingNode()
+        controller_node.enabled = True;
         controller_node.run()
     except rospy.ROSInterruptException:
         pass

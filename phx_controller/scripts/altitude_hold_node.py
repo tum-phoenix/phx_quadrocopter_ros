@@ -2,7 +2,7 @@
 import numpy as np
 import rospy
 from phx_uart_msp_bridge.msg import Altitude
-from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import AutoPilotCmd
 from sensor_msgs.msg import Joy
 
 
@@ -13,10 +13,10 @@ class AltitudeHoldNode():
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
 #        self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
-        self.altitude_pub = rospy.Publisher('/phx/fc/altitude_hold', RemoteControl, queue_size=1)
+        self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
         self.setPoint = 1
-
+        self.enabled = False
         self.p = 1
         self.d = 4
         self.setPoint_d = 0
@@ -35,45 +35,46 @@ class AltitudeHoldNode():
             self.r.sleep()
 
     def altitudeCallback(self, altitude_msg):
-        print("Altitude Callback")
-        # set previousAltitude to current Altitude in first call
-        if self.firstCall:
+        self.enabled:
+            print("Altitude Callback")
+            # set previousAltitude to current Altitude in first call
+            if self.firstCall:
+                self.previousAltitude = altitude_msg.estimated_altitude
+                self.firstCall = 0
+
+            if self.input_rc[4] > 1500:
+                self.setPoint = altitude_msg.estimated_altitude
+                self.controlCommand = self.input_rc[3]
+
+            self.sum_i += self.setPoint - altitude_msg.estimated_altitude
+            if self.sum_i >= self.i_stop:
+                self.sum_i = self.i_stop
+            elif self.sum_i <= -self.i_stop:
+                self.sum_i = -self.i_stop
+
+            controlCommand_p = (self.setPoint - altitude_msg.estimated_altitude) * self.p
+            controlCommand_d = (self.setPoint_d - (altitude_msg.estimated_altitude - self.previousAltitude) * 100) * self.d
+            controlCommand_i = self.sum_i * self.i
+            un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
+            self.controlCommand = np.clip(un_cliped, 1000, 2000)
+            joy_msg = AutoPilotCmd()
+
+            # Replay and override current rc
+            joy_msg.pitch = self.input_rc[0]
+            joy_msg.roll = self.input_rc[1]
+            joy_msg.yaw = self.input_rc[2]
+            joy_msg.throttle = self.controlCommand
+            joy_msg.aux1 = self.input_rc[4]
+            joy_msg.aux2 = self.input_rc[5]
+            joy_msg.aux3 = self.input_rc[6]
+            joy_msg.aux4 = self.input_rc[7]
+
             self.previousAltitude = altitude_msg.estimated_altitude
-            self.firstCall = 0
+    #        self.rc_pub.publish(joy_msg)
+            self.altitude_pub.publish(joy_msg)
 
-        if self.input_rc[4] > 1500:
-            self.setPoint = altitude_msg.estimated_altitude
-            self.controlCommand = self.input_rc[3]
-
-        self.sum_i += self.setPoint - altitude_msg.estimated_altitude
-        if self.sum_i >= self.i_stop:
-            self.sum_i = self.i_stop
-        elif self.sum_i <= -self.i_stop:
-            self.sum_i = -self.i_stop
-
-        controlCommand_p = (self.setPoint - altitude_msg.estimated_altitude) * self.p
-        controlCommand_d = (self.setPoint_d - (altitude_msg.estimated_altitude - self.previousAltitude) * 100) * self.d
-        controlCommand_i = self.sum_i * self.i
-        un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
-        self.controlCommand = np.clip(un_cliped, 1000, 2000)
-        joy_msg = RemoteControl()
-
-        # Replay and override current rc
-        joy_msg.pitch = self.input_rc[0]
-        joy_msg.roll = self.input_rc[1]
-        joy_msg.yaw = self.input_rc[2]
-        joy_msg.throttle = self.controlCommand
-        joy_msg.aux1 = self.input_rc[4]
-        joy_msg.aux2 = self.input_rc[5]
-        joy_msg.aux3 = self.input_rc[6]
-        joy_msg.aux4 = self.input_rc[7]
-
-        self.previousAltitude = altitude_msg.estimated_altitude
-#        self.rc_pub.publish(joy_msg)
-        self.altitude_pub.publish(joy_msg)
-
-        print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude
-        print 'controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i
+            print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude
+            print 'controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i
 
     def rcCallback(self, joy_msg):
         self.input_rc[0] = joy_msg.axes[0]
@@ -86,9 +87,13 @@ class AltitudeHoldNode():
         self.input_rc[7] = joy_msg.buttons[3]
 
 
+    def enableCallback(self, enable):
+        self.enabled = enable
+
 if __name__ == '__main__':
     try:
         controller_node = AltitudeHoldNode()
+        controller_node.enabled = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass

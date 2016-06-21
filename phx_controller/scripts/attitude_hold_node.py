@@ -13,12 +13,13 @@ class AttitudeHoldNode():
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, self.attitudeCallback)
-        self.pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
+        self.pub = rospy.Publisher('/phx/autopilot/input', RemoteControl, queue_size=1)
 
         self.imu = Imu()
 
         self.freq = 100  # Hz
         self.r = rospy.Rate(self.freq)
+        self.enabled = False
 
         self.currentPose = Attitude()
 
@@ -36,37 +37,42 @@ class AttitudeHoldNode():
             self.r.sleep()
 
     def attitudeCallback(self, attitude_msg):
-        self.currentPose = attitude_msg
+        if self.enabled:
+            self.currentPose = attitude_msg
 
-        controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
+            controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
 
-        controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.x)
+            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.x)
 
-        controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.z)
+            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.z)
 
 
 
-        joy_msg = RemoteControl()
-        joy_msg.pitch = controlCommand_pitch
-        joy_msg.roll = controlCommand_roll
-        joy_msg.yaw = controlCommand_yaw
+            joy_msg = RemoteControl()
+            joy_msg.pitch = controlCommand_pitch
+            joy_msg.roll = controlCommand_roll
+            joy_msg.yaw = controlCommand_yaw
 
-        self.pub.publish(joy_msg)
+            self.pub.publish(joy_msg)
 
-        #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
-        #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
-        #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
-        print controlCommand_yaw, controlCommand_roll, controlCommand_pitch
-        #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
+            #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
+            #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll
+            #print 'x: ', self.imu.angular_velocity.x, 'y: ', self.imu.angular_velocity.y, 'z: ', self.imu.angular_velocity.z
+            print controlCommand_yaw, controlCommand_roll, controlCommand_pitch
+            #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', yaw_controlCommand_d, 'i: ', yaw_controlCommand_i, 'yaw: ', attitude_msg.yaw
 
 
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
 
+    def enableCallback(self, enable):
+        self.enabled = enable
+
 
 if __name__ == '__main__':
     try:
         controller_node = AttitudeHoldNode()
+        controller_node = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass

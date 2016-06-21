@@ -20,7 +20,7 @@ class GPSHoldNode():
         self.target_pos = np.array([1, 1, 0])
         self.copter_pos = np.zeros(3)
         self.copter_rot = np.zeros(3)
-
+        self.enabled = False
         # PID parameters
         self.error = 0
         self.p_gain = 1
@@ -77,70 +77,71 @@ class GPSHoldNode():
 
     def run(self):
         while not rospy.is_shutdown():
-            controller_node.get_cur_pos()
-            print '\n--------------------\ncurrent position:', controller_node.copter_pos
-            print 'current rotation:', controller_node.copter_rot
+            if self.enabled:
+                controller_node.get_cur_pos()
+                print '\n--------------------\ncurrent position:', controller_node.copter_pos
+                print 'current rotation:', controller_node.copter_rot
 
-            # calculate PID parameters
-            # distance to target
-            target_vector = np.array([self.copter_pos[0] - self.target_pos[0], self.copter_pos[1] - self.target_pos[1]])
-            previous_error = self.error
-            # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
-            self.error = np.linalg.norm(target_vector)
-            t_error = time.time()
-            self.i_sum += self.error
-            if self.i_sum >= self.i_limit:
-                self.i_sum = self.i_limit
-            elif self.i_sum <= -self.i_limit:
-                self.i_sum = -self.i_limit
+                # calculate PID parameters
+                # distance to target
+                target_vector = np.array([self.copter_pos[0] - self.target_pos[0], self.copter_pos[1] - self.target_pos[1]])
+                previous_error = self.error
+                # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
+                self.error = np.linalg.norm(target_vector)
+                t_error = time.time()
+                self.i_sum += self.error
+                if self.i_sum >= self.i_limit:
+                    self.i_sum = self.i_limit
+                elif self.i_sum <= -self.i_limit:
+                    self.i_sum = -self.i_limit
 
-            if not previous_error == self.error:
-                self.estimated_velocity = (previous_error - self.error) / (t_error - self.prev_time)
-                self.prev_time = time.time()
+                if not previous_error == self.error:
+                    self.estimated_velocity = (previous_error - self.error) / (t_error - self.prev_time)
+                    self.prev_time = time.time()
 
-            control_d = self.estimated_velocity * self.d_gain
-            control_p = self.error * self.p_gain
-            control_i = self.i_sum * self.i_gain
+                control_d = self.estimated_velocity * self.d_gain
+                control_p = self.error * self.p_gain
+                control_i = self.i_sum * self.i_gain
 
-            pid_result = control_p + control_i + control_d
-            print 'pid result: ', pid_result
+                pid_result = control_p + control_i + control_d
+                print 'pid result: ', pid_result
 
-            # calculate angle to target
-            angle = np.arctan(target_vector[1]/target_vector[0]) + self.copter_rot[2]
+                # calculate angle to target
+                angle = np.arctan(target_vector[1]/target_vector[0]) + self.copter_rot[2]
 
-            rotation_z = np.array([[np.cos(angle), np.sin(angle), 0],
-                                [-np.sin(angle), np.cos(angle), 0],
-                                [0, 0, 1]])
+                rotation_z = np.array([[np.cos(angle), np.sin(angle), 0],
+                                    [-np.sin(angle), np.cos(angle), 0],
+                                    [0, 0, 1]])
 
-            # determine ratio of pitch & roll, when the angle is 0 (copter points to target), roll = 0.
-            ratio = np.array([1, 0, 0])
-            ratio = rotation_z.dot(ratio)
+                # determine ratio of pitch & roll, when the angle is 0 (copter points to target), roll = 0.
+                ratio = np.array([1, 0, 0])
+                ratio = rotation_z.dot(ratio)
 
-            # convert to pitch/roll commands with scaling factor for the PID controller
-            lower_speed, upper_speed = -1*pid_result , 1*pid_result
-            ratio = np.interp(ratio,[-1, 1],[lower_speed,upper_speed])
-            print 'ratio: ', ratio
+                # convert to pitch/roll commands with scaling factor for the PID controller
+                lower_speed, upper_speed = -1*pid_result , 1*pid_result
+                ratio = np.interp(ratio,[-1, 1],[lower_speed,upper_speed])
+                print 'ratio: ', ratio
 
-            # override current rc
-            rc_message = self.rc_input
-            rc_message.pitch = 1500 + ratio[0]
-            rc_message.roll = 1500 + ratio [1]
-            # clip results
-            np.clip(rc_message.pitch, 1000, 2000)
-            np.clip(rc_message.roll, 1000, 2000)
-            # use altitude_hold_command
-            # rc_message.throttle = self.controlCommand_throttle
-            self.cmd_pub.publish(rc_message)
+                # override current rc
+                rc_message = self.rc_input
+                rc_message.pitch = 1500 + ratio[0]
+                rc_message.roll = 1500 + ratio [1]
+                # clip results
+                np.clip(rc_message.pitch, 1000, 2000)
+                np.clip(rc_message.roll, 1000, 2000)
+                # use altitude_hold_command
+                # rc_message.throttle = self.controlCommand_throttle
+                self.cmd_pub.publish(rc_message)
 
-            # plot PID results
-            plot = Diagnostics()
-            plot.header.stamp.secs = rospy.get_time()
-            plot.val_a0 = control_p
-            plot.val_a1 = control_i
-            plot.val_a2 = control_d
-            plot.val_b0 = target_vector[0]
-            plot.val_b1 = target_vector[1]
-            self.diag_pub.publish(plot)
+                # plot PID results
+                plot = Diagnostics()
+                plot.header.stamp.secs = rospy.get_time()
+                plot.val_a0 = control_p
+                plot.val_a1 = control_i
+                plot.val_a2 = control_d
+                plot.val_b0 = target_vector[0]
+                plot.val_b1 = target_vector[1]
+                self.diag_pub.publish(plot)
 
             self.r.sleep()
 
@@ -148,6 +149,7 @@ class GPSHoldNode():
 if __name__ == '__main__':
     try:
         controller_node = GPSHoldNode()
+        controller_node.enabled = False
         controller_node.run()
     except rospy.ROSInterruptException:
         pass
