@@ -73,7 +73,7 @@ class AttitudeHoldNode():
 if __name__ == '__main__':
     try:
         controller_node = AttitudeHoldNode()
-        controller_node = True
+        controller_node.enabled = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass
