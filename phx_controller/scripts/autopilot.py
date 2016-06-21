@@ -65,7 +65,7 @@ class Autopilot:
             self.rate.sleep()
             command = ControllerCmd()
             command.enabled = False
-            self.autopilot_commands.publish(command)
+            self.controller_commands.publish(command)
 
             print 'current pose \n', self.current_pose
 

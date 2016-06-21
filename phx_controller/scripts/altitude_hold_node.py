@@ -4,6 +4,7 @@ import rospy
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 
 
@@ -13,7 +14,7 @@ class AltitudeHoldNode():
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
-        self.autopilot_commands = rospy.Subscriber('/phx/autopilot_commands', AutoPilotCmd, self.autopilotCommandCallback)
+        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
 #        self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
@@ -36,8 +37,8 @@ class AltitudeHoldNode():
         while not rospy.is_shutdown():
             self.r.sleep()
 
-    def autopilotCommandCallback(self, autopilot_msg):
-        self.enabled = autopilot_msg.enabled
+    def controllerCommandCallback(self, controller_msg):
+        self.enabled = controller_msg.enabled
 
     def altitudeCallback(self, altitude_msg):
         if self.enabled:
@@ -84,9 +85,6 @@ class AltitudeHoldNode():
         self.input_rc[6] = joy_msg.buttons[2]
         self.input_rc[7] = joy_msg.buttons[3]
 
-
-    def enableCallback(self, enable):
-        self.enabled = enable
 
 if __name__ == '__main__':
     try:
