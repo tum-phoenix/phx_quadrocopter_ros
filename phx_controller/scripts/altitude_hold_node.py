@@ -12,6 +12,7 @@ class AltitudeHoldNode():
     def __init__(self):
         rospy.init_node('altitude_hold_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+        self.node_identifier = 1
         self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
         self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
@@ -38,7 +39,8 @@ class AltitudeHoldNode():
             self.r.sleep()
 
     def controllerCommandCallback(self, controller_msg):
-        self.enabled = controller_msg.enabled
+        if controller_msg.node_identifier == self.node_identifier:
+            self.enabled = controller_msg.enabled
 
     def altitudeCallback(self, altitude_msg):
         if self.enabled:
@@ -74,6 +76,8 @@ class AltitudeHoldNode():
 
             print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude
             print 'controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i
+        else:
+            print 'altitude hold node disabled'
 
     def rcCallback(self, joy_msg):
         self.input_rc[0] = joy_msg.axes[0]

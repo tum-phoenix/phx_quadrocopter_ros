@@ -11,6 +11,7 @@ import time
 class GPSHoldNode():
     def __init__(self):
         rospy.init_node('map_position_hold')
+        self.node_identifier = 5
         self.rate = 10
         self.r = rospy.Rate(self.rate)
 
@@ -64,6 +65,10 @@ class GPSHoldNode():
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             pass
         return self.copter_pos
+
+    def controllerCommandCallback(self, controller_msg):
+        if controller_msg.node_identifier == self.node_identifier:
+            self.enabled = controller_msg.enabled
 
     def rc_callback(self,rc_msg):
         self.rc_input[0] = rc_msg.axes[0]

@@ -12,6 +12,7 @@ from sensor_msgs.msg import Imu
 class LandingNode():
     def __init__(self):
         rospy.init_node('landing_controller')
+        self.node_identifier = 3
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
@@ -39,8 +40,9 @@ class LandingNode():
     def imuCallback(self, imu_msg):
         self.linear_acceleration_z = imu_msg.linear_acceleration.z
 
-    def enableCallback(self, enable):
-        self.enabled = enable
+    def controllerCommandCallback(self, controller_msg):
+        if controller_msg.node_identifier == self.node_identifier:
+            self.enabled = controller_msg.enabled
 
     def run(self):
         while not rospy.is_shutdown():

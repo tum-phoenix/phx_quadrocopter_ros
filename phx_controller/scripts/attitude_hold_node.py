@@ -10,6 +10,7 @@ from sensor_msgs.msg import Imu
 class AttitudeHoldNode():
     def __init__(self):
         rospy.init_node('attitude_hold_controller')
+        self.node_identifier = 2
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, self.attitudeCallback)
@@ -65,8 +66,9 @@ class AttitudeHoldNode():
     def imuCallback(self, imu_msg):
         self.imu = imu_msg
 
-    def enableCallback(self, enable):
-        self.enabled = enable
+    def controllerCommandCallback(self, controller_msg):
+        if controller_msg.node_identifer == self.node_identifer:
+            self.enabled = controller_msg.enabled
 
 
 if __name__ == '__main__':

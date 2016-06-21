@@ -12,6 +12,14 @@ class Autopilot:
     planner node and collision prevention to one outgoing command for the flight controller.
 
     the cmd_vel topic is used with
+    node_identifier:
+    nothing 0
+    altitude_hold_node 1
+    attitude_hold_node 2
+    landing_node 3
+    take_off_node 4
+    map_position_node 5
+
     """
     def __init__(self):
         rospy.init_node('Autopilot_node')
