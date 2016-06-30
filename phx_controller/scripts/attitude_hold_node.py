@@ -3,6 +3,7 @@ import rospy
 from PIDController import PIDController
 from phx_uart_msp_bridge.msg import Attitude
 from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import Imu
 
@@ -14,6 +15,7 @@ class AttitudeHoldNode():
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, self.attitudeCallback)
+        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
         self.pub = rospy.Publisher('/phx/autopilot/input', RemoteControl, queue_size=1)
 
         self.imu = Imu()
@@ -24,9 +26,9 @@ class AttitudeHoldNode():
 
         self.currentPose = Attitude()
 
-        self.yawController = PIDController(1500, 0,0.001,0.1,0,0,100,0)
-        self.pitchController = PIDController(1500, 0, 0.001, 0.1, 0, 0, 100, 0)
-        self.rollController = PIDController(1500, 0, 0.001, 0.1, 0, 0, 100, 0)
+        self.yawController = PIDController(1500, 0,1,1,0,0,100,0)
+        self.pitchController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
+        self.rollController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
 
 
         self.controlCommand_pitch = 1500
@@ -40,12 +42,13 @@ class AttitudeHoldNode():
     def attitudeCallback(self, attitude_msg):
         if self.enabled:
             self.currentPose = attitude_msg
+            self.currentPose.yaw -= 180
 
-            controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
+            controlCommand_pitch = self.pitchController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
 
-            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.x)
+            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
 
-            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.z)
+            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z)
 
 
 
@@ -67,14 +70,13 @@ class AttitudeHoldNode():
         self.imu = imu_msg
 
     def controllerCommandCallback(self, controller_msg):
-        if controller_msg.node_identifer == self.node_identifer:
-            self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
 
 
 if __name__ == '__main__':
     try:
         controller_node = AttitudeHoldNode()
-        controller_node = True
+        controller_node.enabled = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass

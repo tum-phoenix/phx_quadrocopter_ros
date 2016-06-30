@@ -39,8 +39,8 @@ class AltitudeHoldNode():
             self.r.sleep()
 
     def controllerCommandCallback(self, controller_msg):
-        if controller_msg.node_identifier == self.node_identifier:
-            self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
+
 
     def altitudeCallback(self, altitude_msg):
         if self.enabled:

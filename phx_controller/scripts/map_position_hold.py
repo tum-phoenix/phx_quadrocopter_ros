@@ -4,6 +4,7 @@ import tf
 import tf2_ros
 import rospy
 from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
+from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 import time
 
@@ -44,6 +45,7 @@ class GPSHoldNode():
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
         self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
+        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
 
         self.prev_time = 0
 
@@ -67,8 +69,7 @@ class GPSHoldNode():
         return self.copter_pos
 
     def controllerCommandCallback(self, controller_msg):
-        if controller_msg.node_identifier == self.node_identifier:
-            self.enabled = controller_msg.enabled
+        self.enabled = controller_msg.enabled[self.node_identifier]
 
     def rc_callback(self,rc_msg):
         self.rc_input[0] = rc_msg.axes[0]
@@ -94,7 +95,11 @@ class GPSHoldNode():
                 # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
                 self.error = np.linalg.norm(target_vector)
                 t_error = time.time()
-                self.i_sum += self.error
+                factor = 10 # factor for i term reduction
+                if self.error > 1:
+                    self.i_sum += self.error
+                else:
+                    self.i_sum -= self.error * factor
                 if self.i_sum >= self.i_limit:
                     self.i_sum = self.i_limit
                 elif self.i_sum <= -self.i_limit:
