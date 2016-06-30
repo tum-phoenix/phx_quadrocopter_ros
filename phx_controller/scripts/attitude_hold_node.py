@@ -26,9 +26,9 @@ class AttitudeHoldNode():
 
         self.currentPose = Attitude()
 
-        self.yawController = PIDController(1500, 0,1,1,0,0,100,0)
-        self.pitchController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
-        self.rollController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
+        self.yawController = PIDController(1500, 0,1,1,0,0,100,0, 0)
+        self.pitchController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0, 1)
+        self.rollController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0, 2)
 
 
         self.controlCommand_pitch = 1500
@@ -44,11 +44,11 @@ class AttitudeHoldNode():
             self.currentPose = attitude_msg
             self.currentPose.yaw -= 180
 
-            controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y, 0)
+            controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
 
-            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x, 1)
+            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
 
-            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z, 2)
+            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z)
 
 
 
