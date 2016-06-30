@@ -45,9 +45,9 @@ class AttitudeHoldNode():
 
             controlCommand_pitch = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
 
-            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.x)
+            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
 
-            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.z)
+            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z)
 
 
 
