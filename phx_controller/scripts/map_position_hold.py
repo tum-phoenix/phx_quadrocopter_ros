@@ -96,7 +96,7 @@ class GPSHoldNode():
                 self.error = np.linalg.norm(target_vector)
                 t_error = time.time()
                 factor = 10 # factor for i term reduction
-                if(self.error > 1):
+                if self.error > 1:
                     self.i_sum += self.error
                 else:
                     self.i_sum -= self.error * factor

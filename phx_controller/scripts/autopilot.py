@@ -25,7 +25,6 @@ class Autopilot:
         rospy.init_node('Autopilot_node')
         self.enabled_nodes = [False, False, False, False, False]
         self.enabled_nodes[0] = input('altitude on? ')
-
         self.enabled_nodes[1] = input('attitude on? ')
         self.enabled_nodes[2] = input('landing on? ')
         self.enabled_nodes[3] = input('starting on? ')
@@ -78,7 +77,6 @@ class Autopilot:
 
     def run(self):
         while not rospy.is_shutdown():
-
 
             #if self.mode == 1:
             command = ControllerCmd()
