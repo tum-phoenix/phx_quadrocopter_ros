@@ -1,5 +1,8 @@
 import numpy as np
 
+import rospy
+from phx_uart_msp_bridge.msg import Diagnostics
+
 
 class PIDController:
     def __init__(self, controlCommand, setPoint_p, p, d, i, setPoint_d, i_stop, i_mode):
@@ -14,6 +17,8 @@ class PIDController:
         self.i = i
         self.sum_i = 0
         self.i_stop = i_stop
+
+        self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
 
     def calculateControlCommand(self, current_p, current_d):
 
@@ -33,6 +38,15 @@ class PIDController:
         controlCommand_d = (self.setPoint_d - current_d) * self.d
         controlCommand_i = self.sum_i * self.i
         unclipped =  self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
+
+        # plot PID results
+        plot = Diagnostics()
+        plot.header.stamp.secs = rospy.get_time()
+        plot.val_a0 = controlCommand_p
+        plot.val_a1 = controlCommand_i
+        plot.val_a2 = controlCommand_d
+        self.diag_pub.publish(plot)
+
 
         self.previousAltitude = current_p # used by take off controller
         return unclipped
