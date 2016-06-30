@@ -32,10 +32,9 @@ class PIDController:
         controlCommand_p = (self.set_point - current_p) * self.p
         controlCommand_d = (self.setPoint_d - current_d) * self.d
         controlCommand_i = self.sum_i * self.i
-        unclipped =  controlCommand_p + controlCommand_d + controlCommand_i
-        self.controlCommand = np.clip(unclipped,1000,2000)
+        unclipped =  self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
 
         self.previousAltitude = current_p # used by take off controller
-        return self.controlCommand
+        return unclipped
 
 
