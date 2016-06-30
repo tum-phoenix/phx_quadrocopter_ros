@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-
-'''
+"""
 @author: tatsch
-'''
+"""
 
 import roslib
 roslib.load_manifest('phx_vision')
@@ -15,7 +14,7 @@ import tf
 import tf2_ros
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 
 
 class OpticalFlow:
@@ -23,7 +22,7 @@ class OpticalFlow:
         self.prev = None
         self.img = None
         self.flow = None
-        if(os.uname()[4][:3] == 'naarm'):
+        if os.uname()[4][:3] == 'arm':
             self.runningOnPhoenix = True
         else:
             self.runningOnPhoenix = False
@@ -32,9 +31,9 @@ class OpticalFlow:
             
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
-        self.twist_pub = rospy.Publisher("opticalFlow", Twist, queue_size = 10)
-        self.image_pub = rospy.Publisher("flowImage", Image, queue_size = 1)
-        self.twist = Twist()
+        self.twist_pub = rospy.Publisher("opticalFlow", TwistStamped, queue_size=10)
+        self.image_pub = rospy.Publisher("flowImage", Image, queue_size=1)
+        self.twist = TwistStamped()
 
     def callback(self, data):
         try:
@@ -58,8 +57,10 @@ class OpticalFlow:
 
             fx = np.median(self.flow[:, :, 0])
             fy = np.median(self.flow[:, :, 1])
-            self.twist.linear.x = fx
-            self.twist.linear.y = fy
+
+            self.twist.header.stamp = rospy.Time.now()
+            self.twist.twist.linear.x = fx
+            self.twist.twist.linear.y = fy
             self.twist_pub.publish(self.twist)
                 
         except CvBridgeError as e:
