@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+python autopilot.py &
+python altitude_hold_node.py &
+python attitude_hold_node.py &
+python landing_node.py &
+python take_off_node.py & 
+python map_position_hold.py & 
