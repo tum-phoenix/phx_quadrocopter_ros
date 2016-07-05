@@ -4,6 +4,7 @@ import tf
 import tf2_ros
 import rospy
 from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
+from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 import time
@@ -22,7 +23,7 @@ class GPSHoldNode():
         self.target_pos = np.array([1, 1, 0])
         self.copter_pos = np.zeros(3)
         self.copter_rot = np.zeros(3)
-        self.enabled = False
+        self.enabled = True
         # PID parameters
 
 
@@ -47,7 +48,7 @@ class GPSHoldNode():
         self.rc_input.aux4 = 1000
 
         self.rc_sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rc_callback)
-        self.cmd_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
+        self.cmd_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
         self.diag_pub = rospy.Publisher('/diag_out', Diagnostics, queue_size=1)
         self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
 
@@ -144,7 +145,11 @@ class GPSHoldNode():
                 np.clip(rc_message.roll, 1000, 2000)
                 # use altitude_hold_command
                 # rc_message.throttle = self.controlCommand_throttle
-                self.cmd_pub.publish(rc_message)
+
+                autopilot_command = AutoPilotCmd()
+                autopilot_command.rc = rc_message
+                autopilot_command.node_identifier = self.node_identifier
+                self.cmd_pub.publish(autopilot_command)
 
                 # plot PID results
                 plot = Diagnostics()

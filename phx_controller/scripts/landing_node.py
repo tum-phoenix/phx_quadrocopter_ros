@@ -3,6 +3,7 @@ import numpy as np
 import rospy
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import RemoteControl
+from phx_uart_msp_bridge.msg import AutoPilotCmd
 #from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Imu
 from PIDController import PIDController
@@ -22,11 +23,11 @@ class LandingNode():
         self.pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
 
 #        self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
-        self.pub = rospy.Publisher('/phx/autopilot/input', RemoteControl, queue_size=1)
+        self.pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
 
 
-        self.enabled = False
+        self.enabled = True
         self.p = 1
         self.d = 5
         self.setPoint_d = 9.81
@@ -59,20 +60,23 @@ class LandingNode():
             if self.enabled:
                 #controlCommand_p = (self.setPoint - self.altitude) * self.p
                 #controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d
-		controlCommand_land = self.landController.calculateControlCommand(self.altitude,self.linear_acceleration_z)
-                un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
-                self.controlCommand = np.clip(un_cliped, 1000, 2000)
+                un_cliped = self.landController.calculateControlCommand(self.altitude,self.linear_acceleration_z)
+                #un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
+                controlCommand = np.clip(un_cliped, 1000, 2000)
 
                 #print(self.controlCommand, self.altitude, self.linear_acceleration_z)
-		print controlCommand_land
-            self.r.sleep()
-        '''
-        if(self.altitude < self.altitude_start):
-                if(self.linear_acceleration_z > 0.1):
-                    self.throttle += 2
-            else:
-                self.throttle -= 10
-        '''
+                autopilot_command = AutoPilotCmd()
+                autopilot_command.rc.throttle = controlCommand
+                autopilot_command.node_identifier = self.node_identifier
+                print controlCommand
+        self.r.sleep()
+    '''
+    if(self.altitude < self.altitude_start):
+            if(self.linear_acceleration_z > 0.1):
+                self.throttle += 2
+        else:
+            self.throttle -= 10
+    '''
 
 
 
