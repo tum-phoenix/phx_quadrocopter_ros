@@ -83,7 +83,7 @@ class LandingNode():
 if __name__ == '__main__':
     try:
         controller_node = LandingNode()
-        controller_node.enabled = True;
+        controller_node.enabled = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass
