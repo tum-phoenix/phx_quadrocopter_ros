@@ -35,7 +35,7 @@ class GPSHoldNode():
         self.d_gain = 1
         self.estimated_velocity = 0
 
-        self.altitudeController = PIDController(1500, self.p_gain, self.i_gain, self.d_gain, 0, self.i_limit, 0, 0)
+       # self.altitudeController = PIDController(1500, self.p_gain, self.i_gain, self.d_gain, 0, self.i_limit, 0, 0)
 
         self.rc_input = RemoteControl()
         self.rc_input.pitch = 1500
@@ -167,7 +167,7 @@ class GPSHoldNode():
 if __name__ == '__main__':
     try:
         controller_node = GPSHoldNode()
-        controller_node.enabled = False
+        controller_node.enabled = True
         controller_node.run()
     except rospy.ROSInterruptException:
         pass
