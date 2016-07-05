@@ -6,7 +6,7 @@ from phx_uart_msp_bridge.msg import Diagnostics
 
 class PIDController:
 
-    def __init__(self, controlCommand, setPoint_p, p, d, i, setPoint_d, i_stop, i_mode):
+    def __init__(self, controlCommand, p, i, d, setPoint_p, i_stop, setPoint_d, i_mode):
         self.set_point = setPoint_p
         self.i_mode = i_mode # with i mode to use, calculation of i value differs in different controller
         self.controlCommand = controlCommand
@@ -65,6 +65,8 @@ class PIDController:
 
 
         self.previousAltitude = current_p # used by take off controller
+
+        print 'PIDController sagt: controlCommand:', self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i, 'd:', controlCommand_d
         return unclipped
 
 

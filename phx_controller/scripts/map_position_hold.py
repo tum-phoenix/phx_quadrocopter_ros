@@ -7,7 +7,7 @@ from phx_uart_msp_bridge.msg import RemoteControl, Diagnostics
 from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 import time
-
+import PIDController
 
 class GPSHoldNode():
     def __init__(self):
@@ -24,6 +24,8 @@ class GPSHoldNode():
         self.copter_rot = np.zeros(3)
         self.enabled = False
         # PID parameters
+
+
         self.error = 0
         self.p_gain = 1
         self.i_gain = 1
@@ -31,6 +33,8 @@ class GPSHoldNode():
         self.i_limit = 100
         self.d_gain = 1
         self.estimated_velocity = 0
+
+        self.altitudeController = PIDController(1500, self.p_gain, self.i_gain, self.d_gain, 0, self.i_limit, 0, 0)
 
         self.rc_input = RemoteControl()
         self.rc_input.pitch = 1500
@@ -92,7 +96,6 @@ class GPSHoldNode():
                 # distance to target
                 target_vector = np.array([self.copter_pos[0] - self.target_pos[0], self.copter_pos[1] - self.target_pos[1]])
                 previous_error = self.error
-                # maybe use more than one previous error, check if rospy rate higher than tf rate (de/dt will be 0)
                 self.error = np.linalg.norm(target_vector)
                 t_error = time.time()
                 factor = 10 # factor for i term reduction
