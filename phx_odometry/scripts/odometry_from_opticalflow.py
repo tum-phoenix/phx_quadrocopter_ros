@@ -24,7 +24,7 @@ class OpticalFlowOdometry:
         self.odom_msg = Odometry()
 
     def callback(self, twist_data=TwistStamped()):
-        new_time = twist_data.header.stamp.secs()
+        new_time = twist_data.header.stamp.secs
         dx = self.factor[0] * twist_data.twist.linear.x
         dy = self.factor[1] * twist_data.twist.linear.y
 
@@ -39,8 +39,8 @@ class OpticalFlowOdometry:
 
 
 def main(args):
-    of = OpticalFlowOdometry()
     rospy.init_node('OpticalFlowOdometry', anonymous=True)
+    of = OpticalFlowOdometry()
     try:
         rospy.spin()
     except KeyboardInterrupt:

@@ -48,8 +48,7 @@ class OpticalFlow:
             self.prev = self.img
             if self.runningOnPhoenix:
                 try:
-                    print("Tryiign to pub")
-                    self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.draw_flow(self.img, self.flow), "mono8"))
+                    self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.draw_flow(self.img, self.flow), "rgb8"))
                 except CvBridgeError as e:
                     print(e)
             else:
