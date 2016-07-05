@@ -38,12 +38,16 @@ class Autopilot:
         self.rate = rospy.Rate(30)
 
     def callback_input(self, input_msg=AutoPilotCmd()):
+
         from_node = input_msg.node_identifier
         priority = input_msg.priority
 
-        self.current_pose.pitch=input_msg.rc.pitch
-        self.current_pose.roll=input_msg.rc.roll
-        self.current_pose.yaw=input_msg.rc.yaw
+        if self.enabled_nodes[from_node - 1]:
+
+            self.current_pose.pitch = input_msg.rc.pitch
+            self.current_pose.roll = input_msg.rc.roll
+            self.current_pose.yaw = input_msg.rc.yaw
+
 
         '''
         linear_x = input_msg.cmd.linear.x           # forward backward      [-1; 1]
