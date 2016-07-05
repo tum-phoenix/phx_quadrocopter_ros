@@ -2,6 +2,7 @@ import numpy as np
 import rospy
 from PIDController import PIDController
 from phx_uart_msp_bridge.msg import Attitude
+from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import RemoteControl
 from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
@@ -16,13 +17,13 @@ class AttitudeHoldNode():
         self.sub_imu = rospy.Subscriber('/phx/imu', Imu, self.imuCallback)
         self.sub_attitude = rospy.Subscriber('/phx/fc/attitude', Attitude, self.attitudeCallback)
         self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
-        self.pub = rospy.Publisher('/phx/autopilot/input', RemoteControl, queue_size=1)
+        self.pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
         self.imu = Imu()
 
         self.freq = 100  # Hz
         self.r = rospy.Rate(self.freq)
-        self.enabled = False
+        self.enabled = True
 
         self.currentPose = Attitude()
 
@@ -50,14 +51,16 @@ class AttitudeHoldNode():
 
             controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z)
 
-
+            autopilot_command = AutoPilotCmd()
 
             joy_msg = RemoteControl()
             joy_msg.pitch = controlCommand_pitch
             joy_msg.roll = controlCommand_roll
             joy_msg.yaw = controlCommand_yaw
+            autopilot_command.rc = joy_msg
+            autopilot_command.node_identifier = self.node_identifier
 
-            self.pub.publish(joy_msg)
+            self.pub.publish(autopilot_command)
 
             #print 'cc: ', self.controlCommand_pitch, 'p: ', pitch_controlCommand_p, 'd: ', pitch_controlCommand_d, 'i: ', pitch_controlCommand_i, 'pitch: ', attitude_msg.pitch
             #print 'cc: ', self.controlCommand_roll, 'p: ', roll_controlCommand_p, 'd: ', roll_controlCommand_d, 'i: ', roll_controlCommand_i, 'roll: ', attitude_msg.roll

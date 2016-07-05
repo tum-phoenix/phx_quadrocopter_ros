@@ -21,7 +21,7 @@ class AltitudeHoldNode():
         self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
         setPoint_p = 1
-        self.enabled = False
+        self.enabled = True
         p = 1
         i = 0
         d = 4
@@ -60,6 +60,7 @@ class AltitudeHoldNode():
             controlCommand = np.clip(un_cliped, 1000, 2000)
             autopilot_command = AutoPilotCmd()
             autopilot_command.rc.throttle = controlCommand
+            autopilot_command.node_identifier = self.node_identifier
 
             # Replay and override current rc
 
