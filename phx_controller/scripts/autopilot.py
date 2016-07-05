@@ -49,41 +49,41 @@ class Autopilot:
             self.current_pose.yaw = input_msg.rc.yaw
 
 
-        '''
-        linear_x = input_msg.cmd.linear.x           # forward backward      [-1; 1]
-        linear_y = input_msg.cmd.linear.y           # left right            [-1; 1]
-        linear_z = input_msg.cmd.linear.z           # up down               [-1; 1]
-        angular_z = input_msg.cmd.angular.z         # rotation heading      [-1; 1]
+            '''
+            linear_x = input_msg.cmd.linear.x           # forward backward      [-1; 1]
+            linear_y = input_msg.cmd.linear.y           # left right            [-1; 1]
+            linear_z = input_msg.cmd.linear.z           # up down               [-1; 1]
+            angular_z = input_msg.cmd.angular.z         # rotation heading      [-1; 1]
 
-        if linear_x != 0:
-            linear_x = np.clip(linear_x, -1, 1)
-            self.current_pose.pitch = 1500 + linear_x*200
+            if linear_x != 0:
+                linear_x = np.clip(linear_x, -1, 1)
+                self.current_pose.pitch = 1500 + linear_x*200
 
-        if linear_y != 0:
-            linear_y = np.clip(linear_y, -1, 1)
-            self.current_pose.roll = 1500 + linear_y*200
+            if linear_y != 0:
+                linear_y = np.clip(linear_y, -1, 1)
+                self.current_pose.roll = 1500 + linear_y*200
 
-        if linear_z != 0:
-            linear_z = np.clip(linear_z, -1, 1)
-            self.current_pose.throttle = 1500 + linear_z*500
+            if linear_z != 0:
+                linear_z = np.clip(linear_z, -1, 1)
+                self.current_pose.throttle = 1500 + linear_z*500
 
-        if angular_z != 0:
-            angular_z = np.clip(angular_z, -0.2, 0.2)
-            self.current_pose.yaw = 1500 + angular_z*500
-        '''
-        # publish new mixed remote control to flight controller
-        rc_msg = RemoteControl()
-        rc_msg.pitch = self.current_pose.pitch
-        rc_msg.roll = self.current_pose.roll
-        rc_msg.yaw = self.current_pose.yaw
-        rc_msg.throttle = self.current_pose.throttle
-        rc_msg.aux1 = 1000
-        rc_msg.aux2 = 1900
-        rc_msg.aux3 = 1900
-        rc_msg.aux4 = int(1000 + np.random.random()*1000)
+            if angular_z != 0:
+                angular_z = np.clip(angular_z, -0.2, 0.2)
+                self.current_pose.yaw = 1500 + angular_z*500
+            '''
+            # publish new mixed remote control to flight controller
+            rc_msg = RemoteControl()
+            rc_msg.pitch = self.current_pose.pitch
+            rc_msg.roll = self.current_pose.roll
+            rc_msg.yaw = self.current_pose.yaw
+            rc_msg.throttle = self.current_pose.throttle
+            rc_msg.aux1 = 1000
+            rc_msg.aux2 = 1900
+            rc_msg.aux3 = 1900
+            rc_msg.aux4 = int(1000 + np.random.random()*1000)
 
-        self.rc_pub.publish(rc_msg)
-        print rc_msg
+            self.rc_pub.publish(input_msg.rc)
+            print input_msg
 
     def run(self):
         while not rospy.is_shutdown():
