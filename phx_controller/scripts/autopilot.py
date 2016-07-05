@@ -41,6 +41,11 @@ class Autopilot:
         from_node = input_msg.node_identifier
         priority = input_msg.priority
 
+        self.current_pose.pitch=input_msg.rc.pitch
+        self.current_pose.roll=input_msg.rc.roll
+        self.current_pose.yaw=input_msg.rc.yaw
+
+        '''
         linear_x = input_msg.cmd.linear.x           # forward backward      [-1; 1]
         linear_y = input_msg.cmd.linear.y           # left right            [-1; 1]
         linear_z = input_msg.cmd.linear.z           # up down               [-1; 1]
@@ -61,7 +66,7 @@ class Autopilot:
         if angular_z != 0:
             angular_z = np.clip(angular_z, -0.2, 0.2)
             self.current_pose.yaw = 1500 + angular_z*500
-
+        '''
         # publish new mixed remote control to flight controller
         rc_msg = RemoteControl()
         rc_msg.pitch = self.current_pose.pitch
@@ -74,6 +79,7 @@ class Autopilot:
         rc_msg.aux4 = int(1000 + np.random.random()*1000)
 
         self.rc_pub.publish(rc_msg)
+        print rc_msg
 
     def run(self):
         while not rospy.is_shutdown():
@@ -84,7 +90,7 @@ class Autopilot:
 
             self.controller_commands.publish(command)
 
-            print 'current pose \n', self.current_pose
+            #print 'current pose \n', self.current_pose
 
             self.rate.sleep()
 
