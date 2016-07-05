@@ -26,9 +26,9 @@ class AttitudeHoldNode():
 
         self.currentPose = Attitude()
 
-        self.yawController = PIDController(1500, 0,1,1,0,0,100,0)
-        self.pitchController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
-        self.rollController = PIDController(1500, 0, 1, 1, 0, 0, 100, 0)
+        self.yawController = PIDController(1500, 1, 0, 1, 0, 100, 0, 0)
+        self.pitchController = PIDController(1500, 1, 0, 1, 0, 100, 0, 0)
+        self.rollController = PIDController(1500, 1, 0, 1, 0, 100, 0, 0)
 
 
         self.controlCommand_pitch = 1500
