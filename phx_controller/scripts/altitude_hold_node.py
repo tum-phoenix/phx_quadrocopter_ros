@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import rospy
+from PIDController import PIDController
 from phx_uart_msp_bridge.msg import Altitude
 from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import RemoteControl
@@ -19,15 +20,16 @@ class AltitudeHoldNode():
 #        self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
 
-        self.setPoint = 1
+        setPoint_p = 1
         self.enabled = False
-        self.p = 1
-        self.d = 4
-        self.setPoint_d = 0
-        self.i = 0
-        self.sum_i = 0
-        self.i_stop = 1
-        self.controlCommand = 1500
+        p = 1
+        i = 0
+        d = 4
+        setPoint_d = 0
+        i_stop = 1
+        controlCommand = 1500
+
+        self.altitudeController = PIDController(controlCommand, p, i, d, setPoint_p, i_stop, setPoint_d, 0)
 
         self.freq = 100  # Hz
         self.r = rospy.Rate(self.freq)
@@ -50,23 +52,14 @@ class AltitudeHoldNode():
                 self.previousAltitude = altitude_msg.estimated_altitude
                 self.firstCall = 0
 
+            un_cliped = self.altitudeController.calculateControlCommand(altitude_msg.estimated_altitude, (altitude_msg.estimated_altitude - self.previousAltitude) * 100)
+
             if self.input_rc[4] > 1500:
-                self.setPoint = altitude_msg.estimated_altitude
-                self.controlCommand = self.input_rc[3]
+                un_cliped = self.input_rc[3]
 
-            self.sum_i += self.setPoint - altitude_msg.estimated_altitude
-            if self.sum_i >= self.i_stop:
-                self.sum_i = self.i_stop
-            elif self.sum_i <= -self.i_stop:
-                self.sum_i = -self.i_stop
-
-            controlCommand_p = (self.setPoint - altitude_msg.estimated_altitude) * self.p
-            controlCommand_d = (self.setPoint_d - (altitude_msg.estimated_altitude - self.previousAltitude) * 100) * self.d
-            controlCommand_i = self.sum_i * self.i
-            un_cliped = self.controlCommand + controlCommand_p + controlCommand_d + controlCommand_i
-            self.controlCommand = np.clip(un_cliped, 1000, 2000)
+            controlCommand = np.clip(un_cliped, 1000, 2000)
             autopilot_command = AutoPilotCmd()
-            autopilot_command.rc.throttle = self.controlCommand
+            autopilot_command.rc.throttle = controlCommand
 
             # Replay and override current rc
 
@@ -74,8 +67,8 @@ class AltitudeHoldNode():
     #        self.rc_pub.publish(joy_msg)
             self.altitude_pub.publish(autopilot_command)
 
-            print 'set_point:', self.setPoint, '\t alt:', altitude_msg.estimated_altitude
-            print 'controlCommand', un_cliped, self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i
+            print  'alt:', altitude_msg.estimated_altitude, 'controlCommand:', controlCommand
+
         else:
             print 'altitude hold node disabled'
 

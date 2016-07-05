@@ -65,6 +65,8 @@ class PIDController:
 
 
         self.previousAltitude = current_p # used by take off controller
+
+        print 'PIDController sagt: controlCommand:', self.controlCommand, 'p:', controlCommand_p, 'i:', controlCommand_i, 'd:', controlCommand_d
         return unclipped
 
 
