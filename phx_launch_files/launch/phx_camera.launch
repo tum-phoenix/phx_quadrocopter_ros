@@ -18,6 +18,7 @@
             <remap from="camera_info" to="/camera_info" />
         </node>
 
-    <node name="TargetDetector" pkg="phx_vision" type="targetDetectionPublisher.py" />
+    <node name="TargetDetectorNode" pkg="phx_vision" type="targetDetectionPublisher.py" />
+    <node name="OpticalFlowNode" pkg="phx_vision" type="opticalFlowNode.py" />
 </launch>
 

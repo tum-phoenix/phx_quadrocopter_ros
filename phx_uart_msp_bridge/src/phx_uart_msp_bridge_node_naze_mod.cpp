@@ -209,7 +209,7 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
         }
-        serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+        serial_interface.prepare_request(MULTIWII_STATUS); request_attitude++; request_total++;
 
         serial_interface.send_from_buffer();
 

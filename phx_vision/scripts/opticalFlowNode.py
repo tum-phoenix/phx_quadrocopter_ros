@@ -12,30 +12,39 @@ import cv2
 import numpy as np
 import tf
 import tf2_ros
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
+import image_geometry
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import TwistStamped
-
+from phx_uart_msp_bridge.msg import Altitude
 
 class OpticalFlow:
     def __init__(self):
         self.prev = None
         self.img = None
         self.flow = None
-        if os.uname()[4][:3] == 'arm':
-            self.runningOnPhoenix = True
-        else:
-            self.runningOnPhoenix = False
+        self.distance = 0.2
+        self.runningOnPhoenix = True
+	self.cameraModel = image_geometry.PinholeCameraModel()
+        
         if not self.runningOnPhoenix:
             cv2.namedWindow("flow", 1)
             
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("image_mono", Image, self.callback)
+        self.image_sub = rospy.Subscriber("image_mono", Image, self.imageCallback)
+	self.info_sub = rospy.Subscriber('camera_info', CameraInfo, self.cameraInfoCallback)
+	self.altitude_sub = rospy.Subscriber("phx/altitude", Altitude, self.altitudeCallback)
         self.twist_pub = rospy.Publisher("opticalFlow", TwistStamped, queue_size=10)
         self.image_pub = rospy.Publisher("flowImage", Image, queue_size=1)
         self.twist = TwistStamped()
 
-    def callback(self, data):
+    def altitudeCallback(self, data):
+	self.distance = data.estimated_altitude
+
+    def cameraInfoCallback(self, data):
+        self.cameraModel.fromCameraInfo(data)
+
+    def imageCallback(self, data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "mono8")
             
@@ -44,7 +53,7 @@ class OpticalFlow:
                 self.img = self.prev
             
             self.img = cv2.resize(cv_image, (0, 0), fx=0.125, fy=0.125)
-            self.flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, 0.5, 3, 15, 3, 5, 1.2, 0)
+            self.flow = cv2.calcOpticalFlowFarneback(self.prev, self.img, None, 0.5, 3, 15, 3, 5, 1.2, 0)
             self.prev = self.img
             if self.runningOnPhoenix:
                 try:
@@ -56,10 +65,12 @@ class OpticalFlow:
 
             fx = np.median(self.flow[:, :, 0])
             fy = np.median(self.flow[:, :, 1])
+            vx = fx * self.distance / self.cameraModel.fx()
+            vy = fy * self.distance / self.cameraModel.fy()
 
             self.twist.header.stamp = rospy.Time.now()
-            self.twist.twist.linear.x = fx
-            self.twist.twist.linear.y = fy
+            self.twist.twist.linear.x = vx
+            self.twist.twist.linear.y = vy
             self.twist_pub.publish(self.twist)
                 
         except CvBridgeError as e:
