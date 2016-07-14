@@ -96,7 +96,7 @@ public:
     uint16_t error_count = 10;
     bool deinitialize();                            // closes the serial port properly
 private:
-    bool do_debug_printout = false;
+    bool do_debug_printout = true;
 
     std::string serial_device_path;                 // usually /dev/tty.* or /dev/cu.*
     uint32_t serial_device_baud_rate;               // the used baudrate like 9600, 57600 or 115200

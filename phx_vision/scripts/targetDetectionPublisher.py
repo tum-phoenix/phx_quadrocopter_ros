@@ -33,7 +33,7 @@ class image_converter:
             cv2.namedWindow("Image window", 1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image_rect", Image, self.callback)
-        self.image_pub = rospy.Publisher("image_topic_2", Image)
+        self.image_pub = rospy.Publisher("image_topic_2", Image, queue_size=1)
         self.br = tf2_ros.TransformBroadcaster()
         self.t = geometry_msgs.msg.TransformStamped()
 
