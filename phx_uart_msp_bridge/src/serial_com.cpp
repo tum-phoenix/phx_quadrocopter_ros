@@ -660,7 +660,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
             if (do_debug_printout == true) std::cout << "SerialCom::read_msg_from_buffer   >> start byte found";
             msg_preamble = '$';
             uint8_t temp_protocol_type = read_from_input_buffer();
-            if (temp_protocol_type == 'M' || temp_protocol_type == 'R' || temp_protocol_type == 'L' || temp_protocol_type == 'S') {
+            if (temp_protocol_type == 'M' || temp_protocol_type == 'RA' || temp_protocol_type == 'LA' || temp_protocol_type == 'SA') {
                 // MultiWii protocol byte found
                 if ((do_debug_printout == true) && (temp_protocol_type == 'M')) std::cout << "  >> MultiWii protocol byte found";
                 if ((do_debug_printout == true) && (temp_protocol_type == 'P')) std::cout << "  >> PHOENIX protocol byte found";

@@ -187,6 +187,8 @@ int main(int argc, char **argv)
         }
 
         // serial com send requests
+        if (1 == 0) {
+
         if (loop_counter % 100 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
@@ -206,6 +208,8 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
             serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
+        }
+        serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
 
         serial_interface.send_from_buffer();
 
