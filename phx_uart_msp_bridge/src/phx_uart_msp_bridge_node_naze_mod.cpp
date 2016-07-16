@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(125);
+    ros::Rate loop_rate(200);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
@@ -187,8 +187,6 @@ int main(int argc, char **argv)
         }
 
         // serial com send requests
-        if (1 == 0) {
-
         if (loop_counter % 100 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
             serial_interface.prepare_request(MULTIWII_PID);
@@ -208,8 +206,6 @@ int main(int argc, char **argv)
             serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
             serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
-        }
-        serial_interface.prepare_request(MULTIWII_STATUS); request_attitude++; request_total++;
 
         serial_interface.send_from_buffer();
 
