@@ -235,7 +235,7 @@ bool SerialCom::prepare_request(MessageCode msg_code, MessageProtocol protocol){
     return true;
 }
 
-bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll, uint16_t yaw, uint16_t aux1, uint16_t aux2, uint16_t aux3, uint16_t aux4, MessageProtocol msg_protocol) {
+bool SerialCom::prepare_msg_rc(uint16_t ch0, uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4, uint16_t ch5, uint16_t ch6, uint16_t ch7, MessageProtocol msg_protocol) {
     if (do_debug_printout == true) std::cout << "SerialCom::prepare_msg_rc sending" << std::endl;
     Message msg;
     msg.msg_preamble = '$';
@@ -243,14 +243,14 @@ bool SerialCom::prepare_msg_rc(uint16_t throttle, uint16_t pitch, uint16_t roll,
     msg.msg_direction = COM_TO_MULTIWII;
     msg.msg_length = MULTIWII_RC_LENGTH;
     msg.msg_code = MULTIWII_RC_SET;
-    msg.msg_data.multiwii_rc_set.roll = roll;
-    msg.msg_data.multiwii_rc_set.pitch = pitch;
-    msg.msg_data.multiwii_rc_set.yaw = yaw;
-    msg.msg_data.multiwii_rc_set.throttle = throttle;
-    msg.msg_data.multiwii_rc_set.aux1 = aux1;
-    msg.msg_data.multiwii_rc_set.aux2 = aux2;
-    msg.msg_data.multiwii_rc_set.aux3 = aux3;
-    msg.msg_data.multiwii_rc_set.aux4 = aux4;
+    msg.msg_data.multiwii_rc_set.roll = ch0;
+    msg.msg_data.multiwii_rc_set.pitch = ch1;
+    msg.msg_data.multiwii_rc_set.yaw = ch2;
+    msg.msg_data.multiwii_rc_set.throttle = ch3;
+    msg.msg_data.multiwii_rc_set.aux1 = ch4;
+    msg.msg_data.multiwii_rc_set.aux2 = ch5;
+    msg.msg_data.multiwii_rc_set.aux3 = ch6;
+    msg.msg_data.multiwii_rc_set.aux4 = ch7;
 
     uint8_t msg_data_bytes[sizeof(msg.msg_data)];
     memcpy(msg_data_bytes, &msg.msg_data, sizeof(msg.msg_data));

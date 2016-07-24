@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   tf
   sensor_msgs
+  laser_geometry
 )
 
 ## System dependencies are found with CMake's conventions
@@ -98,3 +99,8 @@ include_directories(
 )
 
 
+add_executable(laser_to_pointcloud src/laser_to_pointcloud.cpp)
+
+target_link_libraries(laser_to_pointcloud
+   ${catkin_LIBRARIES}
+)

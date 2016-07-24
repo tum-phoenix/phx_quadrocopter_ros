@@ -22,7 +22,7 @@ def calc_geo_distance(lon0, lat0, lon1, lat1):
     return d
 
 
-class GPWWayPointNode:
+class GPSWayPointNode:
     def __init__(self):
         # init ros
         rospy.init_node('way_point_controller')
@@ -172,6 +172,6 @@ class GPWWayPointNode:
         exit()
 
 if __name__ == '__main__':
-    controller = GPWWayPointNode()
+    controller = GPSWayPointNode()
 
     controller.run()

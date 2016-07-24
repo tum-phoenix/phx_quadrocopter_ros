@@ -1,0 +1,18 @@
+<launch>
+	<machine name="phoenix" address="localhost" />
+	
+	<!-- Laser Scanner -->
+	    <!-- <node name="LaserScanner" pkg="urg_node" type="urg_node" /> -->
+        <node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
+            <param name="ip_address" value="192.168.3.10" />
+            <param name="ip_port" value="10940" />
+            <param name="frame_id" value="laserHOKUYO" />
+            <param name="publish_intensity" value="True" />
+            <param name="cluster" value="3" />
+        </node>
+
+    <!-- Logging -->
+    <include file="$(find phx_launch_files)/launch/logging_rangefinder.launch" />
+
+</launch>
+

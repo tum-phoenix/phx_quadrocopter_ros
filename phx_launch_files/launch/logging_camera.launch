@@ -1,0 +1,22 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <!-- logged topics:
+            /ImageProc_debayer/parameter_descriptions
+            /ImageProc_debayer/parameter_updates
+            /ImageProc_rectify_color/parameter_descriptions
+            /ImageProc_rectify_color/parameter_updates
+            /ImageProc_rectify_mono/parameter_descriptions
+            /ImageProc_rectify_mono/parameter_updates
+
+            /camera_info
+            /image_color
+            /image_mono
+            /image_raw
+            /image_rect
+            /image_rect_color
+        -->
+
+        <node name="FlightLogger_camera" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_camera /ImageProc_debayer/parameter_descriptions /ImageProc_debayer/parameter_updates /ImageProc_rectify_color/parameter_descriptions /ImageProc_rectify_color/parameter_updates /ImageProc_rectify_mono/parameter_descriptions /ImageProc_rectify_mono/parameter_updates /camera_info /image_color /image_mono /image_raw /image_rect /image_rect_color " machine="phoenix" />
+
+</launch>

@@ -1,0 +1,47 @@
+<launch>
+    <machine name="phoenix" address="localhost" />
+
+    <!-- Serial interfaces -->
+        <node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
+        <node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
+
+
+    <!-- Data Logging to Bag File -->
+        <!-- <node name="FlightLogger" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog /phx/fc/gps_home /phx/gps_way_point /phx/fc/gps_way_point /phx/fc/motor /phx/fc/rc /phx/fc/status /phx/fc/altitude /phx/fc/attitude /phx/gps /phx/imu /phx/marvicRC/rc_input /phx/marvicRC/status phx/marvicAltitude/altitude /phx/marvicAltitude/lidar /phx/marvicAltitude/infra_red /phx/marvicAltitude/barometer /phx/marvicAltitude/sonar /phx/rc_computer /camera_info /clock /scan /image_mono /map /throttled_map /move_base/global_costmap/costmap /occupied_cells_vis_array /tf" machine="phoenix" /> -->
+
+        <include file="$(find phx_launch_files)/launch/logging_serial_interfaces.launch" />             <!-- only topics from the serial interfaces -->
+        <include file="$(find phx_launch_files)/launch/logging_rangefinder.launch" />                        <!-- only topics from  -->
+
+        <include file="$(find phx_launch_files)/launch/logging_replay.launch" />                        <!-- all topics -->
+        <!--<include file="$(find phx_launch_files)/launch/logging_map.launch" />-->                    <!-- xy -->
+        <!--<include file="$(find phx_launch_files)/launch/logging_camera.launch" />-->                 <!-- only topics from the camera -->
+
+
+    <!-- GPS filtering-->
+        <!-- <include file="$(find phx_launch_files)/launch/phx_gps.launch" /> -->
+
+    <!-- Camera -->
+        <!-- <include file="$(find phx_launch_files)/launch/phx_camera.launch" /> -->
+
+    <!-- Laser Scanner -->
+        <!-- <node name="LaserScanner" pkg="urg_node" type="urg_node" /> -->
+        <node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
+            <param name="ip_address" value="192.168.3.10" />
+            <param name="ip_port" value="10940" />
+            <param name="frame_id" value="laserHOKUYO" />
+            <param name="publish_intensity" value="True" />
+            <param name="cluster" value="3" />
+        </node>
+
+    <!-- Transforms -->
+    <include file="$(find phx_launch_files)/launch/transforms.launch" />
+
+    <!-- robot model -->
+    
+    <param name="robot_description" command="xacro $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
+    <param name="use_gui" value="False"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+</launch>
+

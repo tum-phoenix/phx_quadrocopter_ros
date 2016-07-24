@@ -1,0 +1,6 @@
+<launch>
+        <machine name="phoenix" address="localhost" />
+
+        <node name="FlightLogger_map" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_map /phx/gps /phx/imu /phx/rc_computer /clock /scan /map /move_base/global_costmap/costmap /occupied_cells_vis_array /tf" machine="phoenix" />
+
+</launch>
