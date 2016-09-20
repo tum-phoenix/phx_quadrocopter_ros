@@ -60,7 +60,7 @@ class LandingNode():
             if self.enabled:
                 #controlCommand_p = (self.setPoint - self.altitude) * self.p
                 #controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d
-                un_cliped = self.landController.calculateControlCommand(self.altitude,self.linear_acceleration_z)
+                un_cliped = self.landController.calculate_control_command(self.altitude, self.linear_acceleration_z)
                 #un_cliped = self.controlCommand + controlCommand_p + controlCommand_d
                 controlCommand = np.clip(un_cliped, 1000, 2000)
 

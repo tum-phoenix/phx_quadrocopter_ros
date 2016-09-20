@@ -45,11 +45,11 @@ class AttitudeHoldNode():
             self.currentPose = attitude_msg
             self.currentPose.yaw -= 180
 
-            controlCommand_pitch = self.pitchController.calculateControlCommand(attitude_msg.pitch,self.imu.angular_velocity.y)
+            controlCommand_pitch = self.pitchController.calculate_control_command(attitude_msg.pitch, self.imu.angular_velocity.y)
 
-            controlCommand_roll = self.rollController.calculateControlCommand(attitude_msg.roll,self.imu.angular_velocity.x)
+            controlCommand_roll = self.rollController.calculate_control_command(attitude_msg.roll, self.imu.angular_velocity.x)
 
-            controlCommand_yaw = self.yawController.calculateControlCommand(attitude_msg.yaw,self.imu.angular_velocity.z)
+            controlCommand_yaw = self.yawController.calculate_control_command(attitude_msg.yaw, self.imu.angular_velocity.z)
 
             autopilot_command = AutoPilotCmd()
 

@@ -52,7 +52,7 @@ class AltitudeHoldNode():
                 self.previousAltitude = altitude_msg.estimated_altitude
                 self.firstCall = 0
 
-            un_cliped = self.altitudeController.calculateControlCommand(altitude_msg.estimated_altitude, (altitude_msg.estimated_altitude - self.previousAltitude) * 100)
+            un_cliped = self.altitudeController.calculate_control_command(altitude_msg.estimated_altitude, (altitude_msg.estimated_altitude - self.previousAltitude) * 100)
 
             if self.input_rc[4] > 1500:
                 un_cliped = self.input_rc[3]
