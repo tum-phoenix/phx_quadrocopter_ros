@@ -6,7 +6,7 @@ from phx_uart_msp_bridge.msg import RemoteControl
 from phx_uart_msp_bridge.msg import AutoPilotCmd
 #from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Imu
-from PIDController import PIDController
+from pid_controller import PIDController
 
 #If we want our code to work properly we have to run another class: AltitudeHoldNode()
 #It should be working before our device reaches the altitude of 1m

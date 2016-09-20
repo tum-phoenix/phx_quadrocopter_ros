@@ -1,6 +1,6 @@
 import numpy as np
 import rospy
-from PIDController import PIDController
+from pid_controller import PIDController
 from phx_uart_msp_bridge.msg import Attitude
 from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import RemoteControl

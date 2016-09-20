@@ -8,7 +8,7 @@ from phx_uart_msp_bridge.msg import AutoPilotCmd
 from phx_uart_msp_bridge.msg import ControllerCmd
 from sensor_msgs.msg import Joy
 import time
-import PIDController
+import pid_controller
 
 class GPSHoldNode():
     def __init__(self):
