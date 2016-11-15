@@ -85,7 +85,7 @@ class BugTwo():
         self.ros_subscribe_target_position = rospy.Subscriber('/clicked_point', geometry_msgs.msg.PointStamped,
                                                               self.get_target)
 
-        ros_subscribe_LaserScan = rospy.Subscriber('/scan_filtered', LaserScan, self.callback_find_obstacle)
+        self.ros_subscribe_LaserScan = rospy.Subscriber('/scan_filtered', LaserScan, self.callback_find_obstacle)
 
         self.get_target()
         self.get_current_pos()
