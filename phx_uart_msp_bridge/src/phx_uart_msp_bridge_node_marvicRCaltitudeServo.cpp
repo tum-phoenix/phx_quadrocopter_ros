@@ -139,16 +139,16 @@ int main(int argc, char **argv)
         // serialcom send requests
         if (loop_counter % 10 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-            serial_interface.prepare_request(MARVIC_BAROMETER, PHOENIX_RC_PROTOCOL); request_barometer++; request_total++;
+            // serial_interface.prepare_request(MARVIC_BAROMETER, PHOENIX_RC_PROTOCOL); request_barometer++; request_total++;
         } else {
             if (loop_counter % 2 == 0) {
-                serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
+                // serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
                 serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             }
             if (loop_counter % 3 == 0) {
-            serial_interface.prepare_request(MARVIC_LIDAR, PHOENIX_RC_PROTOCOL); request_lidar++; request_total++;
-            serial_interface.prepare_request(MARVIC_INFRA_RED, PHOENIX_RC_PROTOCOL); request_infra_red++; request_total++;
-            serial_interface.prepare_request(MARVIC_SONAR, PHOENIX_RC_PROTOCOL); request_sonar++; request_total++;
+            //serial_interface.prepare_request(MARVIC_LIDAR, PHOENIX_RC_PROTOCOL); request_lidar++; request_total++;
+            //serial_interface.prepare_request(MARVIC_INFRA_RED, PHOENIX_RC_PROTOCOL); request_infra_red++; request_total++;
+            //serial_interface.prepare_request(MARVIC_SONAR, PHOENIX_RC_PROTOCOL); request_sonar++; request_total++;
             }
         }
         serial_interface.send_from_buffer();
