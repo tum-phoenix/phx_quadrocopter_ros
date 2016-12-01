@@ -31,7 +31,7 @@ while True:
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_basics.launch' + bcolors.ENDC
         launch_basic = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_basics.launch'], stdout=subprocess.PIPE)
-    if input is '2':
+    elif input is '2':
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_basics.launch' + bcolors.ENDC
         launch_basic = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_basics.launch'], stdout=subprocess.PIPE)
@@ -40,14 +40,14 @@ while True:
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_mapping.launch' + bcolors.ENDC
         launch_mapping = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_mapping.launch'], stdout=subprocess.PIPE)
-    if input is '3':
+    elif input is '3':
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_basics.launch' + bcolors.ENDC
         launch_basic = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_basics.launch'], stdout=subprocess.PIPE)
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_camera.launch' + bcolors.ENDC
         launch_camera = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_camera.launch'], stdout=subprocess.PIPE)
-    if input is '4':
+    elif input is '4':
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_basics.launch' + bcolors.ENDC
         launch_basic = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_basics.launch'], stdout=subprocess.PIPE)
@@ -59,10 +59,13 @@ while True:
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_mapping.launch' + bcolors.ENDC
         launch_mapping = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_mapping.launch'], stdout=subprocess.PIPE)
+    else:
+        'input was not useful.'
+        input = '0'
     print 'startup done.\n\n'
 
     print 'press ctrl - C to stop roscore'
-    while True:
+    while input is not '0':
         try:
             time.sleep(1)
         except KeyboardInterrupt:
@@ -78,4 +81,5 @@ while True:
                 launch_basic.terminate()
                 launch_camera.terminate()
                 launch_mapping.terminate()
-    print 'all launchfiels stopped'
+            break
+    print 'all launch files stopped'
