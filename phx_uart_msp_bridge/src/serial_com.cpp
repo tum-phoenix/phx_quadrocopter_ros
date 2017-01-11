@@ -626,7 +626,7 @@ bool SerialCom::read_msg_from_buffer(Message* msg) {
                 printf("%c ", input_buffer[index]);
                 std::cout << "\033[0m";
             } else {
-                std::cout << "\033[34;2m";
+                std::cout << "\033[34;0m";
                 printf("%i ", input_buffer[index]);
                 std::cout << "\033[0m";
             }

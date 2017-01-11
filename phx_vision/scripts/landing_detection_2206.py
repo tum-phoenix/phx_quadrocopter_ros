@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-q
 '''
-Created on June 6, 2016
+Created on June 22, 2016
 
 @author: hidenobu_matsuki 松木秀伸
 '''
-
 
 # import the necessary packages
 import argparse
 import cv2
 import numpy as np
-
+import math
 
 # load the video
 camera = cv2.VideoCapture(0)
@@ -26,18 +25,18 @@ while True:
 	if not grabbed:
 		break
 
-	# convert the frame to grayscale, blur it, and detect edges
+	# convert the frame to grayscale, blur it, and detect edge
+
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-	ret,th3 = cv2.threshold(blurred,70,255,cv2.THRESH_BINARY_INV)
+	ret,th3 = cv2.threshold(blurred,80,255,cv2.THRESH_BINARY_INV)
 	kernel = np.ones((10, 10), np.uint8)
 	dilation = cv2.dilate(th3, kernel, iterations=1)
+
 	# find contours in the edge map
 	cnts = cv2.findContours(dilation.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-    # show contours
-	#cv2.drawContours(frame, cnts, -1, (0, 255, 0), 3)
 
 	# loop over the contours
 	for c in cnts:
@@ -45,27 +44,40 @@ while True:
 		peri = cv2.arcLength(c, True)
 		approx = cv2.approxPolyDP(c, 0.01 * peri, True)
 
-		# define the landing marker as 12 vertex rectangle
-		if len(approx) >=12 and len(approx) <= 14:
+		# ensure that the approximated contour is "roughly" rectangular
+		if len(approx) >=10 and len(approx) <= 20: #18はあった方が良い
 			# compute the bounding box of the approximated contour and
 			# use the bounding box to compute the aspect ratio
 			(x, y, w, h) = cv2.boundingRect(approx)
-			aspectRatio = w / float(h)
 
 			# compute the solidity of the original contour
 			area = cv2.contourArea(c)
 
-			hullArea = cv2.contourArea(cv2.convexHull(c))
+            #compute the minimum Rectangle, which is constant to rotation.
+			rect = cv2.minAreaRect(c)
+			box = cv2.boxPoints(rect)
+
+            #compute aspect ratio
+			l1 = math.sqrt((box[1,0]-box[0,0])**2+(box[1,1]-box[0,1])**2)
+			l2 = math.sqrt((box[2,0]-box[1,0])**2+(box[2,1]-box[1,1])**2)
+			box = np.int0(box)
+			width = max(l1,l2)
+			height = min(l1,l2)
+			aspectRatio = width / height
+
+            #compute solidity
+			hullArea = cv2.contourArea(box)
 			solidity = area / float(hullArea)
 
 			# compute whether or not the width and height, solidity, and
 			# aspect ratio of the contour falls within appropriate bounds
-			keepDims = w > 5 and h > 5
-			keepSolidity = solidity > 0.65 and solidity < 0.80 #roughly 67~70%
-			keepAspectRatio = aspectRatio >= 0.9 and aspectRatio <= 1.2
+			keepSolidity = solidity > 0.5 and solidity < 0.9
+			keepAspectRatio = (aspectRatio >= 1.7 and aspectRatio <= 2.0) or (aspectRatio >= 1 and aspectRatio <= 1.1)
+			keeparea = area >1300 and area < 120000
+
 
 			# ensure that the contour passes all our tests
-			if keepDims and keepSolidity and keepAspectRatio:
+			if keeparea and keepSolidity and keepAspectRatio:
 				# draw an outline around the target and update the status
 				# text
 				cv2.drawContours(frame, [approx], -1, (0, 0, 255), 4)

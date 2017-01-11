@@ -66,6 +66,7 @@ find_package(catkin REQUIRED COMPONENTS
    Attitude.msg
    Autonomous.msg
    AutoPilotCmd.msg
+   ControllerCmd.msg
    LEDstrip.msg
    LED.msg
    PID.msg

@@ -25,15 +25,12 @@ from cv_bridge import CvBridge, CvBridgeError
 class image_converter:
     def __init__(self):
         self.counter = 0
-        if (os.uname()[4][:3] == 'arm'):
-            self.runningOnPhoenix = True
-        else:
-            self.runningOnPhoenix = False
+        self.runningOnPhoenix = True
         if (not self.runningOnPhoenix):
             cv2.namedWindow("Image window", 1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image_rect", Image, self.callback)
-        self.image_pub = rospy.Publisher("image_topic_2", Image)
+        self.image_pub = rospy.Publisher("targetDetectionImage", Image, queue_size=1)
         self.br = tf2_ros.TransformBroadcaster()
         self.t = geometry_msgs.msg.TransformStamped()
 
@@ -215,21 +212,26 @@ class image_converter:
                     # Distance to Camera
 
 
-                    dist_z = (self.knownWidth * self.focalLength_x) / perWidth
+                    self.dist_z = (self.knownWidth * self.focalLength_x) / perWidth
 
                     # self.dist_x / self.dist_y
                     self.dist_x_p = 0.5 * frame.shape[1] - cX  # Distance to Center (x-direction) in pixel
                     self.dist_y_p = cY - 0.5 * frame.shape[0]
 
-                    self.dist_x = (dist_z * self.dist_x_p) / self.focalLength_x
-                    self.dist_y = (dist_z * self.dist_y_p) / self.focalLength_y
+                    self.dist_x = (self.dist_z * self.dist_x_p) / self.focalLength_x
+                    self.dist_y = (self.dist_z * self.dist_y_p) / self.focalLength_y
 
-                    cv2.putText(frame, "d_z %.5f m" % (dist_z), (cX + 5, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
+                    cv2.putText(frame, "d_z %.5f m" % (self.dist_z), (cX + 5, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
                     cv2.putText(frame, "d_y %.5f m" % (self.dist_x), (cX + 5, cY - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
                     cv2.putText(frame, "d_x %.5f m" % (self.dist_y), (cX + 5, cY - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 255, 0), 1)
+
+                    self.t.transform.translation.x = self.dist_x
+                    self.t.transform.translation.y = self.dist_y
+                    self.t.transform.translation.z = self.dist_z
+                    self.br.sendTransform(self.t)
 
         # loop over Objects (list_id)
         for j in range(0, 5):
@@ -268,10 +270,6 @@ class image_converter:
         cv2.putText(frame, 'status', (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (0, 0, 255), 2)
 
-        self.t.transform.translation.x = self.dist_x
-        self.t.transform.translation.y = self.dist_y
-        self.t.transform.translation.z = self.dist_camera
-        self.br.sendTransform(self.t)
         self.counter += 1
 
         try:

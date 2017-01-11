@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(125);
+    ros::Rate loop_rate(90);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
@@ -189,11 +189,10 @@ int main(int argc, char **argv)
         // serial com send requests
         if (loop_counter % 100 == 0) {
             serial_interface.prepare_request(MULTIWII_STATUS); request_status++; request_total++;
-            serial_interface.prepare_request(MULTIWII_PID);
+//            serial_interface.prepare_request(MULTIWII_PID);
         }
         if (loop_counter % 10 == 0) {
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-            serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
             serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
@@ -204,6 +203,7 @@ int main(int argc, char **argv)
         if (loop_counter % 2 == 0) {
             serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
             serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
+            serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
 
