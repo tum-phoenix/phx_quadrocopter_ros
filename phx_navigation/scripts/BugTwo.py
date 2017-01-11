@@ -17,9 +17,13 @@ class BugTwo():
         self.copter_rot = np.zeroes[3]  # startrotation
         self.current_state = np.zeroes[6]  # zusammenfassung aktuelle pos, aktuelle rot
 
-    def get_target(self):
-        # todo
-        return
+    def get_target(self, clicked_point):
+        self.copter_tar[0] = clicked_point.x
+        self.copter_tar[1] = clicked_point.y
+        self.copter_tar[2] = clicked_point.z
+
+        self.line_to_target(self.copter_pos, self.copter_tar)
+
 
     def get_current_pos(self):
 
@@ -79,22 +83,27 @@ class BugTwo():
         if max(obstacle) == 1:
             self.line_of_sight = False
 
+
+    def
+
     def run(self):
         # todo
-        start = True
+
+        #subscibing to relevant topics
         self.ros_subscribe_target_position = rospy.Subscriber('/clicked_point', geometry_msgs.msg.PointStamped,
                                                               self.get_target)
-
         self.ros_subscribe_LaserScan = rospy.Subscriber('/scan_filtered', LaserScan, self.callback_find_obstacle)
 
+        #Legt alle wichtigen Starteinstellungen fest
         self.get_target()
         self.get_current_pos()
-        self.line_to_target()
+
 
         while not rospy.is_shutdown():
 
             # loop 'Move in straight line'
             if self.line_of_sight:
+                #todo
                 v = 1
 
 
