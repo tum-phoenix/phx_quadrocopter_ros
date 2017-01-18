@@ -17,7 +17,19 @@ class BugTwo():
         self.copter_rot = np.zeroes[3]  # startrotation
         self.current_state = np.zeroes[6]  # zusammenfassung aktuelle pos, aktuelle rot
 
+        # beim vorbeifliegen wird das object erst ab 80° ignoriert - sonst evtl problematisch
+        self.relevant_angle = 160 / 2
+        # ueber dieser Distanz wird das Hindernis ganz ignoriert
+        self.relevant_distance = 20
+        # unter dieser Distanz wird das Hindernis fuer Colision Avoidance relevant
+        self.dangerous_distance = 3
+
+        self.vektor = [0, 0]
+
+
     def get_target(self, clicked_point):
+        # todo change target funktion
+        #todo listen to target topic
         self.copter_tar[0] = clicked_point.x
         self.copter_tar[1] = clicked_point.y
         self.copter_tar[2] = clicked_point.z
@@ -46,19 +58,19 @@ class BugTwo():
             pass
         return self.current_pos
 
-    def line_to_target(copter_pos, copter_tar):
+    def line_to_target(self):
         # Generates Line l from Starpoint to Target
-        if not copter_pos == copter_tar:
+        if not self.copter_pos == self.copter_tar:
 
-            if copter_tar[0] != 0 & copter_pos[0] != 0 & copter_tar[0] != copter_pos[0]:
-                m = (copter_tar[1] - copter_pos[1]) / (copter_tar[0] - copter_pos[0])
+            if self.copter_tar[0] != 0 & self.copter_pos[0] != 0 & self.copter_tar[0] != self.copter_pos[0]:
+                m = (self.copter_tar[1] - self.copter_pos[1]) / (self.copter_tar[0] - self.copter_pos[0])
 
-            t = m * copter_tar[0] - copter_tar[1]
+            t = m * self.copter_tar[0] - self.copter_tar[1]
             l = [m, t]
             # m(x) = a*x+b
             return l
 
-            # else return 0,0? oder position hold aufrufen?
+            # position hold aufrufen?
 
     def callback_find_obstacle(self, new_LaserScan=LaserScan()):
         # takes Laser Scans and Orientation and calculates potential obstacle
@@ -66,25 +78,69 @@ class BugTwo():
         data = np.array(new_LaserScan.ranges)
         obstacle = np.zeroes_like(data)
 
-        obstacle[data > 20] = 0
-        obstacle[data <= 20 & data >= 10] = 0.5
-        obstacle[data < 10] = 1.
+        # in meter
+        # relevant_distance = z. B. 20
+        #dangerous_distance = z.B. 3
 
-        # self.current_state[6] entspricht jaw in euler
+        obstacle[data > self.relevant_distance] = 0
+        obstacle[data <= self.relevant_distance & data >= self.dangerous_distance] = 0.5
+        obstacle[data < self.dangerous_distance] = 1.
 
-        relevant_angle = 60 / 2
+
         angle = abs(LaserScan.angle_min) + abs(LaserScan.angle_max)
 
-        # entfernt alle Messwerte aus dem Array die außerhalb des relevanten Winkels liegen
-        data = data[(abs(LaserScan.angle_min) - relevant_angle) / angle * len(new_LaserScan): (abs(
-            LaserScan.angel_max) - relevant_angle) / angle * len(new_LaserScan)]
+        # removes all measurements outside of a relevant angle
+        data = data[(abs(LaserScan.angle_min) - self.relevant_angle) / angle * len(new_LaserScan): (abs(
+            LaserScan.angel_max) - self.relevant_angle) / angle * len(new_LaserScan)]
 
-        # wenn Hindernis zu nah ändere den loop auf 'Follow the Wall'
+        # if a obsctacel is to close change loop to 'Follow the Wall'
         if max(obstacle) == 1:
             self.line_of_sight = False
 
+    def tangente(self, angle_min, angle_max, Array):  # LaserScan durch Array mit Hinderniskoordinaten austauschen
+        # todo
+        # calculates a tangential to the obstacle
 
-    def
+        data = np.array(Array)
+        length = len(data)
+        vektor = [0, 0]
+        i = 0
+        if length < 4:
+            # big obstacle
+            # todo Tangenten berechnen
+            angle_avg = (angle_min + angle_max) / 2
+            vektor[0] = np.cos(angle_avg - 45 + 90)
+            vektor[1] = np.sine(angle_avg - 45 + 90)
+
+        else:
+            # alles Messwerte aufsummieren & anders umfliegen
+            # small obstacle
+
+            while i < length:
+                sum = sum + data[i]
+                i += 1
+            avg = sum / length  # avg distance to obstacle
+
+            # todo vektor durch twist erstetzen
+            # todo vektorteil des twists in abhaengigkeit von winkel
+            # +-40° reichen fuer Sicherheitsabstand von 1m bei Groeße der Drohne von 1.5m
+            # zu einem Hindernis von Durchmesser ~40cm
+
+            if (angle_min < 180 - 45 & angle_max < 180 - 45):
+                vektor = []  # right
+            else:
+                if (angle_min > 180 - 45 & angle_max > 180 - 45):
+                    vektor = []  # left
+                else:
+                    # object is straight ahead
+
+                    if abs(angle_min - 135) < abs(angle_max - 135):
+                        # obstacle is more to the right
+                        vektor = []  # right
+                    else:
+                        # obstacle is more to the left
+                        vektor = [] #left
+
 
     def run(self):
         # todo
@@ -97,16 +153,19 @@ class BugTwo():
         #Legt alle wichtigen Starteinstellungen fest
         self.get_target()
         self.get_current_pos()
-
+        self.get_parameters()
 
         while not rospy.is_shutdown():
 
             # loop 'Move in straight line'
             if self.line_of_sight:
-                #todo
-                v = 1
+                # todo vektor durch twist ersetzen
+                vektor = [0,1]
 
 
             # loop 'Follow the Wall'
             else:
+                #todo
                 pass
+
+            rospy.sleep(10)
