@@ -397,7 +397,7 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
 
     //std::vector contents are guaranteed to be contiguous, use memset to set all to unknown to save time in loop
     memset(&data[0], -1, sizeof(int8_t) * size);
-    memset(&data[0], true, sizeof(bool) * size);
+    memset(&binary_data[0], true, sizeof(bool) * size);
 
 
     if (mapMutex)
