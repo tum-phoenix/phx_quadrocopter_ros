@@ -40,6 +40,7 @@
 #include "HectorMapMutex.h"
 
 #include "hector_mapping/BinaryOccupancyGrid.h"
+#include "hector_mapping/SparseGrid.h"
 
 #ifndef TF_SCALAR_H
   typedef btScalar tfScalar;
@@ -204,6 +205,7 @@ HectorMappingRos::HectorMappingRos()
   initial_pose_filter_->registerCallback(boost::bind(&HectorMappingRos::initialPoseCallback, this, _1));
 
   binary_map_publisher_ = node_.advertise<hector_mapping::BinaryOccupancyGrid>("binary_map",1,false);
+  sparse_grid_publisher_ = node_.advertise<hector_mapping::SparseGrid>("sparsegrid",1,false);
 
   map__publish_thread_ = new boost::thread(boost::bind(&HectorMappingRos::publishMapLoop, this, p_map_pub_period_));
 
@@ -379,9 +381,13 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
   nav_msgs::GetMap::Response& map_ (mapPublisher.map_);
 
   hector_mapping::BinaryOccupancyGrid binary_map;
+  hector_mapping::SparseGrid sparse_grid;
 
   binary_map.header = map_.map.header;
   binary_map.info = map_.map.info;
+
+  sparse_grid.header = map_.map.header;
+  sparse_grid.info = map_.map.info;
 
   //only update map if it changed
   if (lastGetMapUpdateIndex != gridMap.getUpdateIndex())
@@ -394,6 +400,7 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
 
     std::vector<int8_t>& data = map_.map.data;
     std::vector<uint8_t>& binary_data = binary_map.data;
+    std::vector<int32_t>& sparse_grid_data = sparse_grid.data;
 
     //std::vector contents are guaranteed to be contiguous, use memset to set all to unknown to save time in loop
     memset(&data[0], -1, sizeof(int8_t) * size);
@@ -411,6 +418,8 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
       {
         data[i] = 0;
         binary_data[i] = false;
+        sparse_grid_data.push_back(i);
+        sparse_grid_data.push_back(0);
       }
       else if (gridMap.isOccupied(i))
       {
@@ -434,6 +443,9 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
 
   binary_map.header.stamp = timestamp;
   binary_map_publisher_.publish(binary_map);
+
+  sparse_grid.header.stamp = timestamp;
+  sparse_grid_publisher_.publish(sparse_grid);
 }
 
 bool HectorMappingRos::rosLaserScanToDataContainer(const sensor_msgs::LaserScan& scan, hectorslam::DataContainer& dataContainer, float scaleToMap)

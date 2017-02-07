@@ -116,6 +116,7 @@ protected:
   ros::Publisher scan_point_cloud_publisher_;
 
   ros::Publisher binary_map_publisher_;
+  ros::Publisher sparse_grid_publisher_;
 
   std::vector<MapPublisherContainer> mapPubContainer;
 

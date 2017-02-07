@@ -38,6 +38,7 @@ add_message_files(
   HectorDebugInfo.msg
   HectorIterData.msg
   BinaryOccupancyGrid.msg
+  SparseGrid.msg
 )
 
 ## Generate services in the 'srv' folder
