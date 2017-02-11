@@ -82,18 +82,6 @@ int main(int argc, char *argv[])
     method = 0;
   }
 
-  //  "/home/mykyta_denysov/Desktop/LiClipseWorkspace/Testing/FrontCamCalibration/CalibrationMTX.csv"
-  if (camera_matrix == "/home/mykyta/Desktop/catkin_ws/src/marker_recognition/calibration/cam_mat.csv")
-    ROS_INFO("Same camera matrix");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Circle.jpg");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Heart.jpg");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Pentagram.jpg");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Square.jpg");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Star.jpg");
-  //    reference_images.push_back("/homenh.getParam("camera_matrix", camera_matrix)/mykyta_denysov/catkin_ws/src/marker_recognition/images/Triangle.jpg");
-  //    reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Star_Screenshot_Cropped.jpg");
-//  reference_images.push_back("/home/mykyta_denysov/catkin_ws/src/marker_recognition/images/Heart_cut.jpg");
-
   SignRecognition main_recognizer(reference_images, camera_matrix, method);
   ImageConverter ic(&main_recognizer);
   ros::spin();

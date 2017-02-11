@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV REQUIRED)
+find_package(dlib REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -142,14 +143,26 @@ add_executable(marker_recognition_node
     src/DetectorMatcher.cpp
     )
 
+add_executable(dlib_wrapper_node
+    src/dlib_wrapper_node.cpp
+    )
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(marker_recognition_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_dependencies(dlib_wrapper_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(marker_recognition_node
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
+    )
+
+target_link_libraries(dlib_wrapper_node
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${dlib_LIBRARIES}
     )
 
 #############
@@ -173,6 +186,12 @@ install(TARGETS marker_recognition_node
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
 
+install(TARGETS dlib_wrapper_node
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
@@ -190,6 +209,13 @@ install(DIRECTORY images
 install(DIRECTORY calibration
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     FILES_MATCHING PATTERN "*.csv"
+    PATTERN ".svn" EXCLUDE
+    )
+
+
+install(DIRECTORY classifiers
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    FILES_MATCHING PATTERN "*.xml"
     PATTERN ".svn" EXCLUDE
     )
 
