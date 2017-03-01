@@ -29,7 +29,7 @@ class image_converter:
         if (not self.runningOnPhoenix):
             cv2.namedWindow("Image window", 1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("image_rect", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/cam_front/image_rect", Image, self.callback)
         self.image_pub = rospy.Publisher("targetDetectionImage", Image, queue_size=1)
         self.br = tf2_ros.TransformBroadcaster()
         self.t = geometry_msgs.msg.TransformStamped()

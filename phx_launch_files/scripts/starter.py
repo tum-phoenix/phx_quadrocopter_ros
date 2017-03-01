@@ -27,6 +27,7 @@ while True:
     print '  (2) - phx_basics - phx_mapping'
     print '  (3) - phx_basics - phx_camera'
     print '  (4) - phx_basics - phx_camera - phx_mapping'
+    print '  (end)'
     input = raw_input('>>> ')
     if input is '1':
         print 'starting ' + \
@@ -45,6 +46,7 @@ while True:
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_basics.launch' + bcolors.ENDC
         launch_basic = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_basics.launch'], stdout=subprocess.PIPE)
+        wait(5)
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_camera.launch' + bcolors.ENDC
         launch_camera = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_camera.launch'], stdout=subprocess.PIPE)
@@ -60,6 +62,8 @@ while True:
         print 'starting ' + \
               bcolors.OKGREEN + 'roslaunch phx_launchfiles phx_mapping.launch' + bcolors.ENDC
         launch_mapping = subprocess.Popen(['roslaunch', 'phx_launch_files', 'phx_mapping.launch'], stdout=subprocess.PIPE)
+    elif input == 'end':
+        break
     else:
         'input was not useful.'
         input = '0'
