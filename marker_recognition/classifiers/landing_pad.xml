@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<?xml-stylesheet type='text/xsl' href='image_metadata_stylesheet.xsl'?>
+<dataset>
+<name>imglab dataset</name>
+<comment>Created by imglab tool.</comment>
+<images>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-225755.jpg'>
+    <box top='73' left='287' width='608' height='627'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-225800.jpg'>
+    <box top='64' left='259' width='625' height='648'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-225812.jpg'>
+    <box top='77' left='227' width='643' height='670'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-225813.jpg'>
+    <box top='52' left='239' width='638' height='651'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-225815.jpg'>
+    <box top='117' left='299' width='547' height='564'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231256.jpg'>
+    <box top='65' left='258' width='614' height='631'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231257.jpg'>
+    <box top='53' left='240' width='602' height='622'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231300.jpg'>
+    <box top='42' left='471' width='635' height='656'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231302.jpg'>
+    <box top='22' left='123' width='608' height='641'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231304.jpg'>
+    <box top='15' left='221' width='639' height='669'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231306.jpg'>
+    <box top='61' left='275' width='576' height='591'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231308.jpg'>
+    <box top='50' left='251' width='567' height='601'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231309.jpg'>
+    <box top='46' left='235' width='622' height='630'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231319.jpg'>
+    <box top='48' left='251' width='652' height='663'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231321.jpg'>
+    <box top='34' left='308' width='652' height='671'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231323.jpg'>
+    <box top='45' left='217' width='647' height='664'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231326.jpg'>
+    <box top='69' left='223' width='583' height='609'/>
+  </image>
+  <image file='/home/mykyta/Desktop/good_classifiers/2017-02-10-231327.jpg'>
+    <box top='79' left='331' width='592' height='618'/>
+  </image>
+</images>
+</dataset>

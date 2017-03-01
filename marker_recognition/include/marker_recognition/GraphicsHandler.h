@@ -12,13 +12,11 @@
 
 class GraphicsHandler{
 public:
-	GraphicsHandler();
-	~GraphicsHandler();
-	cv::Mat drawCoordinateAxis(cv::Mat RMat,cv::Mat tvec,cv::Mat Cam_matrix,cv::Mat distCoeffs, cv::Mat camera_frame);
-public:
-	cv::Mat axis_coordinates_;
+  GraphicsHandler();
+  ~GraphicsHandler();
+  void drawCoordinateAxis(cv::Mat RMat,cv::Mat tvec,cv::Mat Cam_matrix,cv::Mat distCoeffs, cv::Mat& camera_frame);
+private:
+  cv::Mat axis_coordinates_;
 };
-
-
 
 #endif /* SRC_ORBPOSEESTIMATIONSELF_GRAPHICSHANDLER_H_ */
