@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(40);
+    ros::Rate loop_rate(30);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance

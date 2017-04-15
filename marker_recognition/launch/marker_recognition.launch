@@ -1,7 +1,0 @@
-<launch>
-        <node pkg="marker_recognition" name="marker_recognition_node" type="marker_recognition_node" output="screen">
-                <param name="reference_images" value="$(find marker_recognition)/images/Heart.jpg"/>
-                <param name="camera_matrix" value="$(find marker_recognition)/calibration/cam_mat.csv"/>
-                <param name="recognition_method" value="0"/>
-        </node>
-</launch>
