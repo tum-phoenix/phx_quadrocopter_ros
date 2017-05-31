@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
   while (ros::ok()){
     nav_msgs::Path path;
-    std::vector<geometry_msgs::PoseStamped> posestoadd(2);
+    std::vector<geometry_msgs::PoseStamped> posestoadd;
 
     posestoadd.push_back(initial);
     posestoadd.push_back(goal);
