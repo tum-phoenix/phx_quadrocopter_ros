@@ -5,7 +5,7 @@
 int main(int argc, char **argv)
 {
  
-  ros::init(argc, argv, "initialpose");
+  ros::init(argc, argv, "goalpose");
 
   ros::NodeHandle n;
 
@@ -20,9 +20,19 @@ int main(int argc, char **argv)
   goal.pose.orientation.z = 0;
   goal.pose.orientation.w = 1;
 
+  goal.header.frame_id = "map";
+  goal.header.stamp = ros::Time::now();
+
+  ros::Rate loop_rate(10);
   ros::Publisher chatter_pub = n.advertise<geometry_msgs::PoseStamped>("/phx/current_goal", 1000);
 
-  chatter_pub.publish(goal);
+  while (ros::ok()){
+    chatter_pub.publish(goal);
+
+    ros::spinOnce();
+
+    loop_rate.sleep();
+  }
 
   return 0;
 

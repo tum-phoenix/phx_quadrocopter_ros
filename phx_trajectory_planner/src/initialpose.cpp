@@ -19,9 +19,21 @@ int main(int argc, char **argv)
   initial.pose.orientation.z = 0;
   initial.pose.orientation.w = 1;
 
+  initial.header.frame_id = "map";
+  initial.header.stamp = ros::Time::now();
+
+  ros::Rate loop_rate(10);
   ros::Publisher chatter_pub = n.advertise<geometry_msgs::PoseStamped>("/phx/pose", 1000);
 
-  chatter_pub.publish(initial);
+
+  while (ros::ok()){
+    chatter_pub.publish(initial);
+
+    ros::spinOnce();
+
+    loop_rate.sleep();
+  }
+
 
   return 0;
 

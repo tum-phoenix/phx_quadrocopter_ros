@@ -36,12 +36,27 @@ int main(int argc, char** argv)
 
   // do shit
 
-  nav_msgs::Path path;
-  path.poses[0] = initial;
-  path.poses[1] = goal;
+  ros::Rate loop_rate(10);
 
 
-  pathpub.publish(path);
+
+  while (ros::ok()){
+    nav_msgs::Path path;
+    std::vector<geometry_msgs::PoseStamped> posestoadd(2);
+
+    posestoadd.push_back(initial);
+    posestoadd.push_back(goal);
+
+    path.poses = posestoadd;
+    path.header.frame_id = "map";
+    path.header.stamp = ros::Time::now();
+
+    pathpub.publish(path);
+    ros::spinOnce();
+
+
+    loop_rate.sleep();
+  }
 
   return 0;
 }
