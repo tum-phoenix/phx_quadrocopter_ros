@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "geometry_msgs/PoseStamped.h"
 
-#include <sstream>
 
 int main(int argc, char **argv)
 {
@@ -11,15 +10,14 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
 
   geometry_msgs::PoseStamped initial;
+  initial.pose.position.x = 2;
+  initial.pose.position.y = 0;
+  initial.pose.position.z = 1;
 
-  initial.Pose.Point.x = 2;
-  initial.Pose.Point.y = 0;
-  initial.Pose.Point.z = 1;
-
-  initial.Pose.Quaternion.x = 0;
-  initial.Pose.Quaternion.y = 0;
-  initial.Pose.Quaternion.z = 0;
-  initial.Pose.Quaternion.w = 1;
+  initial.pose.orientation.x = 0;
+  initial.pose.orientation.y = 0;
+  initial.pose.orientation.z = 0;
+  initial.pose.orientation.w = 1;
 
   ros::Publisher chatter_pub = n.advertise<geometry_msgs::PoseStamped>("/phx/pose", 1000);
 

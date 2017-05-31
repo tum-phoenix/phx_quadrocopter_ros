@@ -9,30 +9,15 @@ geometry_msgs::PoseStamped goal;
 
 void initialCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-  initial.Pose.Point.x = msg.Pose.Point.x;
-  initial.Pose.Point.y = msg.Pose.Point.y;
-  initial.Pose.Point.z = msg.Pose.Point.z;
-
-  initial.Pose.Quaternion.x = msg.Pose.Quaternion.x;
-  initial.Pose.Quaternion.y = msg.Pose.Quaternion.y;
-  initial.Pose.Quaternion.z = msg.Pose.Quaternion.z;
-  initial.Pose.Quaternion.w = msg.Pose.Quaternion.w;
+  initial.header = msg->header;
+  initial.pose = msg->pose;
 }
 
 void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-  goal.Pose.Point.x = msg.Pose.Point.x;
-  goal.Pose.Point.y = msg.Pose.Point.y;
-  goal.Pose.Point.z = msg.Pose.Point.z;
-
-  goal.Pose.Quaternion.x = msg.Pose.Quaternion.x;
-  goal.Pose.Quaternion.y = msg.Pose.Quaternion.y;
-  goal.Pose.Quaternion.z = msg.Pose.Quaternion.z;
-  goal.Pose.Quaternion.w = msg.Pose.Quaternion.w;
+  goal.header = msg->header;
+  goal.pose = msg->pose;
 }
-
-
-
 
 int main(int argc, char** argv)
 {

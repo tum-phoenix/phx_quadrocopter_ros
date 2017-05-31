@@ -1,8 +1,6 @@
 #include "ros/ros.h"
 #include "geometry_msgs/PoseStamped.h"
 
-#include <sstream>
-
 
 int main(int argc, char **argv)
 {
@@ -13,14 +11,14 @@ int main(int argc, char **argv)
 
   geometry_msgs::PoseStamped goal;
 
-  initial.Pose.Point.x = 5;
-  initial.Pose.Point.y = 0;
-  initial.Pose.Point.z = 0;
+  goal.pose.position.x = 5;
+  goal.pose.position.y = 0;
+  goal.pose.position.z = 0;
 
-  initial.Pose.Quaternion.x = 0;
-  initial.Pose.Quaternion.y = 0;
-  initial.Pose.Quaternion.z = 0;
-  initial.Pose.Quaternion.w = 1;
+  goal.pose.orientation.x = 0;
+  goal.pose.orientation.y = 0;
+  goal.pose.orientation.z = 0;
+  goal.pose.orientation.w = 1;
 
   ros::Publisher chatter_pub = n.advertise<geometry_msgs::PoseStamped>("/phx/current_goal", 1000);
 
