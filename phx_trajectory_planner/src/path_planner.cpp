@@ -24,15 +24,13 @@ int main(int argc, char** argv)
 
   ros::init(argc, argv, "path_planner");
 
-  ros::NodeHandle n1;
-  ros::NodeHandle n2;
-  ros::NodeHandle n3;
+  ros::NodeHandle nh;
 
-  ros::Subscriber init_sub = n1.subscribe("/phx/pose", 1000, initialCallback);
-  ros::Subscriber goal_sub = n2.subscribe("/phx/current_goal", 1000, goalCallback);
+  ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1000, initialCallback);
+  ros::Subscriber goal_sub = nh.subscribe("/phx/current_goal", 1000, goalCallback);
 
 
-  ros::Publisher pathpub = n3.advertise<nav_msgs::Path>("/phx/path", 1000);
+  ros::Publisher pathpub = nh.advertise<nav_msgs::Path>("/phx/path", 1000);
 
   // do shit
 
