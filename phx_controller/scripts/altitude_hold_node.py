@@ -14,8 +14,8 @@ class AltitudeHoldNode():
         rospy.init_node('altitude_hold_controller')
         self.input_rc = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
         self.node_identifier = 1
-        self.sub = rospy.Subscriber('/phx/rc_marvic', Joy, self.rcCallback)
-        self.sub = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
+        self.sub1 = rospy.Subscriber('/phx/fc/rc', RemoteControl, self.rcCallback)
+        self.sub2 = rospy.Subscriber('/phx/marvicAltitude/altitude', Altitude, self.altitudeCallback)
         self.autopilot_commands = rospy.Subscriber('/phx/controller_commands', ControllerCmd, self.controllerCommandCallback)
 #        self.rc_pub = rospy.Publisher('/phx/rc_computer', RemoteControl, queue_size=1)
         self.altitude_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
@@ -73,15 +73,15 @@ class AltitudeHoldNode():
         else:
             print 'altitude hold node disabled'
 
-    def rcCallback(self, joy_msg):
-        self.input_rc[0] = joy_msg.axes[0]
-        self.input_rc[1] = joy_msg.axes[1]
-        self.input_rc[2] = joy_msg.axes[2]
-        self.input_rc[3] = joy_msg.axes[3]          # Throttle
-        self.input_rc[4] = joy_msg.buttons[0]
-        self.input_rc[5] = joy_msg.buttons[1]
-        self.input_rc[6] = joy_msg.buttons[2]
-        self.input_rc[7] = joy_msg.buttons[3]
+    def rcCallback(self, rc_msg):
+        self.input_rc[0] = rc_msg.pitch
+        self.input_rc[1] = rc_msg.roll
+        self.input_rc[2] = rc_msg.yaw
+        self.input_rc[3] = rc_msg.throttle          # Throttle
+        self.input_rc[4] = rc_msg.aux1
+        self.input_rc[5] = rc_msg.aux2
+        self.input_rc[6] = rc_msg.aux3
+        self.input_rc[7] = rc_msg.aux4
 
 
 if __name__ == '__main__':
