@@ -129,6 +129,11 @@
         <param name="frame_rate" type="double" value="50.0" />
         <param name="pixel_clock" type="int" value="86" />
     </node>
+
+    <!-- barcode reader -->
+    <!--<node name="barcode_reader_node" pkg="zbar_ros">
+        <remap from="image_raw" to="image" />
+    </node> -->
     
     <!--<node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam"/> -->
 
