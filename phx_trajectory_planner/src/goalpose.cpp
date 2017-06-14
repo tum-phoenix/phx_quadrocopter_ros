@@ -15,10 +15,10 @@ int main(int argc, char **argv)
   goal.pose.position.y = 0;
   goal.pose.position.z = 0;
 
-  goal.pose.orientation.x = 0;
+  goal.pose.orientation.x = 0.707;
   goal.pose.orientation.y = 0;
   goal.pose.orientation.z = 0;
-  goal.pose.orientation.w = 1;
+  goal.pose.orientation.w = 0.707;
 
   goal.header.frame_id = "map";
   goal.header.stamp = ros::Time::now();
