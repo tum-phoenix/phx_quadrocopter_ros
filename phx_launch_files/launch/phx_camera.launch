@@ -131,9 +131,9 @@
     </node>
 
     <!-- barcode reader -->
-    <!--<node name="barcode_reader_node" pkg="zbar_ros">
+    <node name="barcode_reader_node" pkg="zbar_ros">
         <remap from="image_raw" to="image" />
-    </node> -->
+    </node>
     
     <!--<node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam"/> -->
 
