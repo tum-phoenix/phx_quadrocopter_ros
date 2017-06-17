@@ -116,6 +116,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -135,6 +136,7 @@ include_directories(
 add_executable(phx_trajectory_planner src/path_planner.cpp)
 add_executable(phx_trajectory_planner_goal src/goalpose.cpp)
 add_executable(phx_trajectory_planner_initial src/initialpose.cpp)
+add_executable(phx_trajectory_controller src/trajectory_controller.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,6 +158,10 @@ target_link_libraries(${PROJECT_NAME}_goal
  )
 
 target_link_libraries(${PROJECT_NAME}_initial
+	${catkin_LIBRARIES}
+ )
+
+target_link_libraries(phx_trajectory_controller
 	${catkin_LIBRARIES}
  )
 
