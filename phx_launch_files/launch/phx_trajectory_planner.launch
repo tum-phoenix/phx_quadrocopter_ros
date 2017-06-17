@@ -2,7 +2,7 @@
         <node name="path_planner" pkg="phx_trajectory_planner" type="phx_trajectory_planner" output="screen">
 		<param name="num_points" type="int" value="10"/>
 	</node>
-	<node name="pid_controller" pkg="phx_trajectory_planner" type="phx_trajectory_controller" output="screen">
+        <node name="trajectory_controller" pkg="phx_trajectory_planner" type="phx_trajectory_controller" output="screen">
 		<param name="mass" type="int" value="3"/>
 		<param name="thrust_rpm_const_k" type="float" value="1.0"/>
 		<param name="torque_drag_const_b" type="float" value="1.0"/>

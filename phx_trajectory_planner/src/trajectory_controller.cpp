@@ -14,13 +14,13 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   Izz = 0;
   L = 0; // distance from cog to any of the propellers
 
-  nh.getParam("/pid_controller/mass", m);
-  nh.getParam("/pid_controller/thrust_rpm_const_k", k);
-  nh.getParam("/pid_controller/torque_drag_const_b", b);
-  nh.getParam("/pid_controller/I_xx", Ixx);
-  nh.getParam("/pid_controller/I_yy", Iyy);
-  nh.getParam("/pid_controller/I_zz", Izz);
-  nh.getParam("/pid_controller/dist_cog_prop", L);
+  nh.getParam("/trajectory_controller/mass", m);
+  nh.getParam("/trajectory_controller/thrust_rpm_const_k", k);
+  nh.getParam("/trajectory_controller/torque_drag_const_b", b);
+  nh.getParam("/trajectory_controller/I_xx", Ixx);
+  nh.getParam("/trajectory_controller/I_yy", Iyy);
+  nh.getParam("/trajectory_controller/I_zz", Izz);
+  nh.getParam("/trajectory_controller/dist_cog_prop", L);
 
   g = 9.81;
 }
@@ -39,7 +39,7 @@ void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "pid_controller");
+    ros::init(argc, argv, "trajectory_controller");
     ros::NodeHandle nh;
 
     trajectory_controller controller(nh); // init class
@@ -53,7 +53,6 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
-
 
 
         ros::spinOnce();
