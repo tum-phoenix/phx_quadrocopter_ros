@@ -31,6 +31,8 @@ class trajectory_controller
         void set_path(const nav_msgs::Path::ConstPtr& msg);
 
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
+        void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
+        geometry_msgs::Pose find_nearest_pose(const geometry_msgs::Pose::ConstPtr& msg);
 
 };
 
