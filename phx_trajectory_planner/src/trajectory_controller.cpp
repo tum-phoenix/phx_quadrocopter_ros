@@ -6,35 +6,46 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 {
   // get Parameters specified in launchfile
   // all in SI units
-  m = 0;
-  k = 0;
-  b = 0;
-  Ixx = 0;
-  Iyy = 0;
-  Izz = 0;
-  L = 0; // distance from cog to any of the propellers
+  this->m = 0;
+  this->k = 0;
+  this->b = 0;
+  this->Ixx = 0;
+  this->Iyy = 0;
+  this->Izz = 0;
+  this->L = 0; // distance from cog to any of the propellers
 
-  nh.getParam("/trajectory_controller/mass", m);
-  nh.getParam("/trajectory_controller/thrust_rpm_const_k", k);
-  nh.getParam("/trajectory_controller/torque_drag_const_b", b);
-  nh.getParam("/trajectory_controller/I_xx", Ixx);
-  nh.getParam("/trajectory_controller/I_yy", Iyy);
-  nh.getParam("/trajectory_controller/I_zz", Izz);
-  nh.getParam("/trajectory_controller/dist_cog_prop", L);
+  nh.getParam("/trajectory_controller/mass", this->m);
+  nh.getParam("/trajectory_controller/thrust_rpm_const_k", this->k);
+  nh.getParam("/trajectory_controller/torque_drag_const_b", this->b);
+  nh.getParam("/trajectory_controller/I_xx", this->Ixx);
+  nh.getParam("/trajectory_controller/I_yy", this->Iyy);
+  nh.getParam("/trajectory_controller/I_zz", this->Izz);
+  nh.getParam("/trajectory_controller/dist_cog_prop", this->L);
 
-  g = 9.81;
+  this->g = 9.81;
 }
 
 void trajectory_controller::set_path(const nav_msgs::Path::ConstPtr& msg)
 {
-    current_path.header = msg->header;
-    current_path.poses = msg->poses;
+  current_path.header = msg->header;
+  current_path.poses = msg->poses;
 }
 
 void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)
 {
   current.position = msg->position;
   current.orientation = msg->orientation;
+}
+
+void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr& msg)
+{
+  current_goal.position = msg->position;
+  current_goal.orientation = msg->orientation;
+}
+
+geometry_msgs::Pose trajectory_controller::find_nearest_pose(const geometry_msgs::Pose::ConstPtr& msg)
+{
+
 }
 
 int main(int argc, char** argv)
