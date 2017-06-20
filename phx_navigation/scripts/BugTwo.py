@@ -6,7 +6,10 @@ import tf2_ros
 from sensor_msgs.msg import LaserScan
 import geometry_msgs.msg
 
-
+"""
+The BugTwo algorithm, which generates a path around an object without knowing the whole map.
+It's not finished, so don't use it with other classes!
+"""
 class BugTwo():
     def __init__(self):
         rospy.init.node('BugTwo')
@@ -28,17 +31,18 @@ class BugTwo():
 
 
     def get_target(self, clicked_point):
-        # todo change target funktion
-        #todo listen to target topic
+        #TODO: change target funktion
+        #TODO: listen to target topic
         self.copter_tar[0] = clicked_point.x
         self.copter_tar[1] = clicked_point.y
         self.copter_tar[2] = clicked_point.z
 
         self.line_to_target(self.copter_pos, self.copter_tar)
 
+        #TODO: Return missing
+
 
     def get_current_pos(self):
-
         try:
             trans = self.tfBuffer.lookup_transform('map', 'footprint', rospy.Time())
             self.copter_pos[0] = trans.transform.translation.x
@@ -53,28 +57,28 @@ class BugTwo():
             self.copter_rot[1] = euler[1]  # roll
             self.copter_rot[2] = euler[2]  # yaw
             self.current_pos = [self.copter_pos, self.copter_rot]
-
         except tf2_ros.ConnectivityExeption:
             pass
-        return self.current_pos
-
+        return self.current_pos     #TODO: Will throw error if ConnectivityException occures
+    """
+    Generates line from startpoint to target
+    """
     def line_to_target(self):
-        # Generates Line l from Starpoint to Target
         if not self.copter_pos == self.copter_tar:
-
+            #TODO: Rename the variables to show what they are doing (I honestly don't know what m and t are standing for)
             if self.copter_tar[0] != 0 & self.copter_pos[0] != 0 & self.copter_tar[0] != self.copter_pos[0]:
                 m = (self.copter_tar[1] - self.copter_pos[1]) / (self.copter_tar[0] - self.copter_pos[0])
 
             t = m * self.copter_tar[0] - self.copter_tar[1]
-            l = [m, t]
+            line = [m, t]
             # m(x) = a*x+b
-            return l
+            return line
+            #TODO: position hold aufrufen?
 
-            # position hold aufrufen?
-
+    """
+    Takes Laser Scans and Orientation and calculates potential obstacle
+    """
     def callback_find_obstacle(self, new_LaserScan=LaserScan()):
-        # takes Laser Scans and Orientation and calculates potential obstacle
-
         data = np.array(new_LaserScan.ranges)
         obstacle = np.zeroes_like(data)
 
@@ -96,10 +100,11 @@ class BugTwo():
         # if a obsctacel is to close change loop to 'Follow the Wall'
         if max(obstacle) == 1:
             self.line_of_sight = False
-
-    def tangente(self, angle_min, angle_max, Array):  # LaserScan durch Array mit Hinderniskoordinaten austauschen
-        # todo
-        # calculates a tangential to the obstacle
+    """
+    Calculates a tangential to the obstacle
+    """
+    def tangente(self, angle_min, angle_max, Array):
+        #TODO: LaserScan durch Array mit Hinderniskoordinaten austauschen
 
         data = np.array(Array)
         length = len(data)
@@ -107,13 +112,13 @@ class BugTwo():
         i = 0
         if length < 4:
             # big obstacle
-            # todo Tangenten berechnen
+            #TODO: Tangenten berechnen
             angle_avg = (angle_min + angle_max) / 2
             vektor[0] = np.cos(angle_avg - 45 + 90)
             vektor[1] = np.sine(angle_avg - 45 + 90)
 
         else:
-            # alles Messwerte aufsummieren & anders umfliegen
+            #TODO: Alle Messwerte aufsummieren & anders umfliegen
             # small obstacle
 
             while i < length:
@@ -121,8 +126,8 @@ class BugTwo():
                 i += 1
             avg = sum / length  # avg distance to obstacle
 
-            # todo vektor durch twist erstetzen
-            # todo vektorteil des twists in abhaengigkeit von winkel
+            #TODO: vektor durch twist erstetzen
+            #TODO: vektorteil des twists in abhaengigkeit von winkel
             # +-40° reichen fuer Sicherheitsabstand von 1m bei Groeße der Drohne von 1.5m
             # zu einem Hindernis von Durchmesser ~40cm
 
@@ -143,7 +148,7 @@ class BugTwo():
 
 
     def run(self):
-        # todo
+        #TODO
 
         #subscibing to relevant topics
         self.ros_subscribe_target_position = rospy.Subscriber('/clicked_point', geometry_msgs.msg.PointStamped,
@@ -165,7 +170,7 @@ class BugTwo():
 
             # loop 'Follow the Wall'
             else:
-                #todo
+                #TODO
                 pass
 
             rospy.sleep(10)
