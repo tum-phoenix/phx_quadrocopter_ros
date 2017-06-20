@@ -4,6 +4,8 @@
 #include "ros/ros.h"
 #include "nav_msgs/Path.h"
 #include "geometry_msgs/Pose.h"
+#include "tf2/transform_datatypes.h"
+#include "math.h"
 
 class trajectory_controller
 {
@@ -24,6 +26,25 @@ class trajectory_controller
         float L; // distance from COG to any one of the propellers
         float g; // 9.81 m/s²
 
+        float e_theta;
+        float e_phi;
+        float e_psi;
+
+        float theta;
+        float phi;
+        float psi;
+
+        float last_theta;
+        float last_phi;
+        float last_psi;
+
+        float theta_dot;
+        float phi_dot;
+        float psi_dot;
+
+        float t_last;
+        float t_current;
+
     public:
         trajectory_controller(ros::NodeHandle nh); // constructor
 
@@ -32,7 +53,7 @@ class trajectory_controller
 
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
         void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
-        geometry_msgs::Pose find_nearest_pose(const geometry_msgs::Pose::ConstPtr& msg);
+        void trajectory_controller::calc_controller_error();
 
 };
 
