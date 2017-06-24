@@ -9,11 +9,11 @@
     <param name="output_timing" value="false"/>
     <param name="use_tf_scan_transformation" value="true"/>
     <param name="use_tf_pose_start_estimate" value="false"/>
-    <param name="scan_topic" value="scan_filtered"/>
+    <param name="scan_topic" value="scan_filtered_median"/>
 
     <!-- Map size / start point -->
-    <param name="map_resolution" value="0.2"/>
-    <param name="map_size" value="2048"/>
+    <param name="map_resolution" value="0.5"/>
+    <param name="map_size" value="1024"/>
     <param name="map_start_x" value="0.5"/>
     <param name="map_start_y" value="0.5" />
 

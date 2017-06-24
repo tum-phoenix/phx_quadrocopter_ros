@@ -24,6 +24,8 @@
         <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
             <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
         </node>
+        <!-- filter with median against noise -->
+        <node name="LaserScanner_outdoor_filter" pkg="phx_rangefinder" type="LaserScanner_outdoor_filter.py" />
 
     <!-- Transforms -->
     <include file="$(find phx_launch_files)/launch/transforms.launch" />

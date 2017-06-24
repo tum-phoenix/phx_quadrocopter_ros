@@ -9,6 +9,6 @@
             /diagnostics
         -->
 
-        <node name="FlightLogger_rangefinder" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_rangefinder /LaserScannerLAN/parameter_descriptions /LaserScannerLAN/parameter_updates /scan /clock /diagnostics" machine="phoenix" />
+        <node name="FlightLogger_rangefinder" pkg="rosbag" type="record" args="-o /data/flightlogs/flightlog_rangefinder /LaserScannerLAN/parameter_descriptions /LaserScannerLAN/parameter_updates /scan /scan_filtered /clock /diagnostics" machine="phoenix" />
 
 </launch>
