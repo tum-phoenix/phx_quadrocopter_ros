@@ -1,0 +1,36 @@
+<launch>
+    <machine name="phoenix" address="localhost" />
+
+    <!-- Serial interfaces -->
+
+    <!-- GPS filtering-->
+        <!-- <include file="$(find phx_launch_files)/launch/phx_gps.launch" /> -->
+
+    <!-- Camera -->
+        <!-- <include file="$(find phx_launch_files)/launch/phx_camera.launch" /> -->
+
+    <!-- Laser Scanner -->
+        <!-- filtering of laser scanner data -->
+        <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+            <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
+        </node>
+        <!-- filter with median against noise -->
+        <node name="LaserScanner_outdoor_filter" pkg="phx_rangefinder" type="LaserScanner_outdoor_filter.py" />
+
+    <!-- Transforms -->
+    <include file="$(find phx_launch_files)/launch/transforms.launch" />
+
+    <!-- Use this Transforms if you use rosbag play-->
+    <node name="transform_copter_stabilized_to_copter" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 1.0 0.0 0.0 0.0 1.0 copter_stabilized copter"/>
+    <node name="footprint_to_copter_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 1.0 0.0 0.0 0.0 1.0 footprint copter_stabilized" />
+
+
+    <!-- robot model -->
+    
+    <param name="robot_description" command="xacro $(find phx_odometry)/urdf/quadrotor.urdf.xacro" />
+    <param name="use_gui" value="False"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+</launch>
+
