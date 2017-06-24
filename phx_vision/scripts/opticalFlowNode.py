@@ -25,21 +25,21 @@ class OpticalFlow:
         self.flow = None
         self.distance = 0.2
         self.runningOnPhoenix = True
-    self.cameraModel = image_geometry.PinholeCameraModel()
+        self.cameraModel = image_geometry.PinholeCameraModel()
 
         if not self.runningOnPhoenix:
             cv2.namedWindow("flow", 1)
 
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image_mono", Image, self.imageCallback)
-    self.info_sub = rospy.Subscriber('camera_info', CameraInfo, self.cameraInfoCallback)
-    self.altitude_sub = rospy.Subscriber("phx/altitude", Altitude, self.altitudeCallback)
+        self.info_sub = rospy.Subscriber('camera_info', CameraInfo, self.cameraInfoCallback)
+        self.altitude_sub = rospy.Subscriber("phx/altitude", Altitude, self.altitudeCallback)
         self.twist_pub = rospy.Publisher("opticalFlow", TwistStamped, queue_size=10)
         self.image_pub = rospy.Publisher("flowImage", Image, queue_size=1)
         self.twist = TwistStamped()
 
     def altitudeCallback(self, data):
-    self.distance = data.estimated_altitude
+        self.distance = data.estimated_altitude
 
     def cameraInfoCallback(self, data):
         self.cameraModel.fromCameraInfo(data)
@@ -95,10 +95,9 @@ def main(args):
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print ("Shutting down")
+        print("Shutting down")
     cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
     main(sys.argv)
-
