@@ -1,11 +1,6 @@
 <launch>
 	<machine name="phoenix" address="localhost" />
-
     <!-- filtering of laser scanner data -->
-        <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
-            <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
-        </node>
-
         <node pkg="laser_filters" type="scan_to_cloud_filter_chain" name="laser_cloud_generator">
             <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
             <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_cloud_config.yaml" />
