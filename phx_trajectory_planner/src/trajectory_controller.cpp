@@ -7,49 +7,60 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 {
   // get Parameters specified in launchfile
   // all in SI units
-  this->m = 0;
-  this->k = 0;
-  this->b = 0;
-  this->Ixx = 0;
-  this->Iyy = 0;
-  this->Izz = 0;
-  this->L = 0; // distance from cog to any of the propellers
-  this->e_theta = 0;
-  this->e_phi = 0;
-  this->e_psi = 0;
-  this->theta = 0;
-  this->phi = 0;
-  this->psi = 0;
-  this->last_theta = 0;
-  this->last_phi = 0;
-  this->last_psi = 0;
-  this->theta_dot = 0;
-  this->phi_dot = 0;
-  this->psi_dot = 0;
 
-  nh.getParam("/trajectory_controller/mass", this->m);
-  nh.getParam("/trajectory_controller/thrust_rpm_const_k", this->k);
-  nh.getParam("/trajectory_controller/torque_drag_const_b", this->b);
-  nh.getParam("/trajectory_controller/I_xx", this->Ixx);
-  nh.getParam("/trajectory_controller/I_yy", this->Iyy);
-  nh.getParam("/trajectory_controller/I_zz", this->Izz);
-  nh.getParam("/trajectory_controller/dist_cog_prop", this->L);
 
-  this->g = 9.81;
+  m = 0;
+  g = 9.81; // m/s^2 
+  k = 0;
+  b = 0;
+  Ixx = 0;
+  Iyy = 0;
+  Izz = 0;
+  L = 0; // distance from cog to any of the propellers
+  e_theta = 0;
+  e_phi = 0;
+  e_psi = 0;
+  theta = 0;
+  phi = 0;
+  psi = 0;
+  last_theta = 0;
+  last_phi = 0;
+  last_psi = 0;
+  theta_dot = 0;
+  phi_dot = 0;
+  psi_dot = 0;
+
+  nh.getParam("/trajectory_controller/mass", m);
+  nh.getParam("/trajectory_controller/thrust_rpm_const_k", k);
+  nh.getParam("/trajectory_controller/torque_drag_const_b", b);
+  nh.getParam("/trajectory_controller/I_xx", Ixx);
+  nh.getParam("/trajectory_controller/I_yy", Iyy);
+  nh.getParam("/trajectory_controller/I_zz", Izz);
+  nh.getParam("/trajectory_controller/dist_cog_prop", L);
+
 }
 
 void trajectory_controller::set_path(const nav_msgs::Path::ConstPtr& msg)
 {
   current_path.header = msg->header;
   current_path.poses = msg->poses;
-  current = current_path.poses[0];
-  current_goal = current_path.poses[1];
+  current = current_path.poses[0].pose;
+  current_goal = current_path.poses[1].pose;
 }
 
-void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)
+void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
 {
+  // save the old values
+  last_theta = theta;
+  last_phi = phi;
+  last_psi = psi;
+  // get the new ones from the msg
   current.position = msg->position;
   current.orientation = msg->orientation;
+  // calculate euler angles
+  transform_quaternion();
+  // caluculate the controller error
+  calc_controller_error();
 }
 
 void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr& msg)
@@ -58,7 +69,7 @@ void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr
   current_goal.orientation = msg->orientation;
 }
 
-void trajectory_controller::set_current_rotations(const sensor_msgs::Imu::ConstPtr& msg)
+void trajectory_controller::set_current_rotations(const sensor_msgs::Imu::ConstPtr& msg) //FIXME:THis  could be named imu_callback
 {
   float x_imu = msg->angular_velocity.x;
   float y_imu = msg->angular_velocity.y;
@@ -68,6 +79,7 @@ void trajectory_controller::set_current_rotations(const sensor_msgs::Imu::ConstP
 
   phi_dot = root2 * (x_imu + y_imu);
   theta_dot = root2 * (x_imu - y_imu);
+}
 
 void trajectory_controller::calc_controller_error()
 {
@@ -76,12 +88,14 @@ void trajectory_controller::calc_controller_error()
   e_theta = K_D * theta_dot + K_P * theta + K_I * (theta - last_theta) * dt;
 }
 
-void transform_quaternion()
+void trajectory_controller::transform_quaternion()
 {
     tf2::Quaternion q;
     tf2::fromMsg(current.orientation, q);
     tf2::Matrix3x3 m(q);
+    double phi, theta, psi;
     m.getRPY(phi, theta, psi);
+    //TODO: all  members should start with _
 }
 
 int main(int argc, char** argv)
@@ -103,17 +117,6 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
-
-        transform_quaternion();
-        calc_controller_error();
-
-
-
-
-        last_theta = theta;
-        last_phi = phi;
-        last_psi = psi;
-
         ros::spinOnce();
 
         loop_rate.sleep();

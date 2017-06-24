@@ -12,7 +12,7 @@
     <param name="scan_topic" value="scan_filtered"/>
 
     <!-- Map size / start point -->
-    <param name="map_resolution" value="0.05"/>
+    <param name="map_resolution" value="0.2"/>
     <param name="map_size" value="2048"/>
     <param name="map_start_x" value="0.5"/>
     <param name="map_start_y" value="0.5" />

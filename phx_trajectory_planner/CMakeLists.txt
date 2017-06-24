@@ -9,6 +9,8 @@ project(phx_trajectory_planner)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  sensor_msgs
+  nav_msgs
   roscpp
 )
 
@@ -104,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phx_trajectory_planner
-#  CATKIN_DEPENDS geometry_msgs roscpp
+   CATKIN_DEPENDS geometry_msgs nav_msgs sensor_msgs roscpp
 #  DEPENDS system_lib
 )
 

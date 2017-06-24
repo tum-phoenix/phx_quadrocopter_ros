@@ -4,7 +4,10 @@
 #include "ros/ros.h"
 #include "nav_msgs/Path.h"
 #include "geometry_msgs/Pose.h"
+#include "sensor_msgs/Imu.h"
 #include "tf2/transform_datatypes.h"
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "math.h"
 
 class trajectory_controller
@@ -44,6 +47,11 @@ class trajectory_controller
 
         float t_last;
         float t_current;
+	float dt;
+
+	float K_P;
+	float K_I;
+	float K_D;
 
     public:
         trajectory_controller(ros::NodeHandle nh); // constructor
@@ -53,8 +61,9 @@ class trajectory_controller
 
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
         void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
-        void trajectory_controller::calc_controller_error();
-
+        void calc_controller_error();
+	void transform_quaternion();
+	void set_current_rotations(const sensor_msgs::Imu::ConstPtr& msg);
 };
 
 #endif
