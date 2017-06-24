@@ -1,0 +1,9 @@
+<launch>
+    <machine name="phoenix" address="localhost" />
+
+    <!-- barcode reader -->
+    <node name="barcode_reader_node" type="barcode_reader_node" pkg="zbar_ros">
+        <remap from="/image" to="/cam_front/image_rect/" />
+    </node>
+</launch>
+

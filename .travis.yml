@@ -1,0 +1,35 @@
+sudo: required
+
+language: cpp
+
+services:
+  - docker
+
+env:
+  global:
+    - toolset_branch: master
+    - ros_release: kinetic
+    - ubuntu_version: xenial
+    - docker_image: "shadowrobot/build-tools:$ubuntu_version-$ros_release"
+    - used_modules: check_build #check_cache,code_style_check,check_deb_make,codecov_tool
+
+before_install:
+  # pull docker image from shadowrobot
+  - docker pull $docker_image
+
+
+script:
+# run docker image from shadowrobot in ansible working directory and and with travis build dir as mounted volume
+# bash command to run in docker container consists of
+#   - pull latest ansible playbook files from sr robotics
+#   - checkout correct branch
+#   - run ansible playbook with provided parameters
+
+  - >
+      docker run -w "/home/user/sr-build-tools/ansible" -v $TRAVIS_BUILD_DIR:/host$TRAVIS_BUILD_DIR
+      $docker_image
+      bash -c "
+               git pull &&
+               git checkout $toolset_branch &&
+               sudo PYTHONUNBUFFERED=1 ansible-playbook -v -i \"localhost,\" -c local docker_site.yml --tags \"travis,$used_modules\" -e \"travis_repo_dir=/host$TRAVIS_BUILD_DIR  travis_is_pull_request=$TRAVIS_PULL_REQUEST ros_release=$ros_release ubuntu_version=$ubuntu_version\"
+              "
