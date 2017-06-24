@@ -1,10 +1,11 @@
 import rospy
 
+from std_msgs.msg import String
 
 class ZbarReaderNode:
     def __init__(self):
         rospy.init_node('zbar_reader_controller')
-        self.sub_imu = rospy.Subscriber('/barcode', None, self.print_barcode)
+        self.sub = rospy.Subscriber('/barcode', String, self.print_barcode)
 
         self.freq = 100  # Hz
         self.rate = rospy.Rate(self.freq)
