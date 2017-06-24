@@ -36,14 +36,14 @@ ratio = 0.8
 distance = [m.distance for m in matches]
 thres_dist = (sum(distance) / len(distance)) * ratio
 good = [m for m in matches if m.distance < thres_dist]
-    
 
-if len(good)>MIN_MATCH_COUNT:          
-    
+
+if len(good)>MIN_MATCH_COUNT:
+
     # geet matches
     src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
     dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-    
+
     # compute homography and the homography mask
     M, mask_homography = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,2.0)
     src_pts = src_pts.reshape(-1,2)
@@ -52,7 +52,7 @@ if len(good)>MIN_MATCH_COUNT:
     mask_homography_reshaped = np.c_[mask_homography,mask_homography]
     # apply homography mask on the matches
     src_pts_masked = ma.array(src_pts,mask=np.logical_not(mask_homography_reshaped))
-    dst_pts_masked = ma.array(dst_pts,mask=np.logical_not(mask_homography_reshaped))    
+    dst_pts_masked = ma.array(dst_pts,mask=np.logical_not(mask_homography_reshaped))
 
     # using all matches from the homography
     src_pts_good = src_pts_masked.compressed().reshape(-1,2)
@@ -60,30 +60,30 @@ if len(good)>MIN_MATCH_COUNT:
     dst_pts_good = dst_pts_masked.compressed().reshape(-1,2)
     _,rvecs, tvecs = cv2.solvePnP(src_pts_good, dst_pts_good, mtx, dist)
     matchesMask = mask.ravel().tolist()
-    
+
     # draw homography boundaries
     h,w = img1.shape
     pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
     dst = cv2.perspectiveTransform(pts,M)
     img2 = cv2.polylines(img2_color,[np.int32(dst)],True,0,3, cv2.LINE_AA)
-    
+
     # define 3d coordinate system
     axis = np.float32([[3,0,0], [0,3,0], [0,0,-3], [0,0,0]]).reshape(-1,3)
     axis = axis * 50
     imgpts, _ = cv2.projectPoints(axis.reshape(-1,3), rvecs, tvecs, mtx, dist)
-    
+
     # coordinate system base
-    corner = tuple(imgpts[3].ravel()) 
+    corner = tuple(imgpts[3].ravel())
 
     # draw coordinate axis
     img = cv2.line(img2, corner, tuple(imgpts[0].ravel()), (255,0,0), 5)
     img = cv2.line(img2, corner, tuple(imgpts[1].ravel()), (0,255,0), 5)
-    img = cv2.line(img2, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)  
+    img = cv2.line(img2, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
 
 else:
     print("Not enough matches are found - %d/%d" % (len(matches),MIN_MATCH_COUNT))
     matchesMask = None
-    
+
 draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                    singlePointColor = (255,0,0),
                    matchesMask = matchesMask, # draw only inliers

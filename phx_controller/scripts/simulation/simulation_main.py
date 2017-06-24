@@ -81,7 +81,7 @@ class SimulationMain():
             print self.height
             print "still alive"
             self.r.sleep()
-            
+
 
 
 if __name__ == '__main__':

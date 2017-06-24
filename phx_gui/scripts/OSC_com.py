@@ -66,7 +66,7 @@ class OSCr:
         if self.osc_transmitter and time.time() > self.time_of_last_keep_alive_sending + 1:
             self.time_of_last_keep_alive_sending = time.time()
             self.osc_transmitter.send_keep_alive(debug=False)
-    
+
     def add_receive_message(self, topic, forward_to_ros=False):
         if forward_to_ros:
             self.osc_receiver.addMsgHandler(topic, forward_to_ros)
@@ -101,7 +101,7 @@ class OSCr:
         self.thread = threading.Thread(target=self.osc_receiver.serve_forever)
         self.thread.start()
         print ' >>> OSCr started\n'
-    
+
     def stop(self):
         self.osc_receiver.close()
         self.thread.join()

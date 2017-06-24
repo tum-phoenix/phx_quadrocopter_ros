@@ -26,7 +26,7 @@ class image_converter:
     #REad from file for debug purposes
     #image = cv2.imread("pad.png")
     #greyImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
+
     #resizedGreyImage = cv2.resize(greyImage, (0,0), fx=0.125, fy=0.125)
     (T, thresholdedImage) = cv2.threshold(resizedGreyImage, 200, 255, cv2.THRESH_TOZERO)
 

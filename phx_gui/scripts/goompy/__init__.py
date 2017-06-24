@@ -4,14 +4,14 @@ GooMPy: Google Maps for Python
 Copyright (C) 2015 Alec Singer and Simon D. Levy
 
 This code is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as 
-published by the Free Software Foundation, either version 3 of the 
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
-This code is distributed in the hope that it will be useful,     
+This code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License 
+You should have received a copy of the GNU Lesser General Public License
 along with this code.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
@@ -33,7 +33,7 @@ _TILESIZE = 640        # Larget tile we can grab without paying
 _GRABRATE = 4          # Fastest rate at which we can download tiles without paying
 
 _pixrad = _EARTHPIX / math.pi
- 
+
 def _new_image(width, height):
 
     return PIL.Image.new('RGB', (width, height))
@@ -78,16 +78,16 @@ def _pix_to_lon(j, lonpix, ntiles, _TILESIZE, zoom):
 
 def _pix_to_lat(k, latpix, ntiles, _TILESIZE, zoom):
 
-    return math.degrees(math.pi/2 - 2 * math.atan(math.exp(((latpix + _pixels_to_degrees((k-ntiles/2)*_TILESIZE, zoom)) - _EARTHPIX) / _pixrad))) 
+    return math.degrees(math.pi/2 - 2 * math.atan(math.exp(((latpix + _pixels_to_degrees((k-ntiles/2)*_TILESIZE, zoom)) - _EARTHPIX) / _pixrad)))
 
 def fetchTiles(latitude, longitude, zoom, maptype, radius_meters=None, default_ntiles=4):
     '''
-    Fetches tiles from GoogleMaps at the specified coordinates, zoom level (0-22), and map type ('roadmap', 
-    'terrain', 'satellite', or 'hybrid').  The value of radius_meters deteremines the number of tiles that will be 
-    fetched; if it is unspecified, the number defaults to default_ntiles.  Tiles are stored as JPEG images 
+    Fetches tiles from GoogleMaps at the specified coordinates, zoom level (0-22), and map type ('roadmap',
+    'terrain', 'satellite', or 'hybrid').  The value of radius_meters deteremines the number of tiles that will be
+    fetched; if it is unspecified, the number defaults to default_ntiles.  Tiles are stored as JPEG images
     in the mapscache folder.
     '''
- 
+
     latitude = _roundto(latitude, _DEGREE_PRECISION)
     longitude = _roundto(longitude, _DEGREE_PRECISION)
 
@@ -95,7 +95,7 @@ def fetchTiles(latitude, longitude, zoom, maptype, radius_meters=None, default_n
     pixels_per_meter = 2**zoom / (156543.03392 * math.cos(math.radians(latitude)))
 
     # number of tiles required to go from center latitude to desired radius in meters
-    ntiles = default_ntiles if radius_meters is None else int(round(2 * pixels_per_meter / (_TILESIZE /2./ radius_meters))) 
+    ntiles = default_ntiles if radius_meters is None else int(round(2 * pixels_per_meter / (_TILESIZE /2./ radius_meters)))
 
     lonpix = _EARTHPIX + longitude * math.radians(_pixrad)
 
@@ -128,7 +128,7 @@ class GooMPy(object):
         Creates a GooMPy object for specified display widthan and height at the specified coordinates,
         zoom level (0-22), and map type ('roadmap', 'terrain', 'satellite', or 'hybrid').
         The value of radius_meters deteremines the number of tiles that will be used to create
-        the map image; if it is unspecified, the number defaults to default_ntiles.  
+        the map image; if it is unspecified, the number defaults to default_ntiles.
         '''
 
         self.lat = latitude

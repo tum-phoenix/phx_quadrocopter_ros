@@ -4,7 +4,7 @@ __author__ = 'satellite'
 class ParameterTab:
     def __init__(self, ui_win):
         self.ui_win = ui_win
-    
+
     def set_parameters_lcd(self, number, val=0):
         if number == 0:
             self.ui_win.lcdNumber_parameter_00.display(val)
@@ -44,7 +44,7 @@ class ParameterTab:
             self.ui_win.lcdNumber_parameter_17.display(val)
         else:
             print ' -> set_parameters_lcd requested number', number, 'not available'
-    
+
     def set_parameters_slider_limits(self, number, min=10, max=2000):
         if number == 0:
             self.ui_win.horizontalSlider_parameter_00.setRange(min, max)
@@ -84,7 +84,7 @@ class ParameterTab:
             self.ui_win.horizontalSlider_parameter_17.setRange(min, max)
         else:
             print ' -> set_parameters_slider_limits requested number', number, 'not available'
-    
+
     def set_parameters_slider(self, number, val, lcd_linked=True):
         if number == 0:
             self.ui_win.horizontalSlider_parameter_00.setValue(val)
@@ -126,7 +126,7 @@ class ParameterTab:
             print ' -> set_parameters_slider requested number', number, 'not available'
         if lcd_linked:
             self.set_parameters_lcd(number, val)
-    
+
     def get_parameters_slider(self, number):
         if number == 0:
             return self.ui_win.horizontalSlider_parameter_00.value()

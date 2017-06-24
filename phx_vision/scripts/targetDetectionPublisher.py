@@ -147,7 +147,7 @@ class image_converter:
                 self.t.child_frame_id = "Star"
                 list_id = 5
 
-            else: 
+            else:
                 list_id = None
 
             # ensure that the approximated contour is "roughly" rectangular

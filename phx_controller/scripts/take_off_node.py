@@ -26,20 +26,20 @@ class TakeOffNode():
         #self.cmd_pub = rospy.Publisher('/phx/autopilot/input', AutoPilotCmd, queue_size=1)
         self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
-        self.p = 5	#PID controller
+        self.p = 5    #PID controller
         self.d = 1
         self.i = 0.01
         self.enabled = True
         self.i_sum = 0
         self.i_stop = 100
 
-        self.setPoint_p = 1	#wanted altitude
-        self.setPoint_d = 10	#wanted acceleration
+        self.setPoint_p = 1    #wanted altitude
+        self.setPoint_d = 10    #wanted acceleration
 
         self.altitude = 0
         self.linear_acceleration_z = 0
 
-        self.controlCommand = 1300	#throttle
+        self.controlCommand = 1300    #throttle
         self.previousAltitude = 0
 
         self.freq = 100
@@ -72,8 +72,8 @@ class TakeOffNode():
             elif self.i_sum <= -self.i_stop:
                 self.i_sum = -self.i_stop
 
-            controlCommand_p = (self.setPoint_p - self.altitude) * self.p			#Wanted altitude - Current altitude
-            controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d	#Error: Wanted acceleration - Current Acceleration
+            controlCommand_p = (self.setPoint_p - self.altitude) * self.p            #Wanted altitude - Current altitude
+            controlCommand_d = (self.setPoint_d - self.linear_acceleration_z) * self.d    #Error: Wanted acceleration - Current Acceleration
             controlCommand_i = self.i_sum * self.i
 
             un_cliped = self.controlCommand + controlCommand_p + controlCommand_i + controlCommand_d

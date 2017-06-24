@@ -12,8 +12,8 @@ MIN_MATCH_COUNT = 10
 world_image = 'DSC_0033.JPG'
 
 # load the recognition image and the real-world image in grayscale and color
-img1 = cv2.imread('Recognition_Items.jpeg',0)        
-img2 = cv2.imread(world_image,0) 
+img1 = cv2.imread('Recognition_Items.jpeg',0)
+img2 = cv2.imread(world_image,0)
 img2_color = cv2.imread(world_image,1)
 
 # Initiate ORB detector
@@ -41,54 +41,54 @@ ratio = 0.8
 distance = [m.distance for m in matches]
 thres_dist = (sum(distance) / len(distance)) * ratio
 good = [m for m in matches if m.distance < thres_dist]
-    
 
-if len(good)>MIN_MATCH_COUNT:          
+
+if len(good)>MIN_MATCH_COUNT:
     # get matches from source and query image
     src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
     dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-    
+
     # find Homography between the two images
     M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-    
+
     #append a zero column and reshape source points and find rotation and translation vectors
     src_pts_3d = np.c_[src_pts, np.zeros((len(good),1,1))]
     src_pts_3d = src_pts_3d.reshape(-1,3)
     _, rvecs, tvecs = cv2.solvePnP(src_pts_3d, dst_pts, mtx, dist)
     matchesMask = mask.ravel().tolist()
-    
+
     # draw rectangle around found region
     h,w = img1.shape
     pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
     dst = cv2.perspectiveTransform(pts,M)
     img2 = cv2.polylines(img2_color,[np.int32(dst)],True,0,3, cv2.LINE_AA)
-    
+
     #draw coordinate axis in first image and perspective transform it -> not used since projection from 3D space necessary anyway
     pts_axis = np.float32([ [0,0],[0,500],[500,0] ]).reshape(-1,1,2)
     axis_transformed = cv2.perspectiveTransform(pts_axis,M)
-    
+
     #draw the additional lines in the white rectangle -> not used since projection from 3D space necessary anyway
     axis_transformed = axis_transformed.reshape(3,2)
     axis_transformed = tuple(map(tuple,axis_transformed))
-    
+
     cv2.line(img2,axis_transformed[0],axis_transformed[1],(255,0,0),5)
     cv2.line(img2,axis_transformed[0],axis_transformed[2],(0,255,0),5)
-    
+
     #z axis needs to projected from 3d points, since it cannot be projected from the 2d image
     axis = np.float32([[3,0,0], [0,3,0], [0,0,-3], [0,0,0]]).reshape(-1,3)
     axis = axis * 200
     imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
-    
-    # get the coordinate origin and axis lines 
+
+    # get the coordinate origin and axis lines
     corner = tuple(imgpts[3].ravel())
-     
+
     img = cv2.line(img2, corner, tuple(imgpts[0].ravel()), (255,0,0), 5)
     img = cv2.line(img2, corner, tuple(imgpts[1].ravel()), (0,255,0), 5)
     img = cv2.line(img2, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
 else:
     print("Not enough matches are found - %d/%d" % (len(matches),MIN_MATCH_COUNT))
     matchesMask = None
-    
+
 draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                    singlePointColor = None,
                    matchesMask = matchesMask, # draw only inliers

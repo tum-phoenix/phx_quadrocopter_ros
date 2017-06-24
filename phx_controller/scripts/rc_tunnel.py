@@ -26,7 +26,7 @@ class RCReflectNode:
         self.counter_input = 0                      # setup some more useful variables
         self.counter_output = 0                     # setup some more useful variables
         self.start_time = time.time()               # setup some more useful variables
-        
+
         while not rospy.is_shutdown():              # run the mainloop until ros is shut down
             # main loop stuff goes here:
                                                     # this node has nothing to do in the mainloop

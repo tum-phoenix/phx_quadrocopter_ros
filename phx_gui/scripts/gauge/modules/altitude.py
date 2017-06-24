@@ -16,7 +16,7 @@ class AltitudeTab:
                                         'marvic_sonar': 5,
                                         'marvic_fused': 6}
         self.altitude_dataset = np.zeros((self.record_altitude, len(self.altitude_dataset_index), 2))
-        
+
         # create plots in different colors
         # naze baro - lila
         self.plot_fc_barometer = self.graphicsView_altitude.plotItem.plot()
@@ -33,7 +33,7 @@ class AltitudeTab:
         # fused - grey
         self.plot_marvic_fused = self.graphicsView_altitude.plotItem.plot()
         self.plot_marvic_fused.setPen(pyqtgraph.mkPen(color=(100, 100, 100)))
-    
+
     def update_altitude_plot(self):
         cur_time = self.altitude_dataset[:, :, 1].max()
         self.plot_fc_barometer.setData(self.altitude_dataset[:, self.altitude_dataset_index['fc_barometer'], 1] - cur_time,

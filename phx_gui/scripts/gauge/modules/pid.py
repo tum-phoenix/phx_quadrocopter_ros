@@ -38,7 +38,7 @@ class PIDtab:
 
     def pid_config_storage_comment_update(self, index):
         self.ui_win.pid_lineEdit_config_storage.setText(self.pid_config_storage_comments[index])
-    
+
     def pid_config_storage_comment_save(self):
         index = self.ui_win.spinBox_pid_config_storage.value()
         self.pid_config_storage[index, 0] = self.ui_win.pid_spinBox_roll_p.value()
@@ -74,7 +74,7 @@ class PIDtab:
 
         self.pid_config_storage_comments[index] = str(self.ui_win.pid_lineEdit_config_storage.text())
         self.save_pid_config()
-    
+
     def pid_config_storage_comment_load(self):
         index = self.ui_win.spinBox_pid_config_storage.value()
         self.ui_win.pid_spinBox_roll_p.setValue(self.pid_config_storage[index, 0])
@@ -107,7 +107,7 @@ class PIDtab:
         self.ui_win.pid_spinBox_mag_p.setValue(self.pid_config_storage[index, 27])
         self.ui_win.pid_spinBox_mag_i.setValue(self.pid_config_storage[index, 28])
         self.ui_win.pid_spinBox_mag_d.setValue(self.pid_config_storage[index, 29])
-    
+
     def callback_fc_pid_cleanflight(self, cur_pid_settings):
         # this function is located here for simplicity writing the code!!!
         if self.ui_win.checkBox_pid_update.isChecked():
@@ -144,7 +144,7 @@ class PIDtab:
             self.ui_win.pid_spinBox_mag_d.setValue(cur_pid_settings.mag.d)
         else:
             pass
-    
+
     def send_pid_values(self):
         if self.ui_win.checkBox_pid_active.isChecked() and self.ros_publish_function:
             pid_msg = PID_cleanflight()
@@ -181,4 +181,4 @@ class PIDtab:
             self.ros_publish_function(pid_msg)
         else:
             print 'not allowed'
-    
+

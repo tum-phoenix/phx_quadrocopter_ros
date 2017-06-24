@@ -280,7 +280,7 @@ def mainloop():
 
     plot_ax.legend()
     plot_canvas.draw()
-    
+
     # osc stuff -----------------------------------------------------------------------------------------------------------------------------------------------
     print 'osc connection status: OSCr', osc_receiver.connection_status, 'OSCt', osc_transmitter.connection_status, osc_transmitter.sending_failed_counter, time.time() - osc_receiver.time_of_last_keep_alive_receiving
     osc_receiver.keep_alive()

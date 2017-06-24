@@ -62,21 +62,21 @@ class GPStab:
 
         # setup graph
         self.graphicsView_gps.plotItem.showGrid(x=True, y=True, alpha=0.2)
-        
+
         # create plot for gps path
         self.gps_qtgraph_plot = self.graphicsView_gps.plotItem.plot()
         self.gps_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0, 0, 100)))
-        
+
         # create plot for geo circle
         self.gps_geo_cicle_qtgraph_plot = self.graphicsView_gps.plotItem.plot()
         self.gps_geo_cicle_qtgraph_plot.setPen(pyqtgraph.mkPen(color=(0, 0, 200)))
-        
+
         # create scatter plot for poi
         self.gps_scatter_plot = pyqtgraph.ScatterPlotItem()
         self.gps_scatter_plot.setData(self.gps_positions.values())
         # self.gps_scatter_plot.setData([{'pos': (2, 2), 'symbol': 'o', 'pen': pyqtgraph.mkPen(color=(0, 0, 200))},..])
         self.graphicsView_gps.addItem(self.gps_scatter_plot)
-        
+
         # create labels for poi
         self.gps_position_labels = {}
         # label = pyqtgraph.TextItem(text='test')
@@ -191,7 +191,7 @@ class GPStab:
                     self.text_boxes[1].setText(text_output)
                 elif label == 'phoenix' and self.text_boxes[2]:
                     self.text_boxes[2].setText(text_output)
-    
+
     def gps_plot_mouse_clicked(self, event):
         if self.graphicsView_gps.plotItem.sceneBoundingRect().contains(event.scenePos()):
             mouse_position = self.graphicsView_gps.plotItem.mapToView(event.scenePos())
@@ -209,7 +209,7 @@ class GPStab:
                         print 'for the clicked button', button, 'no function is defined'
                 else:
                     self.mouse_click_callback(x_val, y_val)
-    
+
     def gps_plot_mouse_moved(self, event):
         if self.graphicsView_gps.plotItem.sceneBoundingRect().contains(event):
             mouse_position = self.graphicsView_gps.plotItem.mapToView(event)

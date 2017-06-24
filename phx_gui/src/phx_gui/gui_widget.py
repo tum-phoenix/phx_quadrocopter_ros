@@ -18,7 +18,7 @@ class GuiWidget(QMainWindow): #QWidget
         Widget for use with the OSC class
         Handles all widget callbacks
         """
-    
+
     def __init__(self, context):
         """
             :param context: plugin context hook to enable adding widgets as a ROS_GUI pane, ''PluginContext''
@@ -27,5 +27,5 @@ class GuiWidget(QMainWindow): #QWidget
         rp = rospkg.RosPack()
         ui_file = os.path.join(rp.get_path('phx_gui'), 'resource', 'gui_widget.ui')
         loadUi(ui_file, self, {'BagGraphicsView': BagGraphicsView})
-        
+
         self.setObjectName('GuiWidget')

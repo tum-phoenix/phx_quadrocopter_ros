@@ -26,7 +26,7 @@ def testMatrix():
 
     tr2 = pg.Transform3D(tr)
     assert np.all(tr.matrix() == tr2.matrix())
-    
+
     # This is the most important test:
     # The transition from Transform3D to SRTTransform3D is a tricky one.
     tr3 = pg.SRTTransform3D(tr2)

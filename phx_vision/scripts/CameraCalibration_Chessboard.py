@@ -34,18 +34,18 @@ for fname in images:
         img = cv2.drawChessboardCorners(img, (6,9), corners2,ret)
         cv2.imshow('img',img)
         cv2.waitKey(500)
-           
-#get calibration output from the camera     
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)  
 
-# #read image to undistort and get it 
+#get calibration output from the camera
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+
+# #read image to undistort and get it
 # img = cv2.imread('WIN_20160517_12_10_40_Pro.jpg')
 # h,  w = img.shape[:2]
 # newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
-# 
+#
 # # undistort
 # dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
-# 
+#
 # # crop the image
 # x,y,w,h = roi
 # dst = dst[y:y+h, x:x+w]
