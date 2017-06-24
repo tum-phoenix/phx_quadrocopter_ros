@@ -2,8 +2,6 @@
     <machine name="phoenix" address="localhost" />
 
     <!-- Serial interfaces -->
-        <node name="UARTBridge_naze" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_naze_mod" output="screen" machine="phoenix" />
-        <node name="UARTBridge_marvic" pkg="phx_uart_msp_bridge" type="phx_uart_msp_bridge_node_marvicRCaltitudeServo" output="screen" machine="phoenix" />
 
     <!-- GPS filtering-->
         <!-- <include file="$(find phx_launch_files)/launch/phx_gps.launch" /> -->
@@ -12,14 +10,6 @@
         <!-- <include file="$(find phx_launch_files)/launch/phx_camera.launch" /> -->
 
     <!-- Laser Scanner -->
-        <!-- <node name="LaserScanner" pkg="urg_node" type="urg_node" /> -->
-        <node name="LaserScannerLAN" pkg="urg_node" type="urg_node" >
-            <param name="ip_address" value="192.168.3.10" />
-            <param name="ip_port" value="10940" />
-            <param name="frame_id" value="laserHOKUYO" />
-            <param name="publish_intensity" value="True" />
-            <param name="cluster" value="3" />
-        </node>
         <!-- filtering of laser scanner data -->
         <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
             <rosparam command="load" file="$(find phx_rangefinder)/laser_filter_config.yaml" />
@@ -29,6 +19,11 @@
 
     <!-- Transforms -->
     <include file="$(find phx_launch_files)/launch/transforms.launch" />
+
+    <!-- Use this Transforms if you use rosbag play-->
+    <node name="transform_copter_stabilized_to_copter" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 1.0 0.0 0.0 0.0 1.0 copter_stabilized copter"/>
+    <node name="footprint_to_copter_link" pkg="tf2_ros" type="static_transform_publisher"  args="0.0 0.0 1.0 0.0 0.0 0.0 1.0 footprint copter_stabilized" />
+
 
     <!-- robot model -->
     
