@@ -1,9 +1,26 @@
 <launch>
     <machine name="phoenix" address="localhost" />
 
-    <!-- barcode reader -->
-    <node name="barcode_reader_node" type="barcode_reader_node" pkg="zbar_ros">
+
+    <!-- barcode reader front  -->
+    <!--
+    <node name="barcode_reader_front" type="barcode_reader_node" pkg="zbar_ros">
         <remap from="/image" to="/cam_front/image_rect/" />
+	    <remap from="/barcode" to="/barcode_front" />
+	    <param name="throttle_repeated_barcodes" value="1" />
+    </node>-->
+
+    <!-- barcode reader node bottom  --> <!--
+    <node name="barcode_reader_bottom" type="barcode_reader_node" pkg="zbar_ros">
+        <remap from="/image" to="/cam_bottom/image_rect/" />
+	    <remap from="/barcode" to="/barcode_bottom" />
+	    <param name="throttle_repeated_barcodes" value="1" />
+    </node>-->
+    <!-- barcode reader nodelet bottom  -->
+    <node name="barcode_reader_bottom" type="nodelet" pkg="nodelet" args="load zbar_ros/barcode_reader_nodelet nodelet_manager">
+        <remap from="/image" to="/cam_bottom/image_rect/" />
+	    <remap from="/barcode" to="/barcode_bottom" />
+	    <param name="throttle_repeated_barcodes" value="1" />
     </node>
 </launch>
 
