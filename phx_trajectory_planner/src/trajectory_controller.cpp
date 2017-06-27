@@ -40,7 +40,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 
 }
 
-void trajectory_controller::set_path(const nav_msgs::Path::ConstPtr& msg)
+void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
 {
   current_path.header = msg->header;
   current_path.poses = msg->poses;
@@ -48,7 +48,8 @@ void trajectory_controller::set_path(const nav_msgs::Path::ConstPtr& msg)
   current_goal = current_path.poses[1].pose;
 }
 
-void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
+/*
+void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)
 {
   // save the old values
   last_theta = theta;
@@ -62,6 +63,7 @@ void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr
   // caluculate the controller error
   calc_controller_error();
 }
+*/
 
 void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr& msg)
 {
@@ -69,7 +71,7 @@ void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr
   current_goal.orientation = msg->orientation;
 }
 
-void trajectory_controller::set_current_rotations(const sensor_msgs::Imu::ConstPtr& msg) //FIXME:THis  could be named imu_callback
+void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
   float x_imu = msg->angular_velocity.x;
   float y_imu = msg->angular_velocity.y;
@@ -93,9 +95,7 @@ void trajectory_controller::transform_quaternion()
     tf2::Quaternion q;
     tf2::fromMsg(current.orientation, q);
     tf2::Matrix3x3 m(q);
-    double phi, theta, psi;
     m.getRPY(phi, theta, psi);
-    //TODO: all  members should start with _
 }
 
 int main(int argc, char** argv)
@@ -106,10 +106,10 @@ int main(int argc, char** argv)
     trajectory_controller controller(nh); // init class
 
     // subscribe to class trajectory_controller controller's method set_path
-    ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::set_path, &controller);
+    ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::path_callback, &controller);
 
     //ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1, &trajectory_controller::set_current_pose, &controller);
-    ros::Subscriber imu_pose = nh.subscribe("/phoenix/imu", 10, &trajectory_controller::set_current_rotations, &controller);
+    ros::Subscriber imu_pose = nh.subscribe("/phoenix/imu", 10, &trajectory_controller::imu_callback, &controller);
     //ros::Publisher MotorMsg = nh.advertise<>("/phoenix/cmd_motor", 10);
 
     ros::Rate loop_rate(50);
