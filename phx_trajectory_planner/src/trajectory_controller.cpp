@@ -1,5 +1,18 @@
 // implements a pid_controller as modeled in the paper "Quadrocopter Dynamics, Simulation and Control"
-// !!! This is not a trajectory controller yet !!! Only stability as in paper
+// !!! This is not a trajectory controller yet !!! Only attitude stabilization as in paper
+
+
+/* open points:
+    1.) 6 propeller kompatibel
+    2.) reglerparameter (K_I, K_P, K_D)
+    3.) motor msgs schicken
+    4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit
+    5.) Simulation
+    .
+    .
+    .
+    Unendlich.) trajektorienfolgeregler (bis jetzt nur lage)
+*/
 
 #include "phx_trajectory_planner/trajectory_controller.h"
 
