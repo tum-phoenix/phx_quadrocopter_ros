@@ -103,18 +103,83 @@ void trajectory_controller::transform_quaternion()
     m.getRPY(_phi, _theta, _psi);
 }
 
+// converts thrust to throttle command in %
+double trajectory_controller::convert_thrust(double newton)
+{
+  double gramm = newton/(_g*1000);
+
+  double val = 0;
+  double a = 0;
+  double b = 0;
+  double c = 0;
+  double d = 0;
+
+  // vgl. prop.schubkennfeld
+  // linear interpolation
+  if(gramm < 600)
+  {
+    a = 0;
+    b = 600;
+    c = 0;
+    d = 50;
+  }
+  else if(gramm < 930)
+  {
+    a = 600;
+    b = 930;
+    c = 50;
+    d = 65;
+  }
+  else if(gramm < 1150)
+  {
+    a = 930;
+    b = 1150;
+    c = 65;
+    d = 75;
+  }
+  else if(gramm < 1350)
+  {
+    a = 1150;
+    b = 1350;
+    c = 75;
+    d = 85;
+  }
+  else if(gramm < 1520)
+  {
+    a = 1350;
+    b = 1520;
+    c = 85;
+    d = 100;
+  }
+  else
+  {
+    return 100;
+  }
+
+  val = c + (d-c)*(gramm-a)/(b-a);
+  return val;
+}
+
 // calcs thrusts according to paper
 void trajectory_controller::set_thrusts()
 {
   double gravity_norm = _m * _g / ( 4*cos(_theta)*cos(_psi) );
 
   // Einzelschuebe in Newton
-  double T1 = gravity_norm - ( 2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  double T2 = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
-  double T3 = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  double T4 = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
+  double thrusts[4] = {0};
+  thrusts[0] = gravity_norm - ( 2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
+  thrusts[1] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
+  thrusts[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
+  thrusts[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
 
-  // TODO in prozent umrechnen und über MotorMsg publishen
+  // in prozent umrechnen
+  double perc_cmd[4] = {0};
+  for(int i = 0; i < 4; i++)
+  {
+    perc_cmd[i] = convert_thrust(thrusts[i]);
+  }
+
+  // TODO über MotorMsg publishen
 
 }
 

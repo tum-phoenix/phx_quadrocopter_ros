@@ -70,6 +70,7 @@ class trajectory_controller
         void set_thrusts();
 
         void do_one_iteration();
+        double convert_thrust(double newton);
 };
 
 #endif
