@@ -3,13 +3,13 @@
 		<param name="num_points" type="int" value="10"/>
 	</node>
         <node name="trajectory_controller" pkg="phx_trajectory_planner" type="phx_trajectory_controller" output="screen">
-		<param name="mass" type="int" value="3"/>
-		<param name="thrust_rpm_const_k" type="float" value="1.0"/>
-		<param name="torque_drag_const_b" type="float" value="1.0"/>
-		<param name="I_xx" type="float" value="1.0"/>
-		<param name="I_yy" type="float" value="1.0"/>
-		<param name="I_zz" type="float" value="1.0"/>
-		<param name="dist_cog_prop" type="float" value="1.0"/>
+                <param name="mass" type="double" value="0.4365"/>
+                <param name="thrust_rpm_const_k" type="double" value="0.73"/>
+                <param name="torque_drag_const_b" type="double" value="0.1"/>
+                <param name="I_xx" type="double" value="0.000007"/>
+                <param name="I_yy" type="double" value="0.000007"/>
+                <param name="I_zz" type="double" value="0.000012"/>
+                <param name="dist_cog_prop" type="double" value="0.18"/>
 	</node>
 	<node name="goalpose_publisher" pkg="phx_trajectory_planner" type="phx_trajectory_planner_goal" output="screen" />
 	<node name="initialpose_publisher" pkg="phx_trajectory_planner" type="phx_trajectory_planner_initial" 	output="screen" />
