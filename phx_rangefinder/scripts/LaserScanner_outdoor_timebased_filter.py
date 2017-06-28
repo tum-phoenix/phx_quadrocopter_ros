@@ -7,15 +7,25 @@ from sensor_msgs.msg import LaserScan
 #Iterations until median is calculated
 COUNT = 5
 
-data_2d = []
+data_2d = np.array([])
 
 def callback_LaserScan_timebased_filter(new_LaserScan=LaserScan()):
+    global data_2d
     data = np.array(new_LaserScan.ranges)
-    data_2d.append(data)
+    data[np.isnan(data)] = 0
+#    print ("Data shape:" , data.shape)
+
+    if data_2d != np.array([]):
+        temp = np.append(data_2d, [data], axis=0)
+    else: temp = [data]
+    data_2d = temp
+    print ("Temp shape", np.shape(temp))
     if len(data_2d) == COUNT:
-        data = nd.filters.median_filter(np.array(new_LaserScan.ranges), axis=0)
-        pub_cost_range.publish(data)
-        data = []
+        result = np.median(temp, axis=0)
+        #pub_cost_range.publish(result)
+        print (result, len(result))
+        data_2d = np.array([])
+
 
 
 
