@@ -42,6 +42,10 @@ class trajectory_controller
         double _last_phi;
         double _last_psi;
 
+        double _integral_theta;
+        double _integral_phi;
+        double _integral_psi;
+
         double _theta_dot;
         double _phi_dot;
         double _psi_dot;

@@ -6,8 +6,9 @@
     1.) 6 propeller kompatibel
     2.) reglerparameter (K_I, K_P, K_D)
     3.) motor msgs schicken
-    4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit
+    4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit -- CHECK
     5.) Simulation
+    6.) Testen, ob es bisher soweit funktioniert
     .
     .
     .
@@ -38,10 +39,16 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _last_theta = 0;
   _last_phi = 0;
   _last_psi = 0;
+  _integral_theta = 0;
+  _integral_phi = 0;
+  _integral_psi = 0;
   _theta_dot = 0;
   _phi_dot = 0;
   _psi_dot = 0;
   _dt = 0;
+  _K_I = 0;
+  _K_P = 0;
+  _K_D = 0;
 
   nh.getParam("/trajectory_controller/mass", _m);
   nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
@@ -103,9 +110,30 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 // calculates controller error as suggested in paper
 void trajectory_controller::calc_controller_error()
 {
-  _e_psi = _K_D * _psi_dot + _K_P * _psi + _K_I * (_psi - _last_psi) * _dt;
-  _e_phi = _K_D * _phi_dot + _K_P * _phi + _K_I * (_phi - _last_phi) * _dt;
-  _e_theta = _K_D * _theta_dot + _K_P * _theta + _K_I * (_theta - _last_theta) * _dt;
+  if (abs(_integral_theta) > 0.01 || abs(_integral_phi) > 0.01 || abs(_integral_psi) > 0.01)
+  {
+      _integral_theta = 0;
+      _integral_phi = 0;
+      _integral_psi = 0;
+  }
+  else
+  {
+      _integral_theta += (_theta - _last_theta) * _dt;
+      _integral_phi += (_phi - _last_phi) * _dt;
+      _integral_psi += (_psi - _last_psi) * _dt;
+  }
+
+  //Needed to fix mistake where one or two NaNs appear
+  if (isnan(_integral_theta) || isnan(_integral_phi) || isnan(_integral_psi))
+  {
+      _integral_theta = 0;
+      _integral_phi = 0;
+      _integral_psi = 0;
+  }
+
+  _e_psi = _K_D * _psi_dot + _K_P * _psi + _K_I * _integral_psi;
+  _e_phi = _K_D * _phi_dot + _K_P * _phi + _K_I * _integral_phi;
+  _e_theta = _K_D * _theta_dot + _K_P * _theta + _K_I * _integral_theta;
 }
 
 void trajectory_controller::transform_quaternion()
@@ -193,11 +221,18 @@ void trajectory_controller::set_thrusts()
   }
 
   // TODO über MotorMsg publishen
-
+  // Debug
+  std::cout << "T1: " << int(perc_cmd[0]) << "  T2: " << perc_cmd[1] << std::endl;
+  std::cout << "T3: " << perc_cmd[2] << "  T4: " << perc_cmd[3] << std::endl;
+  std::cout << "-------" << std::endl;
 }
 
 void trajectory_controller::do_one_iteration()
 {
+  _K_P = 3;
+  _K_I = 5.5;
+  _K_D = 4;
+
   _now = ros::Time::now(); // get_current_time
 
   if(_dt != -1)
@@ -240,13 +275,15 @@ int main(int argc, char** argv)
 
     // wie oft publishen imu_pose?
 
-    ros::Rate loop_rate(50);
+    ros::Rate loop_rate(0.5);
 
     controller._dt = -1; // um den ersten loop durchgang zu checken
 
     while(ros::ok())
     {
         controller.do_one_iteration();
+
+        //MotorMsg.publish();
 
         ros::spinOnce();
 
