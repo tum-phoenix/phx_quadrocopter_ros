@@ -4,27 +4,37 @@ import scipy.ndimage as nd
 import rospy
 from sensor_msgs.msg import LaserScan
 
-#Iterations until median is calculated
-COUNT = 5
+# Counter for updating data array with round robin scheduling
+COUNT = 0
 
+# Size of array. Increase for better median filtering
+SIZE = 5
+
+# Array of range arrays
 data_2d = np.array([])
 
 def callback_LaserScan_timebased_filter(new_LaserScan=LaserScan()):
     global data_2d
-    data = np.array(new_LaserScan.ranges)
-    data[np.isnan(data)] = 0
-#    print ("Data shape:" , data.shape)
+    global COUNT
 
-    if data_2d != np.array([]):
-        temp = np.append(data_2d, [data], axis=0)
-    else: temp = [data]
-    data_2d = temp
+    data = np.array(new_LaserScan.ranges)
+    # Set invalid values to zero
+    data[np.isnan(data)] = 0
+
+    if not data_2d:
+        data_2d = numpy.array([data]*SIZE)
+    
     print ("Temp shape", np.shape(temp))
-    if len(data_2d) == COUNT:
-        result = np.median(temp, axis=0)
-        #pub_cost_range.publish(result)
-        print (result, len(result))
-        data_2d = np.array([])
+    if COUNT => SIZE: COUNT = 0
+    data_2d[COUNT] = data
+    COUNT += 1
+    result = np.median(data_2d, axis=0)
+    
+    print (result, len(result))
+    
+    # Publish filtered ranges
+    new_LaserScan.ranges = result
+    pub_scan_filtered.publish(new_LaserScan)
 
 
 
