@@ -9,6 +9,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "math.h"
+#include "phx_uart_msp_bridge/Motor.h"
 //#include "roslib.h"
 
 class trajectory_controller
@@ -50,9 +51,15 @@ class trajectory_controller
         double _phi_dot;
         double _psi_dot;
 
-        double _K_P;
-        double _K_I;
-        double _K_D;
+        double _K_P_theta;
+        double _K_I_theta;
+        double _K_D_theta;
+        double _K_P_phi;
+        double _K_I_phi;
+        double _K_D_phi;
+        double _K_P_psi;
+        double _K_I_psi;
+        double _K_D_psi;
 
     public:
 
@@ -60,6 +67,7 @@ class trajectory_controller
         ros::Time _now;
         ros::Time _last;
         ros::Duration _ros_dt;
+        phx_uart_msp_bridge::Motor _thrusts;
 
         trajectory_controller(ros::NodeHandle nh); // constructor
 
@@ -73,7 +81,7 @@ class trajectory_controller
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
 
-        void do_one_iteration();
+        void do_controlling(ros::Publisher);
         double convert_thrust(double newton);
 };
 

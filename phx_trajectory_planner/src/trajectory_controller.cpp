@@ -46,9 +46,15 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _phi_dot = 0;
   _psi_dot = 0;
   _dt = 0;
-  _K_I = 0;
-  _K_P = 0;
-  _K_D = 0;
+  _K_I_theta = 0;
+  _K_P_theta = 0;
+  _K_D_theta = 0;
+  _K_I_phi = 0;
+  _K_P_phi = 0;
+  _K_D_phi = 0;
+  _K_I_psi = 0;
+  _K_P_psi = 0;
+  _K_D_psi = 0;
 
   nh.getParam("/trajectory_controller/mass", _m);
   nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
@@ -131,9 +137,9 @@ void trajectory_controller::calc_controller_error()
       _integral_psi = 0;
   }
 
-  _e_psi = _K_D * _psi_dot + _K_P * _psi + _K_I * _integral_psi;
-  _e_phi = _K_D * _phi_dot + _K_P * _phi + _K_I * _integral_phi;
-  _e_theta = _K_D * _theta_dot + _K_P * _theta + _K_I * _integral_theta;
+  _e_psi = _K_D_psi * _psi_dot + _K_P_psi * _psi + _K_I_psi * _integral_psi;
+  _e_phi = _K_D_phi * _phi_dot + _K_P_phi * _phi + _K_I_phi * _integral_phi;
+  _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
 }
 
 void trajectory_controller::transform_quaternion()
@@ -207,54 +213,76 @@ void trajectory_controller::set_thrusts()
   double gravity_norm = _m * _g / ( 4*cos(_theta)*cos(_psi) );
 
   // Einzelschuebe in Newton
-  double thrusts[4] = {0};
-  thrusts[0] = gravity_norm - ( 2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  thrusts[1] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
-  thrusts[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  thrusts[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
+  double thrustsNewton[4] = {0};
+  thrustsNewton[0] = gravity_norm - ( 2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
+  thrustsNewton[1] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
+  thrustsNewton[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
+  thrustsNewton[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
 
   // in prozent umrechnen
-  double perc_cmd[4] = {0};
-  for(int i = 0; i < 4; i++)
-  {
-    perc_cmd[i] = convert_thrust(thrusts[i]);
-  }
+  _thrusts.header.frame_id = "";
+  _thrusts.header.stamp = ros::Time::now();
+  _thrusts.motor0 = convert_thrust(thrustsNewton[0]);
+  _thrusts.motor1 = convert_thrust(thrustsNewton[1]);
+  _thrusts.motor2 = convert_thrust(thrustsNewton[2]);
+  _thrusts.motor3 = convert_thrust(thrustsNewton[3]);
+  _thrusts.motor4 = 0;
+  _thrusts.motor5 = 0;
 
   // TODO über MotorMsg publishen
   // Debug
-  std::cout << "T1: " << int(perc_cmd[0]) << "  T2: " << perc_cmd[1] << std::endl;
-  std::cout << "T3: " << perc_cmd[2] << "  T4: " << perc_cmd[3] << std::endl;
-  std::cout << "-------" << std::endl;
+  //std::cout << "T1: " << int(perc_cmd[0]) << "  T2: " << perc_cmd[1] << std::endl;
+  //std::cout << "T3: " << perc_cmd[2] << "  T4: " << perc_cmd[3] << std::endl;
+  //std::cout << "-------" << std::endl;
 }
 
-void trajectory_controller::do_one_iteration()
+void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 {
-  _K_P = 3;
-  _K_I = 5.5;
-  _K_D = 4;
+  //Parameters
+  _K_P_theta = 3;
+  _K_I_theta = 5.5;
+  _K_D_theta = 4;
+  _K_P_phi = 3;
+  _K_I_phi = 5.5;
+  _K_D_phi = 4;
+  _K_P_psi = 3;
+  _K_I_psi = 5.5;
+  _K_D_psi = 4;
 
-  _now = ros::Time::now(); // get_current_time
+  _dt = -1; //For the first loop
+  ros::Rate loop_rate(50);  //Calculation Rate
 
-  if(_dt != -1)
+  while(ros::ok())
   {
-    _ros_dt = _now - _last;
-    _dt = _ros_dt.toSec();
+    _now = ros::Time::now(); // get_current_time
+
+    if(_dt != -1)
+    {
+      _ros_dt = _now - _last;
+      _dt = _ros_dt.toSec();
+    }
+    else
+    {
+      _dt = 0; // for calc_controller_error
+    }
+
+    transform_quaternion();
+    calc_controller_error();
+
+    set_thrusts();
+
+    _last_theta = _theta; // prepare for next iteration
+    _last_psi = _psi;
+    _last_phi = _phi;
+
+    _last = _now; // time
+
+    MotorMsg.publish(_thrusts);
+
+    ros::spinOnce();
+
+    loop_rate.sleep();
   }
-  else
-  {
-    _dt = 0; // for calc_controller_error
-  }
-
-  transform_quaternion();
-  calc_controller_error();
-
-  set_thrusts();
-
-  _last_theta = _theta; // prepare for next iteration
-  _last_psi = _psi;
-  _last_phi = _phi;
-
-  _last = _now; // time
 }
 
 int main(int argc, char** argv)
@@ -271,24 +299,11 @@ int main(int argc, char** argv)
     ros::Subscriber imu_pose = nh.subscribe("/phoenix/imu", 10, &trajectory_controller::imu_callback, &controller);
 
     // TODO motormsg
-    //ros::Publisher MotorMsg = nh.advertise<>("/phoenix/cmd_motor", 10);
+    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phoenix/cmd_motor", 10);
 
     // wie oft publishen imu_pose?
 
-    ros::Rate loop_rate(0.5);
-
-    controller._dt = -1; // um den ersten loop durchgang zu checken
-
-    while(ros::ok())
-    {
-        controller.do_one_iteration();
-
-        //MotorMsg.publish();
-
-        ros::spinOnce();
-
-        loop_rate.sleep();
-    }
+    controller.do_controlling(MotorMsg);
 
     return 0;
 }
