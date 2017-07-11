@@ -201,13 +201,18 @@ void trajectory_controller::calc_controller_error()
 // converts thrust to throttle command in %
 int trajectory_controller::convert_thrust(double newton)
 {
-  double gramm = newton/(_g*1000);
+  double gramm = 1000*newton/_g;
 
   double val = 0;
   double a = 0;
   double b = 0;
   double c = 0;
   double d = 0;
+	
+  if(gramm < 0)
+  {
+	  gramm = 0;
+  }
 
   // vgl. prop.schubkennfeld
   // linear interpolation
@@ -268,10 +273,10 @@ void trajectory_controller::set_thrusts()
   thrustsNewton[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
   thrustsNewton[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
     
-  ROS_DEBUG("motor0 %d \n", thrustsNewton[0]);
-  ROS_DEBUG("motor1 %d \n", thrustsNewton[1]);
-  ROS_DEBUG("motor2 %d \n", thrustsNewton[2]);
-  ROS_DEBUG("motor3 %d \n", thrustsNewton[3]);
+  //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
+  //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
+  //ROS_DEBUG("motor2 %lf \n", thrustsNewton[2]);
+  //ROS_DEBUG("motor3 %lf \n", thrustsNewton[3]);
 
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
@@ -284,11 +289,11 @@ void trajectory_controller::set_thrusts()
   _thrusts.motor5 = 0;
     
   //debug
-    /*ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
+    ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
     ROS_DEBUG("motor1 %d \n", _thrusts.motor1);
     ROS_DEBUG("motor2 %d \n", _thrusts.motor2);
     ROS_DEBUG("motor3 %d \n", _thrusts.motor3);
-*/
+
   // TODO über MotorMsg publishen
   // Debug
   //std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
