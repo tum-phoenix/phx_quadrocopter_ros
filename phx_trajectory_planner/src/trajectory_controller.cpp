@@ -267,6 +267,11 @@ void trajectory_controller::set_thrusts()
   thrustsNewton[1] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
   thrustsNewton[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
   thrustsNewton[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
+    
+  ROS_DEBUG("motor0 %d \n", thrustsNewton[0]);
+  ROS_DEBUG("motor1 %d \n", thrustsNewton[1]);
+  ROS_DEBUG("motor2 %d \n", thrustsNewton[2]);
+  ROS_DEBUG("motor3 %d \n", thrustsNewton[3]);
 
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
@@ -279,15 +284,15 @@ void trajectory_controller::set_thrusts()
   _thrusts.motor5 = 0;
     
   //debug
-    ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
+    /*ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
     ROS_DEBUG("motor1 %d \n", _thrusts.motor1);
     ROS_DEBUG("motor2 %d \n", _thrusts.motor2);
     ROS_DEBUG("motor3 %d \n", _thrusts.motor3);
-
+*/
   // TODO über MotorMsg publishen
   // Debug
-  std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
-  std::cout << "T3: " << _thrusts.motor3 << "  T4: " << _thrusts.motor4 << std::endl;
+  //std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
+  //std::cout << "T3: " << _thrusts.motor3 << "  T4: " << _thrusts.motor4 << std::endl;
   //std::cout << "-------" << std::endl;
 }
 
