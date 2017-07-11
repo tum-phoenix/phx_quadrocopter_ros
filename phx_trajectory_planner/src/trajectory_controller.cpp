@@ -353,10 +353,10 @@ int main(int argc, char** argv)
     ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::path_callback, &controller);
 
     //ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1, &trajectory_controller::set_current_pose, &controller);
-    ros::Subscriber imu_pose = nh.subscribe("/phoenix/imu", 10, &trajectory_controller::imu_callback, &controller);
+    ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 10, &trajectory_controller::imu_callback, &controller);
 
     // TODO motormsg
-    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phoenix/cmd_motor", 10);
+    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/cmd_motor", 10);
 
     // wie oft publishen imu_pose?
 
