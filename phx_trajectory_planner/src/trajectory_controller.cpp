@@ -4,8 +4,8 @@
 
 /* open points:
     1.) 6 propeller kompatibel
-    2.) reglerparameter (K_I, K_P, K_D)
-    3.) motor msgs schicken
+    2.) reglerparameter (K_I, K_P, K_D) -- CHECK
+    3.) motor msgs schicken -- CHECK
     4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit -- CHECK
     5.) Simulation
     6.) Testen, ob es bisher soweit funktioniert
@@ -115,7 +115,7 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
   double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
-  _psi_dot = msg->angular_velocity.z;
+  _psi_dot = - msg->angular_velocity.z;
 
 
   // do coordinate frame trafo from imu_coosy --> coosy in paper
@@ -125,34 +125,15 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   _theta_dot = root2 * (x_imu - y_imu);
 }
 
-// calculates controller error as suggested in paper
-void trajectory_controller::calc_controller_error()
+//Transform the quaternions into rotations about the coordinate axes
+void trajectory_controller::transform_quaternion()
 {
-  if (abs(_integral_theta) > 0.01 || abs(_integral_phi) > 0.01 || abs(_integral_psi) > 0.01)
-  {
-      _integral_theta = 0;
-      _integral_phi = 0;
-      _integral_psi = 0;
-  }
-  else
-  {
-      _integral_theta += (_theta - _last_theta) * _dt;
-      _integral_phi += (_phi - _last_phi) * _dt;
-      _integral_psi += (_psi - _last_psi) * _dt;
-  }
-
-  //Needed to fix mistake where one or two NaNs appear
-  if (isnan(_integral_theta) || isnan(_integral_phi) || isnan(_integral_psi))
-  {
-      _integral_theta = 0;
-      _integral_phi = 0;
-      _integral_psi = 0;
-  }
-
-  _e_psi = _K_D_psi * _psi_dot + _K_P_psi * _psi + _K_I_psi * _integral_psi;
-  _e_phi = _K_D_phi * _phi_dot + _K_P_phi * _phi + _K_I_phi * _integral_phi;
-  _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
+    tf2::Quaternion q;
+    tf2::fromMsg(_current.orientation, q);
+    tf2::Matrix3x3 m(q);
+    m.getRPY(_phi, _theta, _psi);
 }
+
 
 //Second controller to controll the angles
 void trajectory_controller::calc_delta_x_dot()
@@ -187,12 +168,33 @@ void trajectory_controller::calc_delta_x_dot()
   _psi_dot -= _cmd_r;
 }
 
-void trajectory_controller::transform_quaternion()
+// Calculates controller error as suggested in paper
+void trajectory_controller::calc_controller_error()
 {
-    tf2::Quaternion q;
-    tf2::fromMsg(_current.orientation, q);
-    tf2::Matrix3x3 m(q);
-    m.getRPY(_phi, _theta, _psi);
+  if (abs(_integral_theta) > 0.2 || abs(_integral_phi) > 0.2 || abs(_integral_psi) > 0.2)
+  {
+      _integral_theta = 0;
+      _integral_phi = 0;
+      _integral_psi = 0;
+  }
+  else
+  {
+      _integral_theta += (_theta - _last_theta) * _dt;
+      _integral_phi += (_phi - _last_phi) * _dt;
+      _integral_psi += (_psi - _last_psi) * _dt;
+  }
+
+  //Needed to fix mistake where one or two NaNs appear
+  if (isnan(_integral_theta) || isnan(_integral_phi) || isnan(_integral_psi))
+  {
+      _integral_theta = 0;
+      _integral_phi = 0;
+      _integral_psi = 0;
+  }
+
+  _e_psi = _K_D_psi * _psi_dot + _K_P_psi * _psi + _K_I_psi * _integral_psi;
+  _e_phi = _K_D_phi * _phi_dot + _K_P_phi * _phi + _K_I_phi * _integral_phi;
+  _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
 }
 
 // converts thrust to throttle command in %
