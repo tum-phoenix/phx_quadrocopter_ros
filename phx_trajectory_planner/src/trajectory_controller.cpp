@@ -286,8 +286,8 @@ void trajectory_controller::set_thrusts()
 
   // TODO über MotorMsg publishen
   // Debug
-  //std::cout << "T1: " << int(perc_cmd[0]) << "  T2: " << perc_cmd[1] << std::endl;
-  //std::cout << "T3: " << perc_cmd[2] << "  T4: " << perc_cmd[3] << std::endl;
+  std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
+  std::cout << "T3: " << _thrusts.motor3 << "  T4: " << _thrusts.motor4 << std::endl;
   //std::cout << "-------" << std::endl;
 }
 
