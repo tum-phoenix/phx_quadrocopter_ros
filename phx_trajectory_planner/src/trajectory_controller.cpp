@@ -199,7 +199,7 @@ void trajectory_controller::calc_controller_error()
 }
 
 // converts thrust to throttle command in %
-double trajectory_controller::convert_thrust(double newton)
+int trajectory_controller::convert_thrust(double newton)
 {
   double gramm = newton/(_g*1000);
 
@@ -253,7 +253,7 @@ double trajectory_controller::convert_thrust(double newton)
   }
 
   val = c + (d-c)*(gramm-a)/(b-a);
-  return val;
+  return (int)val;
 }
 
 // calcs thrusts according to paper
@@ -277,6 +277,12 @@ void trajectory_controller::set_thrusts()
   _thrusts.motor3 = convert_thrust(thrustsNewton[3]);
   _thrusts.motor4 = 0;
   _thrusts.motor5 = 0;
+    
+  //debug
+    ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
+    ROS_DEBUG("motor1 %d \n", _thrusts.motor1);
+    ROS_DEBUG("motor2 %d \n", _thrusts.motor2);
+    ROS_DEBUG("motor3 %d \n", _thrusts.motor3);
 
   // TODO über MotorMsg publishen
   // Debug
