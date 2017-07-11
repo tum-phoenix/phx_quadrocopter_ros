@@ -97,7 +97,7 @@ class trajectory_controller
         void set_thrusts();
 
         void do_controlling(ros::Publisher);
-        double convert_thrust(double newton);
+        int convert_thrust(double newton);
 };
 
 #endif
