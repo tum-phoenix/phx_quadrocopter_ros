@@ -117,7 +117,8 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   double y_imu = msg->angular_velocity.y;
   _psi_dot = - msg->angular_velocity.z;
 
-
+  _current.orientation = msg->orientation;
+    
   // do coordinate frame trafo from imu_coosy --> coosy in paper
   double root2 = sqrt(1/2);
 
@@ -350,7 +351,7 @@ int main(int argc, char** argv)
     trajectory_controller controller(nh); // init class
 
     // subscribe to class trajectory_controller controller's method set_path
-    ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::path_callback, &controller);
+    //ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::path_callback, &controller);
 
     //ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1, &trajectory_controller::set_current_pose, &controller);
     ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 10, &trajectory_controller::imu_callback, &controller);
