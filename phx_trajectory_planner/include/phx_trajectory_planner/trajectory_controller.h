@@ -35,6 +35,10 @@ class trajectory_controller
         double _e_phi;
         double _e_psi;
 
+        double _cmd_p;
+        double _cmd_q;
+        double _cmd_r;
+
         double _theta;
         double _phi;
         double _psi;
@@ -46,6 +50,9 @@ class trajectory_controller
         double _integral_theta;
         double _integral_phi;
         double _integral_psi;
+        double _integral_theta_PI;
+        double _integral_phi_PI;
+        double _integral_psi_PI;
 
         double _theta_dot;
         double _phi_dot;
@@ -60,6 +67,13 @@ class trajectory_controller
         double _K_P_psi;
         double _K_I_psi;
         double _K_D_psi;
+
+        double _RCAH_P_psi;
+        double _RCAH_I_psi;
+        double _RCAH_P_phi;
+        double _RCAH_I_phi;
+        double _RCAH_P_theta;
+        double _RCAH_I_theta;
 
     public:
 
@@ -76,6 +90,7 @@ class trajectory_controller
 
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
         void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
+        void calc_delta_x_dot();
         void calc_controller_error();
         void transform_quaternion();
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);

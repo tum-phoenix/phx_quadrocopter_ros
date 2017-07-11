@@ -33,6 +33,9 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _e_theta = 0;
   _e_phi = 0;
   _e_psi = 0;
+  _cmd_p = 0;
+  _cmd_q = 0;
+  _cmd_r = 0;
   _theta = 0;
   _phi = 0;
   _psi = 0;
@@ -42,6 +45,9 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _integral_theta = 0;
   _integral_phi = 0;
   _integral_psi = 0;
+  _integral_theta_PI = 0;
+  _integral_phi_PI = 0;
+  _integral_psi_PI = 0;
   _theta_dot = 0;
   _phi_dot = 0;
   _psi_dot = 0;
@@ -55,6 +61,12 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_psi = 0;
   _K_P_psi = 0;
   _K_D_psi = 0;
+  _RCAH_P_theta = 0;
+  _RCAH_I_theta = 0;
+  _RCAH_P_phi = 0;
+  _RCAH_I_phi = 0;
+  _RCAH_P_psi = 0;
+  _RCAH_I_psi = 0;
 
   nh.getParam("/trajectory_controller/mass", _m);
   nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
@@ -142,6 +154,39 @@ void trajectory_controller::calc_controller_error()
   _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
 }
 
+//Second controller to controll the angles
+void trajectory_controller::calc_delta_x_dot()
+{
+  if (abs(_integral_theta_PI) > 0.01 || abs(_integral_phi_PI) > 0.01 || abs(_integral_psi_PI) > 0.01)
+  {
+      _integral_theta_PI = 0;
+      _integral_phi_PI = 0;
+      _integral_psi_PI = 0;
+  }
+  else
+  {
+      _integral_theta_PI += (_theta - _last_theta) * _dt;
+      _integral_phi_PI += (_phi - _last_phi) * _dt;
+      _integral_psi_PI += (_psi - _last_psi) * _dt;
+  }
+
+  //Needed to fix mistake where one or two NaNs appear
+  if (isnan(_integral_theta_PI) || isnan(_integral_phi_PI) || isnan(_integral_psi_PI))
+  {
+      _integral_theta_PI = 0;
+      _integral_phi_PI = 0;
+      _integral_psi_PI = 0;
+  }
+
+  _cmd_r = _RCAH_P_psi * (_psi - _last_psi) + _RCAH_I_psi * _integral_psi_PI;
+  _cmd_p = _RCAH_P_phi * (_phi - _last_phi) + _RCAH_I_phi * _integral_phi_PI;
+  _cmd_q = _RCAH_P_theta * (_theta - _last_theta) + _RCAH_I_theta * _integral_theta_PI;
+
+  _phi_dot -= _cmd_p;
+  _theta_dot -= _cmd_q;
+  _psi_dot -= _cmd_r;
+}
+
 void trajectory_controller::transform_quaternion()
 {
     tf2::Quaternion q;
@@ -163,6 +208,7 @@ double trajectory_controller::convert_thrust(double newton)
 
   // vgl. prop.schubkennfeld
   // linear interpolation
+  // Wenn Regler zu hohen Schub gibt, wird 100 eingestellt
   if(gramm < 600)
   {
     a = 0;
@@ -239,15 +285,23 @@ void trajectory_controller::set_thrusts()
 void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 {
   //Parameters
-  _K_P_theta = 3;
-  _K_I_theta = 5.5;
-  _K_D_theta = 4;
-  _K_P_phi = 3;
-  _K_I_phi = 5.5;
-  _K_D_phi = 4;
-  _K_P_psi = 3;
-  _K_I_psi = 5.5;
-  _K_D_psi = 4;
+  _K_P_theta = -33.52;
+  _K_I_theta = -0.022;
+  _K_D_theta = -16.75;
+  _K_P_phi = -12.45;
+  _K_I_phi = -0.006;
+  _K_D_phi = -20.45;
+  _K_P_psi = -1.05;
+  _K_I_psi = -0.017;
+  _K_D_psi = -12.64;
+
+  _RCAH_P_theta = 4.174;
+  _RCAH_I_theta = 12.893;
+  _RCAH_P_phi = 5.496;
+  _RCAH_I_phi = 11.761;
+  _RCAH_P_psi = 3.75;
+  _RCAH_I_psi = 4.942;
+
 
   _dt = -1; //For the first loop
   ros::Rate loop_rate(50);  //Calculation Rate
@@ -267,6 +321,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
     }
 
     transform_quaternion();
+    calc_delta_x_dot();
     calc_controller_error();
 
     set_thrusts();
