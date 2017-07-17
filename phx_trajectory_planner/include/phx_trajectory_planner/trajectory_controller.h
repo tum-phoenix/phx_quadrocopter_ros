@@ -68,12 +68,14 @@ class trajectory_controller
         double _K_I_psi;
         double _K_D_psi;
 
+    /*
         double _RCAH_P_psi;
         double _RCAH_I_psi;
         double _RCAH_P_phi;
         double _RCAH_I_phi;
         double _RCAH_P_theta;
         double _RCAH_I_theta;
+  */
 
     public:
 
