@@ -3,7 +3,7 @@
 
 
 /* open points:
-    1.) 6 propeller kompatibel
+    1.) 6 propeller kompatibel -- CHECK
     2.) reglerparameter (K_I, K_P, K_D) -- CHECK
     3.) motor msgs schicken -- CHECK
     4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit -- CHECK
@@ -136,8 +136,8 @@ void trajectory_controller::transform_quaternion()
 }
 
 
-//Second controller to controll the angles
-void trajectory_controller::calc_delta_x_dot()
+//Second controller to control the angles
+/*void trajectory_controller::calc_delta_x_dot()
 {
   if (abs(_integral_theta_PI) > 0.01 || abs(_integral_phi_PI) > 0.01 || abs(_integral_psi_PI) > 0.01)
   {
@@ -167,7 +167,7 @@ void trajectory_controller::calc_delta_x_dot()
   _phi_dot -= _cmd_p;
   _theta_dot -= _cmd_q;
   _psi_dot -= _cmd_r;
-}
+}*/
 
 // Calculates controller error as suggested in paper
 void trajectory_controller::calc_controller_error()
@@ -264,14 +264,16 @@ int trajectory_controller::convert_thrust(double newton)
 // calcs thrusts according to paper
 void trajectory_controller::set_thrusts()
 {
-  double gravity_norm = _m * _g / ( 4*cos(_theta)*cos(_psi) );
+  double gravity_norm = _m * _g / ( 6*cos(_theta)*cos(_psi) );
 
   // Einzelschuebe in Newton
-  double thrustsNewton[4] = {0};
-  thrustsNewton[0] = gravity_norm - ( 2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  thrustsNewton[1] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) - ( _e_theta*_Iyy )/( 2*_L );
-  thrustsNewton[2] = gravity_norm - ( -2*_b*_e_phi*_Ixx + _e_psi*_Izz*_k*_L )/( 4*_b*_L );
-  thrustsNewton[3] = gravity_norm + ( _k*_e_psi*_Izz )/( 4*_b ) + ( _e_theta*_Iyy )/( 2*_L );
+  double thrustsNewton[6] = {0};	
+  thrustsNewton[0] = gravity_norm + _e_phi/(6*_L*_Ixx) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[1] = gravity_norm + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_phi/(6*_L*_Ixx) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[2] = gravity_norm - _e_phi/(3*_L*_Ixx) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[3] = gravity_norm - _e_phi/(6*_L*_Ixx) - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[4] = gravity_norm - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_phi/(6*_L*_Ixx) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[5] = gravity_norm + _e_phi/(3*_L*_Ixx) - _e_psi*_k*_Izz/(6*_b);
     
   //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
   //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
@@ -285,8 +287,8 @@ void trajectory_controller::set_thrusts()
   _thrusts.motor1 = convert_thrust(thrustsNewton[1]);
   _thrusts.motor2 = convert_thrust(thrustsNewton[2]);
   _thrusts.motor3 = convert_thrust(thrustsNewton[3]);
-  _thrusts.motor4 = 0;
-  _thrusts.motor5 = 0;
+  _thrusts.motor4 = convert_thrust(thrustsNewton[4]);
+  _thrusts.motor5 = convert_thrust(thrustsNewton[5]);
     
   //debug
     ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
@@ -304,23 +306,24 @@ void trajectory_controller::set_thrusts()
 void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 {
   //Parameters
-  _K_P_theta = -33.52;
-  _K_I_theta = -0.022;
-  _K_D_theta = -16.75;
-  _K_P_phi = -12.45;
-  _K_I_phi = -0.006;
-  _K_D_phi = -20.45;
-  _K_P_psi = -1.05;
-  _K_I_psi = -0.017;
-  _K_D_psi = -12.64;
+  _K_P_theta = 0.04;
+  _K_I_theta = 0.0005;
+  _K_D_theta = 0.838266;
+  _K_P_phi = 0.0722;
+  _K_I_phi = 0.00126;
+  _K_D_phi = 0.90285;
+  _K_P_psi = 0.2379;
+  _K_I_psi = 0.047;
+  _K_D_psi = 0.88298;
 
+/*
   _RCAH_P_theta = 4.174;
   _RCAH_I_theta = 12.893;
   _RCAH_P_phi = 5.496;
   _RCAH_I_phi = 11.761;
   _RCAH_P_psi = 3.75;
   _RCAH_I_psi = 4.942;
-
+*/
 
   _dt = -1; //For the first loop
   ros::Rate loop_rate(50);  //Calculation Rate
