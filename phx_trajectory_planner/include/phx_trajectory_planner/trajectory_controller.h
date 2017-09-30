@@ -53,6 +53,7 @@ class trajectory_controller
         double _integral_theta_PI;
         double _integral_phi_PI;
         double _integral_psi_PI;
+        double _limit_integral;
 
         double _theta_dot;
         double _phi_dot;
