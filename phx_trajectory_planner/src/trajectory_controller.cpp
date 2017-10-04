@@ -205,7 +205,8 @@ void trajectory_controller::calc_controller_error()
 // converts thrust to throttle command in %
 int trajectory_controller::convert_thrust(double newton)
 {
-  double gramm = 1000*newton/_g;
+  //double gramm = 1000*newton/_g;
+  double gramm = 100;
 
   double val = 0;
   double a = 0;
