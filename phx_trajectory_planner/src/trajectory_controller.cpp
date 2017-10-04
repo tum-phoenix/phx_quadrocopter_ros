@@ -258,10 +258,11 @@ int trajectory_controller::convert_thrust(double newton)
   }
   else
   {
-    return 100;
+    return 2000;
   }
 
   val = c + (d-c)*(gramm-a)/(b-a);
+  val = 1025 + 975 * val/100;
   return (int)val;
 }
 
@@ -301,7 +302,6 @@ void trajectory_controller::set_thrusts()
     ROS_DEBUG("motor2 %d \n", _thrusts.motor2);
     ROS_DEBUG("motor3 %d \n", _thrusts.motor3);
 
-  // TODO über MotorMsg publishen
   // Debug
   //std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
   //std::cout << "T3: " << _thrusts.motor3 << "  T4: " << _thrusts.motor4 << std::endl;
@@ -381,7 +381,7 @@ int main(int argc, char** argv)
     ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 10, &trajectory_controller::imu_callback, &controller);
 
     // TODO motormsg
-    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/cmd_motor", 10);
+    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 10);
 
     // wie oft publishen imu_pose?
 
