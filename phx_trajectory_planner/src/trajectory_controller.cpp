@@ -197,7 +197,8 @@ void trajectory_controller::calc_controller_error()
       _integral_psi = 0;
   }
 
-  _e_psi = _K_D_psi * _psi_dot + _K_P_psi * _psi + _K_I_psi * _integral_psi;
+  //_e_psi = _K_D_psi * _psi_dot + _K_P_psi * _psi + _K_I_psi * _integral_psi;
+  _e_psi = 0;
   _e_phi = _K_D_phi * _phi_dot + _K_P_phi * _phi + _K_I_phi * _integral_phi;
   _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
 }
@@ -205,8 +206,8 @@ void trajectory_controller::calc_controller_error()
 // converts thrust to throttle command in %
 int trajectory_controller::convert_thrust(double newton)
 {
-  //double gramm = 1000*newton/_g;
-  double gramm = 100;
+  double gramm = 1000*newton/_g;
+  //double gramm = 100;
 
   double val = 0;
   double a = 0;
@@ -379,10 +380,10 @@ int main(int argc, char** argv)
     //ros::Subscriber path_sub = nh.subscribe("/phx/path", 1, &trajectory_controller::path_callback, &controller);
 
     //ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1, &trajectory_controller::set_current_pose, &controller);
-    ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 10, &trajectory_controller::imu_callback, &controller);
+    ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 1, &trajectory_controller::imu_callback, &controller);
 
     // TODO motormsg
-    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 10);
+    ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
 
     // wie oft publishen imu_pose?
 
