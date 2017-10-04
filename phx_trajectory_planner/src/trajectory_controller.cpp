@@ -62,12 +62,14 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_psi = 0;
   _K_P_psi = 0;
   _K_D_psi = 0;
+/* 
   _RCAH_P_theta = 0;
   _RCAH_I_theta = 0;
   _RCAH_P_phi = 0;
   _RCAH_I_phi = 0;
   _RCAH_P_psi = 0;
   _RCAH_I_psi = 0;
+*/
 
   nh.getParam("/trajectory_controller/mass", _m);
   nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
