@@ -62,6 +62,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_psi = 0;
   _K_P_psi = 0;
   _K_D_psi = 0;
+<<<<<<< HEAD
   /*
   _RCAH_P_theta = 0;
   _RCAH_I_theta = 0;
