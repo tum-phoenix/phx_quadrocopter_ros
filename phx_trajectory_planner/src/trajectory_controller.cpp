@@ -62,12 +62,14 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_psi = 0;
   _K_P_psi = 0;
   _K_D_psi = 0;
+  /*
   _RCAH_P_theta = 0;
   _RCAH_I_theta = 0;
   _RCAH_P_phi = 0;
   _RCAH_I_phi = 0;
   _RCAH_P_psi = 0;
   _RCAH_I_psi = 0;
+  */
 
   nh.getParam("/trajectory_controller/mass", _m);
   nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
@@ -269,12 +271,12 @@ void trajectory_controller::set_thrusts()
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};	
-  thrustsNewton[0] = gravity_norm + _e_phi*_Ixx/(6*_L) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[1] = gravity_norm + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_phi*_Ixx/(6*_L) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[2] = gravity_norm - _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[3] = gravity_norm - _e_phi*_Ixx/(6*_L) - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[4] = gravity_norm - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_phi*_Ixx/(6*_L) + _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[0] = gravity_norm + _e_phi*_Ixx/(6*_L) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[1] = gravity_norm + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_phi*_Ixx/(6*_L) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[2] = gravity_norm - _e_phi*_Ixx/(3*_L) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[3] = gravity_norm - _e_phi*_Ixx/(6*_L) - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[4] = gravity_norm - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_phi*_Ixx/(6*_L) - _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);
     
   //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
   //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
@@ -284,11 +286,12 @@ void trajectory_controller::set_thrusts()
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
   _thrusts.header.stamp = ros::Time::now();
-  _thrusts.motor0 = convert_thrust(thrustsNewton[0]);
+  //Reihenfolge durch uart_bridge festgelegt
+  _thrusts.motor0 = convert_thrust(thrustsNewton[3]);
   _thrusts.motor1 = convert_thrust(thrustsNewton[1]);
-  _thrusts.motor2 = convert_thrust(thrustsNewton[2]);
-  _thrusts.motor3 = convert_thrust(thrustsNewton[3]);
-  _thrusts.motor4 = convert_thrust(thrustsNewton[4]);
+  _thrusts.motor2 = convert_thrust(thrustsNewton[4]);
+  _thrusts.motor3 = convert_thrust(thrustsNewton[0]);
+  _thrusts.motor4 = convert_thrust(thrustsNewton[2]);
   _thrusts.motor5 = convert_thrust(thrustsNewton[5]);
     
   //debug
