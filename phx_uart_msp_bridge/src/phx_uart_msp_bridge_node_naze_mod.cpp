@@ -401,6 +401,8 @@ int main(int argc, char **argv)
                         motorMsg.motor1 = input_msg.msg_data.multiwii_motor.motor1;
                         motorMsg.motor2 = input_msg.msg_data.multiwii_motor.motor2;
                         motorMsg.motor3 = input_msg.msg_data.multiwii_motor.motor3;
+                        motorMsg.motor4 = input_msg.msg_data.multiwii_motor.motor4;
+                        motorMsg.motor5 = input_msg.msg_data.multiwii_motor.motor5;
                         motor_pub.publish(motorMsg);
                         received_motor++;
                     } else if (input_msg.msg_code == MULTIWII_GPS) {
@@ -507,7 +509,6 @@ int main(int argc, char **argv)
 // callbacks
 void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pwm) {
     std::cout << "\033[1;31m>>> motor_pwm_callback is deactivated!\033[0m"<< std::endl;
-    /*
     serial_interface.prepare_msg_motor((uint16_t) set_motor_pwm->motor0,
                                        (uint16_t) set_motor_pwm->motor1,
                                        (uint16_t) set_motor_pwm->motor2,
@@ -515,7 +516,6 @@ void motor_pwm_callback(const phx_uart_msp_bridge::Motor::ConstPtr& set_motor_pw
                                        (uint16_t) set_motor_pwm->motor4,
                                        (uint16_t) set_motor_pwm->motor5);
     serial_interface.send_from_buffer();
-    */
 }
 
 void rc_direct_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& RemoteControlMsg_input) {
@@ -577,3 +577,4 @@ void set_pid_callback(const phx_uart_msp_bridge::PID_cleanflight::ConstPtr& set_
                                      (uint8_t) (set_pid->mag.d));
     serial_interface.send_from_buffer();
 }
+
