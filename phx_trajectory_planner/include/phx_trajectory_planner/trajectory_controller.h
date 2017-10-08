@@ -21,6 +21,7 @@ class trajectory_controller
         geometry_msgs::Pose _current;
 
         double _m; // mass
+        /* not needed anymore in new implementation
         double _k; // thrust_rpm_const_k
         double _b; // torque_drag_const_b
 
@@ -29,45 +30,47 @@ class trajectory_controller
         double _Izz;
 
         double _L; // distance from COG to any one of the propellers
-        double _g; // 9.81 m/s²
+        */
+        double _g; // gravity, 9.81 m/s²
 
-        double _e_theta;
-        double _e_phi;
-        double _e_psi;
-
-        double _cmd_p;
-        double _cmd_q;
-        double _cmd_r;
-
-        double _theta;
+        double _phi_cmd; // Kommandagroessen
+        double _theta_cmd;
+        //double _psi_cmd; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
+        double _p_cmd; // Rates
+        double _q_cmd;
+        double _r_cmd;
+    
+        double _theta; // current states
         double _phi;
         double _psi;
+        double _p; // Rates
+        double _q;
+        double _r;
+    
+        double _u_p; // Rate Controller Outputs
+        double _u_q;
+        double _u_r;
 
-        double _last_theta;
-        double _last_phi;
-        double _last_psi;
+        double _e_p; // Rate Controller Inputs
+        double _e_q;
+        double _e_r;
+        double _last_e_p; // for integration
+        double _last_e_q;
+        double _last_e_r;
+        double _integral_p;
+        double _integral_q;
+        double _integral_r;
+        double _limit_integral; // TO-DO: sinnvollen Wert ueberlegen!!
 
-        double _integral_theta;
-        double _integral_phi;
-        double _integral_psi;
-        double _integral_theta_PI;
-        double _integral_phi_PI;
-        double _integral_psi_PI;
-        double _limit_integral;
-
-        double _theta_dot;
-        double _phi_dot;
-        double _psi_dot;
-
-        double _K_P_theta;
-        double _K_I_theta;
-        double _K_D_theta;
         double _K_P_phi;
-        double _K_I_phi;
-        double _K_D_phi;
-        double _K_P_psi;
-        double _K_I_psi;
-        double _K_D_psi;
+        double _K_P_theta;
+        //double _K_P_psi;
+        double _K_P_p;
+        double _K_I_p;
+        double _K_P_q;
+        double _K_I_q;
+        double _K_P_r;
+        double _K_I_r;
 
     /*
         double _RCAH_P_psi;
