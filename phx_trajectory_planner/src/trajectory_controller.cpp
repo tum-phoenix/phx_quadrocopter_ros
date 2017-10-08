@@ -160,10 +160,10 @@ void trajectory_controller::calc_controller_outputs()
   // Regleroutputs outer loop	
   double u_phi = _K_P_phi * e_phi;
   double u_theta = _K_P_theta * e_theta;
-  double u_psi = 0
+  double u_psi = 0;
 
   // Rates
-  _e_p = u_phi - _p; Regler Inputs inner loop
+  _e_p = u_phi - _p; // Regler Inputs inner loop
   _e_q = u_theta - _q;
   _e_r = u_psi - _r;
 	  
@@ -171,7 +171,7 @@ void trajectory_controller::calc_controller_outputs()
   {
       _integral_p = _limit_integral;
   }
-  else if(isnan(_integral_p) // needed for fixing mistake when random NaN appeared
+  else if(isnan(_integral_p)) // needed for fixing mistake when random NaN appeared
   {
       _integral_p = 0;	  
   }
@@ -184,7 +184,7 @@ void trajectory_controller::calc_controller_outputs()
   {
       _integral_q = _limit_integral;
   }
-  else if(isnan(_integral_q) // needed for fixing mistake when random NaN appeared
+  else if(isnan(_integral_q)) // needed for fixing mistake when random NaN appeared
   {
       _integral_q = 0;	  
   }
@@ -197,13 +197,13 @@ void trajectory_controller::calc_controller_outputs()
   {
       _integral_r = _limit_integral;
   }
-  else if(isnan(_integral_r) // needed for fixing mistake when random NaN appeared
+  else if(isnan(_integral_r)) // needed for fixing mistake when random NaN appeared
   {
       _integral_r = 0;	  
   }
   else
   {
-      _integral_r += (_e_r - _last_e_r) * _dt;  
+      _integral_r += (_e_r - _last_e_r) * _dt;
   }
 	  
   _u_p = _K_P_p * _e_p + _K_I_p * _integral_p;
@@ -385,7 +385,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 
     transform_quaternion();
     //calc_delta_x_dot();
-    calc_controller_error();
+    calc_controller_outputs();
 
     set_thrusts();
 

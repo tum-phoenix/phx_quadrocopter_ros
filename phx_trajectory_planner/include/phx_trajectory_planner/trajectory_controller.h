@@ -97,7 +97,7 @@ class trajectory_controller
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
         void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
         void calc_delta_x_dot();
-        void calc_controller_error();
+        void calc_controller_outputs();
         void transform_quaternion();
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
