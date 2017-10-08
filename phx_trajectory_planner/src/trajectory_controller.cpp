@@ -6,6 +6,7 @@
     3.) limit integral --> prevent integral wind-up sinnvoll ueberlegen!!
     4.) passt winkel trafo von quaternionen zu Eulerwinkel?? Drehreihenfolge XYZ??
     5.) passen Eulerwinkel und Drehraten prinzipiell? --> ueberpreufen (z.B. Koordinatentrafo bei Drehraten aber nicht Winkel gemacht...)
+    6.) Drehraten Einheit passt?
     .
     .
     .
@@ -130,9 +131,14 @@ void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr
 // callback for imu_pose subscriber
 void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
+  // ====================================================================
+  // angenommen Drehraten kommen in [°/s]! --> Umrechnung in rad/s notwendig
+  // Koordinatentrafo nicht auch für Eulerwinkel notwendig?!?!
+  // ====================================================================	
+	
   double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
-  _r = msg->angular_velocity.z; // !Vorzeichen!
+  _r = msg->angular_velocity.z*pi/180; // !Vorzeichen!; in rad/s umrechnen
 
   _current.orientation = msg->orientation;
   transform_quaternion();
@@ -140,8 +146,8 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // do coordinate frame trafo from imu_coosy --> coosy in paper
   double root2 = sqrt(1/2);
 
-  _p = root2 * (x_imu + y_imu);
-  _q = root2 * (x_imu - y_imu);
+  _p = root2 * (x_imu + y_imu)*pi/180; // in rad/s umrechnen
+  _q = root2 * (x_imu - y_imu)*pi/180;
 }
 
 //Transform the quaternions into rotations about the coordinate axes
