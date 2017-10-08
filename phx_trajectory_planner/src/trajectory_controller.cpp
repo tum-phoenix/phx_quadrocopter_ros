@@ -1,14 +1,9 @@
-// implements a pid_controller as modeled in the paper "Quadrocopter Dynamics, Simulation and Control"
-// !!! This is not a trajectory controller yet !!! Only attitude stabilization as in paper
-
+// !!! This is not a trajectory controller yet !!! Only attitude stabilization based on Simulink / Simmechanics model
 
 /* open points:
-    1.) 6 propeller kompatibel -- CHECK
-    2.) reglerparameter (K_I, K_P, K_D) -- CHECK
-    3.) motor msgs schicken -- CHECK
-    4.) I anteil nur zuschalten wenn innerhalb gewisser genauigkeit -- CHECK
-    5.) Simulation
-    6.) Testen, ob es bisher soweit funktioniert
+    1.) Reglerparameter fine tunen mit Simulink
+    2.) Masseeigenschaften Simulink Modell ueberpruefen
+    3.) limit integral --> prevent integral wind-up sinnvoll ueberlegen!!
     .
     .
     .
@@ -23,37 +18,63 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   // get Parameters specified in launchfile
   // all in SI units
   _m = 0;
+  nh.getParam("/trajectory_controller/mass", _m);
+	
   _g = 9.81; // m/s^2
-  _k = 0;
-  _b = 0;
+  /*_k = 0; not needed in new implementation
+  _b = 0; 
   _Ixx = 0;
   _Iyy = 0;
   _Izz = 0;
-  _L = 0; // distance from cog to any of the propellers
-  _e_theta = 0;
-  _e_phi = 0;
-  _e_psi = 0;
-  _cmd_p = 0;
-  _cmd_q = 0;
-  _cmd_r = 0;
-  _theta = 0;
+  _L = 0;*/ // distance from cog to any of the propellers
+	
+  _phi_cmd = 0; // Kommandogroessen
+  _theta_cmd = 0;
+  //_psi_cmd = 0; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
+  _p_cmd = 0;
+  _q_cmd = 0;
+  _r_cmd = 0;
+	
+  _u_p = 0; // Regleroutputs (Drehraten)
+  _u_q = 0;
+  _u_r = 0;
+	
+  _e_p = 0; // Reglerinputs Drehraten
+  _e_q = 0;
+  _e_r = 0;
+  _last_e_p = 0; // for integration
+  _last_e_q = 0;
+  _last_e_r = 0;	
+
+  _theta = 0; // current states
   _phi = 0;
   _psi = 0;
-  _last_theta = 0;
-  _last_phi = 0;
-  _last_psi = 0;
-  _integral_theta = 0;
+  _p = 0;
+  _q = 0;
+  _r = 0;
+	
+  /*_integral_theta = 0; // noch keinen I Anteil in Winkel
   _integral_phi = 0;
-  _integral_psi = 0;
-  _integral_theta_PI = 0;
-  _integral_phi_PI = 0;
-  _integral_psi_PI = 0;
-  _limit_integral = 0.2;
-  _theta_dot = 0;
-  _phi_dot = 0;
-  _psi_dot = 0;
+  _integral_psi = 0;*/
+  _integral_p = 0;
+  _integral_q = 0;
+  _integral_r = 0;
+  
+  _limit_integral = 0.2; 
+
   _dt = 0;
-  _K_I_theta = 0;
+	
+  _K_P_phi = 0.559369;
+  _K_P_theta = 1.59269;
+  //_K_P_psi = 0;
+  _K_P_p = 0.027858;
+  _K_I_p = 0.00959;
+  _K_P_q = 0.093234;
+  _K_I_q = 1.22891;
+  _K_P_r = 0.1868;
+  _K_I_r = 37.36;
+	
+  /*_K_I_theta = 0; old implementation
   _K_P_theta = 0;
   _K_D_theta = 0;
   _K_I_phi = 0;
@@ -61,24 +82,14 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_D_phi = 0;
   _K_I_psi = 0;
   _K_P_psi = 0;
-  _K_D_psi = 0;
+  _K_D_psi = 0;*/
 
-  /*
-  _RCAH_P_theta = 0;
-  _RCAH_I_theta = 0;
-  _RCAH_P_phi = 0;
-  _RCAH_I_phi = 0;
-  _RCAH_P_psi = 0;
-  _RCAH_I_psi = 0;
-  */
-
-  nh.getParam("/trajectory_controller/mass", _m);
-  nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
+  /*nh.getParam("/trajectory_controller/thrust_rpm_const_k", _k);
   nh.getParam("/trajectory_controller/torque_drag_const_b", _b);
   nh.getParam("/trajectory_controller/I_xx", _Ixx);
   nh.getParam("/trajectory_controller/I_yy", _Iyy);
   nh.getParam("/trajectory_controller/I_zz", _Izz);
-  nh.getParam("/trajectory_controller/dist_cog_prop", _L);
+  nh.getParam("/trajectory_controller/dist_cog_prop", _L);*/
 
 }
 
@@ -119,15 +130,15 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
   double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
-  _psi_dot = - msg->angular_velocity.z;
+  _r = msg->angular_velocity.z; // !Vorzeichen!
 
   _current.orientation = msg->orientation;
     
   // do coordinate frame trafo from imu_coosy --> coosy in paper
   double root2 = sqrt(1/2);
 
-  _phi_dot = root2 * (x_imu + y_imu);
-  _theta_dot = root2 * (x_imu - y_imu);
+  _p = root2 * (x_imu + y_imu);
+  _q = root2 * (x_imu - y_imu);
 }
 
 //Transform the quaternions into rotations about the coordinate axes
@@ -139,43 +150,68 @@ void trajectory_controller::transform_quaternion()
     m.getRPY(_phi, _theta, _psi);
 }
 
-
-//Second controller to control the angles
-/*void trajectory_controller::calc_delta_x_dot()
+// Calculates controller error as suggested in paper
+void trajectory_controller::calc_controller_outputs()
 {
-  if (abs(_integral_theta_PI) > 0.01 || abs(_integral_phi_PI) > 0.01 || abs(_integral_psi_PI) > 0.01)
+  // Attitude
+  double e_phi = _phi_cmd - _phi;
+  double e_theta = _theta_cmd - _theta;
+  //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
+  // Regleroutputs outer loop	
+  double u_phi = _K_P_phi * e_phi;
+  double u_theta = _K_P_theta * e_theta;
+  double u_psi = 0
+
+  // Rates
+  _e_p = u_phi - _p; Regler Inputs inner loop
+  _e_q = u_theta - _q;
+  _e_r = u_psi - _r;
+	  
+  if (abs(_integral_p) > _limit_integral)
   {
-      _integral_theta_PI = 0;
-      _integral_phi_PI = 0;
-      _integral_psi_PI = 0;
+      _integral_p = _limit_integral;
+  }
+  else if(isnan(_integral_p) // needed for fixing mistake when random NaN appeared
+  {
+      _integral_p = 0;	  
   }
   else
   {
-      _integral_theta_PI += (_theta - _last_theta) * _dt;
-      _integral_phi_PI += (_phi - _last_phi) * _dt;
-      _integral_psi_PI += (_psi - _last_psi) * _dt;
+      _integral_p += (_e_p - _last_e_p) * _dt;  
   }
-
-  //Needed to fix mistake where one or two NaNs appear
-  if (isnan(_integral_theta_PI) || isnan(_integral_phi_PI) || isnan(_integral_psi_PI))
+	  
+  if (abs(_integral_q) > _limit_integral)
   {
-      _integral_theta_PI = 0;
-      _integral_phi_PI = 0;
-      _integral_psi_PI = 0;
+      _integral_q = _limit_integral;
   }
-
-  _cmd_r = _RCAH_P_psi * (_psi - _last_psi) + _RCAH_I_psi * _integral_psi_PI;
-  _cmd_p = _RCAH_P_phi * (_phi - _last_phi) + _RCAH_I_phi * _integral_phi_PI;
-  _cmd_q = _RCAH_P_theta * (_theta - _last_theta) + _RCAH_I_theta * _integral_theta_PI;
-
-  _phi_dot -= _cmd_p;
-  _theta_dot -= _cmd_q;
-  _psi_dot -= _cmd_r;
-}*/
-
-// Calculates controller error as suggested in paper
-void trajectory_controller::calc_controller_error()
-{
+  else if(isnan(_integral_q) // needed for fixing mistake when random NaN appeared
+  {
+      _integral_q = 0;	  
+  }
+  else
+  {
+      _integral_q += (_e_q - _last_e_q) * _dt;  
+  }
+	  
+  if (abs(_integral_r) > _limit_integral)
+  {
+      _integral_r = _limit_integral;
+  }
+  else if(isnan(_integral_r) // needed for fixing mistake when random NaN appeared
+  {
+      _integral_r = 0;	  
+  }
+  else
+  {
+      _integral_r += (_e_r - _last_e_r) * _dt;  
+  }
+	  
+  _u_p = _K_P_p * _e_p + _K_I_p * _integral_p;
+  _u_q = _K_P_q * _e_q + _K_I_q * _integral_q;
+  _u_r = _K_P_r * _e_r + _K_I_r * _integral_r;
+  	  
+  /*	old version  
+  						macht verodern von allem hier wirklich Sinn? siehe oben
   if (abs(_integral_theta) > _limit_integral || abs(_integral_phi) > _limit_integral || abs(_integral_psi) > _limit_integral)
   {
       _integral_theta = _limit_integral;
@@ -201,6 +237,7 @@ void trajectory_controller::calc_controller_error()
   _e_psi = 0;
   _e_phi = _K_D_phi * _phi_dot + _K_P_phi * _phi + _K_I_phi * _integral_phi;
   _e_theta = _K_D_theta * _theta_dot + _K_P_theta * _theta + _K_I_theta * _integral_theta;
+  */
 }
 
 // converts thrust to throttle command in %
@@ -264,7 +301,7 @@ int trajectory_controller::convert_thrust(double newton)
   }
 
   val = c + (d-c)*(gramm-a)/(b-a);
-  val = 1025 + 975 * val/100;
+  val = 1025 + 975 * val/100; // convert to PWM for motor
   return (int)val;
 }
 
@@ -274,13 +311,23 @@ void trajectory_controller::set_thrusts()
   double gravity_norm = _m * _g / ( 6*cos(_theta)*cos(_phi) );
 
   // Einzelschuebe in Newton
-  double thrustsNewton[6] = {0};	
-  thrustsNewton[0] = gravity_norm + _e_phi*_Ixx/(6*_L) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
+  double thrustsNewton[6] = {0};
+  // old implementation aus paper
+  /*thrustsNewton[0] = gravity_norm + _e_phi*_Ixx/(6*_L) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
   thrustsNewton[1] = gravity_norm + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_phi*_Ixx/(6*_L) + _e_psi*_k*_Izz/(6*_b);
   thrustsNewton[2] = gravity_norm - _e_phi*_Ixx/(3*_L) - _e_psi*_k*_Izz/(6*_b);
   thrustsNewton[3] = gravity_norm - _e_phi*_Ixx/(6*_L) - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_psi*_k*_Izz/(6*_b);
   thrustsNewton[4] = gravity_norm - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_phi*_Ixx/(6*_L) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);
+  thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);*/
+	
+  // new implementation based on Simulink
+  double cog_correction = 0.365; // voruebergehend - Anpassung an Schwerpunktslage
+  thrustsNewton[0] = gravity_norm + cog_correction + _u_p + _u_q - _u_r;
+  thrustsNewton[1] = gravity_norm + cog_correction - _u_p + _u_q + _u_r;
+  thrustsNewton[2] = gravity_norm - 2*_u_p - _u_r;
+  thrustsNewton[3] = gravity_norm - cog_correction - _u_p - _u_q + _u_r;
+  thrustsNewton[4] = gravity_norm - cog_correction + _u_p - _u_q - _u_r;
+  thrustsNewton[5] = gravity_norm + 2*_u_p + _u_r;
     
   //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
   //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
@@ -290,7 +337,7 @@ void trajectory_controller::set_thrusts()
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
   _thrusts.header.stamp = ros::Time::now();
-  //Reihenfolge durch uart_bridge festgelegt
+  // Convert to Hex Clean Flight Reihenfolge
   _thrusts.motor0 = convert_thrust(thrustsNewton[3]);
   _thrusts.motor1 = convert_thrust(thrustsNewton[1]);
   _thrusts.motor2 = convert_thrust(thrustsNewton[4]);
@@ -299,21 +346,17 @@ void trajectory_controller::set_thrusts()
   _thrusts.motor5 = convert_thrust(thrustsNewton[5]);
     
   //debug
-    ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
+    /*ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
     ROS_DEBUG("motor1 %d \n", _thrusts.motor1);
     ROS_DEBUG("motor2 %d \n", _thrusts.motor2);
-    ROS_DEBUG("motor3 %d \n", _thrusts.motor3);
-
-  // Debug
-  //std::cout << "T1: " << _thrusts.motor0 << "  T2: " << _thrusts.motor1 << std::endl;
-  //std::cout << "T3: " << _thrusts.motor3 << "  T4: " << _thrusts.motor4 << std::endl;
-  //std::cout << "-------" << std::endl;
+    ROS_DEBUG("motor3 %d \n", _thrusts.motor3);*/
 }
 
 void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 {
   //Parameters
-  _K_P_theta = 37.086;
+  // old version, now initialiazed in constructor
+  /*_K_P_theta = 37.086;
   _K_I_theta = 41.91;
   _K_D_theta = 10.65;
   _K_P_phi = 8.816;
@@ -321,19 +364,10 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
   _K_D_phi = 5.14;
   _K_P_psi = 25.88;
   _K_I_psi = 23.926;
-  _K_D_psi = 8.94;
-
-/*
-  _RCAH_P_theta = 4.174;
-  _RCAH_I_theta = 12.893;
-  _RCAH_P_phi = 5.496;
-  _RCAH_I_phi = 11.761;
-  _RCAH_P_psi = 3.75;
-  _RCAH_I_psi = 4.942;
-*/
+  _K_D_psi = 8.94;*/
 
   _dt = -1; //For the first loop
-  ros::Rate loop_rate(50);  //Calculation Rate
+  ros::Rate loop_rate(100);  //Calculation Rate
 
   while(ros::ok())
   {
@@ -355,9 +389,9 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 
     set_thrusts();
 
-    _last_theta = _theta; // prepare for next iteration
-    _last_psi = _psi;
-    _last_phi = _phi;
+    _last_e_p = _e_p; // prepare for next iteration
+    _last_e_q = _e_q;
+    _last_e_r = _e_r;
 
     _last = _now; // time
 
@@ -384,8 +418,6 @@ int main(int argc, char** argv)
 
     // TODO motormsg
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
-
-    // wie oft publishen imu_pose?
 
     controller.do_controlling(MotorMsg);
 
