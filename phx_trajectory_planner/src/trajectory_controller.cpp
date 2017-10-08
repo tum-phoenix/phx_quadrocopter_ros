@@ -4,6 +4,8 @@
     1.) Reglerparameter fine tunen mit Simulink
     2.) Masseeigenschaften Simulink Modell ueberpruefen
     3.) limit integral --> prevent integral wind-up sinnvoll ueberlegen!!
+    4.) passt winkel trafo von quaternionen zu Eulerwinkel?? Drehreihenfolge XYZ??
+    5.) passen Eulerwinkel und Drehraten prinzipiell? --> ueberpreufen (z.B. Koordinatentrafo bei Drehraten aber nicht Winkel gemacht...)
     .
     .
     .
@@ -28,10 +30,10 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _Izz = 0;
   _L = 0;*/ // distance from cog to any of the propellers
 	
-  _phi_cmd = 0; // Kommandogroessen
+  _phi_cmd = 0; // Kommandogroessen in rad!
   _theta_cmd = 0;
   //_psi_cmd = 0; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
-  _p_cmd = 0;
+  _p_cmd = 0; // [rad/s]
   _q_cmd = 0;
   _r_cmd = 0;
 	
@@ -133,7 +135,8 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   _r = msg->angular_velocity.z; // !Vorzeichen!
 
   _current.orientation = msg->orientation;
-    
+  transform_quaternion();
+	
   // do coordinate frame trafo from imu_coosy --> coosy in paper
   double root2 = sqrt(1/2);
 
@@ -147,7 +150,7 @@ void trajectory_controller::transform_quaternion()
     tf2::Quaternion q;
     tf2::fromMsg(_current.orientation, q);
     tf2::Matrix3x3 m(q);
-    m.getRPY(_phi, _theta, _psi);
+    m.getRPY(_phi, _theta, _psi); // in rad
 }
 
 // Calculates controller error as suggested in paper
@@ -383,7 +386,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
       _dt = 0; // for calc_controller_error
     }
 
-    transform_quaternion();
+    //transform_quaternion(); should only be executed when new orientation arives? --> now called in imu_callback
     //calc_delta_x_dot();
     calc_controller_outputs();
 
