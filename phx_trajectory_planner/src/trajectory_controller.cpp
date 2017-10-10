@@ -63,19 +63,20 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _integral_q = 0;
   _integral_r = 0;
   
-  _limit_integral = 0.2; 
+  //_limit_integral = 0.2;
+  _limit_integral = _m*_g/6;
 
   _dt = 0;
 	
-  _K_P_phi = 0.559369;
+  _K_P_phi = 0.56252;
   _K_P_theta = 1.59269;
   //_K_P_psi = 0;
-  _K_P_p = 0.027858;
-  _K_I_p = 0.00959;
-  _K_P_q = 0.093234;
-  _K_I_q = 1.22891;
-  _K_P_r = 0.1868;
-  _K_I_r = 37.36;
+  _K_P_p = 0.08877;
+  _K_I_p = 0.25469;
+  _K_P_q = 0.16285;
+  _K_I_q = 1.3512405;
+  _K_P_r = 0.18682;
+  _K_I_r = 37.3649;
 	
   /*_K_I_theta = 0; old implementation
   _K_P_theta = 0;
@@ -331,12 +332,18 @@ void trajectory_controller::set_thrusts()
 	
   // new implementation based on Simulink
   double cog_correction = 0.365; // voruebergehend - Anpassung an Schwerpunktslage
-  thrustsNewton[0] = gravity_norm + cog_correction + _u_p + _u_q - _u_r;
+  thrustsNewton[0] = gravity_norm + cog_correction + _u_q - _u_r;
+  thrustsNewton[1] = gravity_norm + cog_correction + _u_q + _u_r;
+  thrustsNewton[2] = gravity_norm - _u_p - _u_r;
+  thrustsNewton[3] = gravity_norm - cog_correction - _u_q + _u_r;
+  thrustsNewton[4] = gravity_norm - cog_correction - _u_q - _u_r;
+  thrustsNewton[5] = gravity_norm + _u_p + _u_r;
+  /*thrustsNewton[0] = gravity_norm + cog_correction + _u_p + _u_q - _u_r;
   thrustsNewton[1] = gravity_norm + cog_correction - _u_p + _u_q + _u_r;
   thrustsNewton[2] = gravity_norm - 2*_u_p - _u_r;
   thrustsNewton[3] = gravity_norm - cog_correction - _u_p - _u_q + _u_r;
   thrustsNewton[4] = gravity_norm - cog_correction + _u_p - _u_q - _u_r;
-  thrustsNewton[5] = gravity_norm + 2*_u_p + _u_r;
+  thrustsNewton[5] = gravity_norm + 2*_u_p + _u_r;*/
     
   //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
   //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
