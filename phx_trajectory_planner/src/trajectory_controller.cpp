@@ -139,7 +139,7 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 	
   double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
-  _r = msg->angular_velocity.z*pi/180; // !Vorzeichen!; in rad/s umrechnen
+  _r = msg->angular_velocity.z*M_PI/180; // !Vorzeichen!; in rad/s umrechnen
 
   _current.orientation = msg->orientation;
   transform_quaternion();
