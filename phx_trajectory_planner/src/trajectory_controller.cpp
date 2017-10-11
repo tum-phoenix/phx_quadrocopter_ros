@@ -147,8 +147,8 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // do coordinate frame trafo from imu_coosy --> coosy in paper
   double root2 = sqrt(1/2);
 
-  _p = root2 * (x_imu + y_imu)*pi/180; // in rad/s umrechnen
-  _q = root2 * (x_imu - y_imu)*pi/180;
+  _p = root2 * (x_imu + y_imu)*M_PI/180; // in rad/s umrechnen
+  _q = root2 * (x_imu - y_imu)*M_PI/180;
 }
 
 //Transform the quaternions into rotations about the coordinate axes
