@@ -4,6 +4,7 @@
     1.) Reglerparameter fine tunen mit Simulink
     2.) limit integral --> prevent integral wind-up sinnvoll ueberlegen!!
 	3.) passen Eulerwinkel und Drehraten? Drehraten filtern? (z.B. einfacher Tiefpass)
+	4.) horizontale Geschwindigkeit zu null regeln
     .
     .
     .
