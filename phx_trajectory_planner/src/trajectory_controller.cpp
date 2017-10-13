@@ -69,14 +69,14 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_P_phi = 2.264305; // PID Roll
   _K_I_phi = 0.845257;
   _K_D_phi = 0.502417;
-  _K_P_theta = 2.101059; // PID Pitch
-  _K_I_theta = 1.4335615;
-  _K_D_theta = 0.258446;
+  _K_P_theta = 2.9259899; // PID Pitch
+  _K_I_theta = 1.9397181;
+  _K_D_theta = 0.37002521;
   //_K_P_psi = 0;
   _K_P_p = 0.340461; // PI rollrate
   _K_I_p = 0.02371677;
-  _K_P_q = 0.18372158; // PI pitchrate
-  _K_I_q = 1.791958;
+  _K_P_q = 0.5492050; // PI pitchrate
+  _K_I_q = 1.9120622;
   _K_P_r = 0.18682464; // PI yawrate
   _K_I_r = 37.3649283;
 
