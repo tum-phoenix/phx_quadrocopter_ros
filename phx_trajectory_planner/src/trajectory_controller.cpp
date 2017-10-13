@@ -3,8 +3,8 @@
 /* open points:
     1.) Reglerparameter fine tunen mit Simulink
     2.) limit integral --> prevent integral wind-up sinnvoll ueberlegen!!
-	3.) passen Eulerwinkel und Drehraten? Drehraten filtern? (z.B. einfacher Tiefpass)
-	4.) horizontale Geschwindigkeit zu null regeln
+    3.) passen Eulerwinkel und Drehraten? Drehraten filtern? (z.B. einfacher Tiefpass)
+    4.) horizontale Geschwindigkeit zu null regeln
     .
     .
     .
@@ -30,9 +30,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _q_cmd = 0;
   _r_cmd = 0;
 	
-  _u_phi = 0; // Regleroutputs (PID Winkel)
-  _u_theta = 0;
-  //_u_psi = 0;
   _u_p = 0; // Regleroutputs (PI Drehraten)
   _u_q = 0;
   _u_r = 0;
@@ -56,9 +53,9 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _q = 0;
   _r = 0;
 	
-  _integral_theta = 0;
   _integral_phi = 0;
-  _integral_psi = 0;
+  _integral_theta = 0;
+  //_integral_psi = 0;
   _integral_p = 0;
   _integral_q = 0;
   _integral_r = 0;
@@ -164,23 +161,23 @@ double trajectory_controller::integrate(double last_integral, double error, doub
 {
   if(isnan(last_integral)) // needed for fixing mistake when random NaN appeared
   {
-      last_integral = 0;	  
+    last_integral = 0;
   }
 	
-  integral = last_integral + (error + last_error) * K_I * _dt/2; // discrete trapezoidal integration
+  double integral = last_integral + (error + last_error) * K_I * _dt/2; // discrete trapezoidal integration
 	
-  if (integral > limit)
+  if(integral > limit)
   {
-      integral = limit;
+    integral = limit;
   }
   else if(integral < -limit)
   {
-	  integral = -limit
+    integral = -limit;
   }
 	
   if(isnan(integral)) // needed for fixing mistake when random NaN appeared
   {
-      integral = 0;	  
+    integral = 0;
   }
 	
   return integral;
@@ -202,29 +199,29 @@ void trajectory_controller::calc_controller_outputs()
   if(_dt != 0)
   {
   	diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
-	diff_e_theta = (_e_theta - last_e_theta)/_dt;
+    diff_e_theta = (_e_theta - _last_e_theta)/_dt;
   }
 	
   // Regleroutputs outer loop	
-  double u_phi = _K_P_phi * e_phi + _integral_phi + diff_e_phi * _K_D_phi; // p_cmd
-  double u_theta = _K_P_theta * e_theta + _integral_theta + diff_e_theta * _K_D_theta; // q_cmd
+  double u_phi = _K_P_phi * _e_phi + _integral_phi + diff_e_phi * _K_D_phi; // p_cmd
+  double u_theta = _K_P_theta * _e_theta + _integral_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
 	
-  if(u_phi > max_cmd_rate)
+  if(u_phi > _max_cmd_rate)
   {
-	u_phi = max_cmd_rate;  
+    u_phi = _max_cmd_rate;
   }
-  else if(u_phi < -max_cmd_rate)
+  else if(u_phi < -_max_cmd_rate)
   {
-	u_phi = -max_cmd_rate;  
+    u_phi = -_max_cmd_rate;
   }
-  if(u_theta > max_cmd_rate)
+  if(u_theta > _max_cmd_rate)
   {
-	u_theta = max_cmd_rate;  
+    u_theta = _max_cmd_rate;
   }
-  else if(u_theta < -max_cmd_rate)
+  else if(u_theta < -_max_cmd_rate)
   {
-	u_theta = -max_cmd_rate;  
+    u_theta = -_max_cmd_rate;
   }
 
   // Rates
@@ -400,9 +397,9 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 
     set_thrusts();
 
-	// prepare for next iteration
-	_last_e_phi = _e_phi;
-	_last_e_theta = _e_theta;
+    // prepare for next iteration
+    _last_e_phi = _e_phi;
+    _last_e_theta = _e_theta;
     _last_e_p = _e_p;
     _last_e_q = _e_q;
     _last_e_r = _e_r;
@@ -430,7 +427,7 @@ int main(int argc, char** argv)
     //ros::Subscriber init_sub = nh.subscribe("/phx/pose", 1, &trajectory_controller::set_current_pose, &controller);
     ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 1, &trajectory_controller::imu_callback, &controller);
 	
-	ros::Subscriber euler_angles = nh.subscribe("/phx/fc/attitude", 1, &trajectory_controller::attitude_callback, &controller);
+    ros::Subscriber euler_angles = nh.subscribe("/phx/fc/attitude", 1, &trajectory_controller::attitude_callback, &controller);
 
     // TODO motormsg
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
