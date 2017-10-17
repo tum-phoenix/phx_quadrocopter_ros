@@ -11,6 +11,7 @@
 #include "math.h"
 #include "phx_uart_msp_bridge/Motor.h"
 #include "phx_uart_msp_bridge/Attitude.h"
+#include "phx_uart_msp_bridge/RemoteControl.h"
 //#include "roslib.h"
 
 class trajectory_controller
@@ -40,6 +41,7 @@ class trajectory_controller
         double _p_cmd; // Rates
         double _q_cmd;
         double _r_cmd;
+        double _dT; // throttle delta
     
         double _phi; // current states
         double _theta;
@@ -106,6 +108,7 @@ class trajectory_controller
         //void transform_quaternion();
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
+        void rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);
 
         void do_controlling(ros::Publisher);
         int convert_thrust(double newton);
