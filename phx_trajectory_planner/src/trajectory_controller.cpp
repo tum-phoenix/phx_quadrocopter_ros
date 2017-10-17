@@ -1,7 +1,7 @@
 // !!! This is not a trajectory controller yet !!! Only attitude stabilization based on Simulink / Simmechanics model
 
 /* open points:
-    1.) passen Eulerwinkel und Drehraten? Drehraten filtern? (z.B. einfacher Tiefpass)
+    1.) passen Vorzeichen von Eulerwinkel bzw Drehraten? v.a. psi? Drehraten filtern? (z.B. einfacher Tiefpass)
     2.) Regler für horizontale und vertikale Geschwindigkeit (Altitude Hold)
     .
     .
@@ -119,10 +119,10 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // Drehraten kommen in [°/s]! --> Umrechnung in rad/s notwendig
   // Koordinatentrafo nicht notwendig
   // ====================================================================	
-	
-  _p = msg->angular_velocity.x*M_PI/180;
-  _q = msg->angular_velocity.y*M_PI/180;
-  _r = msg->angular_velocity.z*M_PI/180;
+					// Umrechnung s. UART MSP BRIDGE SRC
+  _p = msg->angular_velocity.x*(M_PI/180)*(2000/8192);
+  _q = msg->angular_velocity.y*(M_PI/180)*(2000/8192);
+  _r = msg->angular_velocity.z*(M_PI/180)*(2000/8192);
 	
   /*double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
