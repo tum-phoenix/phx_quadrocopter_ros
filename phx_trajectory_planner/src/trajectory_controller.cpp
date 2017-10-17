@@ -130,8 +130,8 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // ====================================================================	
 					// Umrechnung s. UART MSP BRIDGE SRC
   _p = msg->angular_velocity.x*(M_PI/180)*(2000/8192);
-  _q = msg->angular_velocity.y*(M_PI/180)*(2000/8192);
-  _r = msg->angular_velocity.z*(M_PI/180)*(2000/8192);
+  _q = -msg->angular_velocity.y*(M_PI/180)*(2000/8192);
+  _r = -msg->angular_velocity.z*(M_PI/180)*(2000/8192);
 	
   /*double x_imu = msg->angular_velocity.x;
   double y_imu = msg->angular_velocity.y;
@@ -160,7 +160,7 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg)
 {
   _phi = (double) msg->roll*M_PI/180;
-  _theta = (double) msg->pitch*M_PI/180;
+  _theta = (double) -msg->pitch*M_PI/180;
   _psi = (double) msg->yaw*M_PI/180;
 }
 
