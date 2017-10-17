@@ -27,6 +27,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _p_cmd = 0; // [rad/s]
   _q_cmd = 0;
   _r_cmd = 0;
+  _dT = 0; // additional throttle
 	
   _u_p = 0; // Regleroutputs (PI Drehraten)
   _u_q = 0;
@@ -87,6 +88,14 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
   _current_path.poses = msg->poses;
   _current = _current_path.poses[0].pose;
   _current_goal = _current_path.poses[1].pose;
+}
+
+void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
+{
+  //_phi_cmd = msg->roll;
+  //_theta_cmd = msg->pitch;
+  //_psi_cmd = msg->yaw;
+  //_dT = msg->throttle;  
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -322,12 +331,12 @@ void trajectory_controller::set_thrusts()
 	
   // new implementation based on Simulink
   double cog_correction = 0.37; // voruebergehend - Anpassung an Schwerpunktslage
-  thrustsNewton[0] = gravity_norm + cog_correction + _u_q - _u_r;
-  thrustsNewton[1] = gravity_norm + cog_correction + _u_q + _u_r;
-  thrustsNewton[2] = gravity_norm - _u_p - _u_r;
-  thrustsNewton[3] = gravity_norm - cog_correction - _u_q + _u_r;
-  thrustsNewton[4] = gravity_norm - cog_correction - _u_q - _u_r;
-  thrustsNewton[5] = gravity_norm + _u_p + _u_r;
+  thrustsNewton[0] = _dT + gravity_norm + cog_correction + _u_q - _u_r;
+  thrustsNewton[1] = _dT + gravity_norm + cog_correction + _u_q + _u_r;
+  thrustsNewton[2] = _dT + gravity_norm - _u_p - _u_r;
+  thrustsNewton[3] = _dT + gravity_norm - cog_correction - _u_q + _u_r;
+  thrustsNewton[4] = _dT + gravity_norm - cog_correction - _u_q - _u_r;
+  thrustsNewton[5] = _dT + gravity_norm + _u_p + _u_r;
   /*thrustsNewton[0] = gravity_norm + cog_correction + _u_p + _u_q - _u_r;
   thrustsNewton[1] = gravity_norm + cog_correction - _u_p + _u_q + _u_r;
   thrustsNewton[2] = gravity_norm - 2*_u_p - _u_r;
@@ -426,8 +435,11 @@ int main(int argc, char** argv)
     ros::Subscriber imu_pose = nh.subscribe("/phx/imu", 1, &trajectory_controller::imu_callback, &controller);
 	
     ros::Subscriber euler_angles = nh.subscribe("/phx/fc/attitude", 1, &trajectory_controller::attitude_callback, &controller);
+	
+	// phx/fc/rc oder phx/fc/rc_pilot?
+	ros::Subscriber rc = nh.subscribe("/phx/fc/rc_pilot", 1, &trajectory_controller::rc_callback, &controller);
 
-    // TODO motormsg
+    // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
 
     controller.do_controlling(MotorMsg);
