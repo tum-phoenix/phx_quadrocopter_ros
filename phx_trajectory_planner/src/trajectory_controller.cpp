@@ -59,9 +59,9 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _integral_q = 0;
   _integral_r = 0;
   
-  // 					max thrust
-  _limit_integral_rates = (1.52 - _m/6)*_g;
-  _max_cmd_rate = 100*M_PI/180; // 100 °/s
+  // 		durch Simulation ausgelegt
+  _limit_integral = 0.2;
+  //_max_cmd_rate = 100*M_PI/180; // 100 °/s
 
   _dt = 0;
 	
@@ -164,22 +164,22 @@ void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitud
   _psi = (double) msg->yaw*M_PI/180;
 }
 
-double trajectory_controller::integrate(double last_integral, double error, double last_error, double limit, double K_I)
+double trajectory_controller::integrate(double last_integral, double error, double last_error)
 {
   if(isnan(last_integral)) // needed for fixing mistake when random NaN appeared
   {
     last_integral = 0;
   }
 	
-  double integral = last_integral + (error + last_error) * K_I * _dt/2; // discrete trapezoidal integration
+  double integral = last_integral + (error + last_error) * _dt/2; // discrete trapezoidal integration
 	
-  if(integral > limit)
+  if(integral > _limit_integral)
   {
-    integral = limit;
+    integral = _limit_integral;
   }
-  else if(integral < -limit)
+  else if(integral < -_limit_integral)
   {
-    integral = -limit;
+    integral = -_limit_integral;
   }
 	
   if(isnan(integral)) // needed for fixing mistake when random NaN appeared
@@ -198,20 +198,20 @@ void trajectory_controller::calc_controller_outputs()
   _e_theta = _theta_cmd - _theta;
   //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
 
-  _integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, _max_cmd_rate, _K_I_phi);
-  _integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, _max_cmd_rate, _K_I_theta);
+  _integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi);
+  _integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta);
   
   double diff_e_phi = 0;
   double diff_e_theta = 0;
   if(_dt != 0)
   {
-  	diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
+    diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
     diff_e_theta = (_e_theta - _last_e_theta)/_dt;
   }
 	
   // Regleroutputs outer loop	
-  double u_phi = _K_P_phi * _e_phi + _integral_phi + diff_e_phi * _K_D_phi; // p_cmd
-  double u_theta = _K_P_theta * _e_theta + _integral_theta + diff_e_theta * _K_D_theta; // q_cmd
+  double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
+  double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
 	
   if(u_phi > _max_cmd_rate)
@@ -236,13 +236,13 @@ void trajectory_controller::calc_controller_outputs()
   _e_q = u_theta - _q;
   _e_r = u_psi - _r;
 
-  _integral_p = integrate(_integral_p, _e_p, _last_e_p, _limit_integral_rates, _K_I_p);
-  _integral_q = integrate(_integral_q, _e_q, _last_e_q, _limit_integral_rates, _K_I_q);
-  _integral_r = integrate(_integral_r, _e_r, _last_e_r, _limit_integral_rates, _K_I_r);
+  _integral_p = integrate(_integral_p, _e_p, _last_e_p);
+  _integral_q = integrate(_integral_q, _e_q, _last_e_q);
+  _integral_r = integrate(_integral_r, _e_r, _last_e_r);
 	  
-  _u_p = _K_P_p * _e_p + _integral_p;
-  _u_q = _K_P_q * _e_q + _integral_q;
-  _u_r = _K_P_r * _e_r + _integral_r;	
+  _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
+  _u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
+  _u_r = _K_P_r * _e_r + _integral_r * _K_I_r;	
   /*	
   _u_p = _K_P_p * _e_p + _K_I_p * _integral_p;
   _u_q = _K_P_q * _e_q + _K_I_q * _integral_q;
