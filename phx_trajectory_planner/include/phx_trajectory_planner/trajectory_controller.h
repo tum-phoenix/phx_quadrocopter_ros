@@ -80,8 +80,8 @@ class trajectory_controller
         double _integral_p;
         double _integral_q;
         double _integral_r;
-        double _limit_integral_rates;
-        double _max_cmd_rate;
+        double _limit_integral;
+        //double _max_cmd_rate;
     
         double _u_p; // Rate Controller Outputs
         double _u_q;
