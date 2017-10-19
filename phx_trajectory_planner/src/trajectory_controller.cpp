@@ -61,7 +61,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   
   // 		durch Simulation ausgelegt
   _limit_integral = 0.2;
-  //_max_cmd_rate = 100*M_PI/180; // 100 °/s
+  _max_cmd_rate = 100*M_PI/180; // 100 °/s
 
   _dt = 0;
 	
