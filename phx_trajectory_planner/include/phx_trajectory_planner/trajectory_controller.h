@@ -112,7 +112,7 @@ class trajectory_controller
 
         void do_controlling(ros::Publisher);
         int convert_thrust(double newton);
-        double integrate(double last_integral, double error, double last_error, double limit, double K_I);
+        double integrate(double last_integral, double error, double last_error);
         void attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg);
 };
 
