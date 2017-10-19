@@ -1,12 +1,13 @@
 // !!! This is not a trajectory controller yet !!! Only attitude stabilization based on Simulink / Simmechanics model
 
 /* open points:
-    1.) passen Vorzeichen von Eulerwinkel bzw Drehraten? v.a. psi? Drehraten filtern? (z.B. einfacher Tiefpass)
-    2.) Regler für horizontale und vertikale Geschwindigkeit (Altitude Hold)
+    1.) Position Hold Regler, Altitude hold
+    2.) Mehr Sensoren integrieren! z.B. Lidar für Höhe... (bis jetzt nur IMU Drehraten + gefilterte Lagewinkel)
+    3.) Drehraten filtern? (z.B. einfacher Tiefpass)
     .
     .
     .
-    Unendlich.) trajektorienfolgeregler (bis jetzt nur lage)
+    Unendlich.) Trajektorienfolgeregler (bis jetzt nur lage)
 */
 
 #include "phx_trajectory_planner/trajectory_controller.h"
