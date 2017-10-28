@@ -42,6 +42,7 @@ class trajectory_controller
         double _p_cmd; // Rates
         double _q_cmd;
         double _r_cmd;
+        double _altitude_cmd;
         double _dT; // throttle delta
     
         double _phi; // current states
@@ -128,7 +129,7 @@ class trajectory_controller
 
         void do_controlling(ros::Publisher);
         int convert_thrust(double newton);
-        double integrate(double last_integral, double error, double last_error);
+        double integrate(double last_integral, double error, double last_error, double limit_integral);
         void attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg);
 };
 

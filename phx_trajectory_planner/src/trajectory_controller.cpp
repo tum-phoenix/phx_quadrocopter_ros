@@ -3,11 +3,12 @@
 /* open points:
 		1.) Timestamp bei marvicAltitude Msg einfuegen!! --> fuer Tiefpassfilter
 				--> Tiefpassfilter Matlab validieren (z.B. Hand unten durch ziehen sollte keine schnelle Dynamik implizieren...)
-    2.) Drehraten filtern, Offset! --> ueberpruefen durch Integration und Vergleich mit Winkeln
-    3.) Remotecontrol Theta und Phi kommandieren koennen!
-		4.) altitude kommandieren können!
-    4.) als Backup: altitude hold regler auskommentieren und Throttle dT kommandieren koennen
-    5.) Position hold, Imu Acceleration verwenden
+    2.) altitude hold testen
+    3.) Drehraten filtern, Offset! --> ueberpruefen durch Integration und Vergleich mit Winkeln
+    4.) Remotecontrol Theta und Phi kommandieren koennen! z.B. via ssh arrow-keys?
+    5.) altitude kommandieren können via ssh keys +/- ...?
+    6.) als Backup: altitude hold regler auskommentieren und Throttle dT kommandieren koennen
+    7.) Position hold, Imu Acceleration verwenden
     .
     .
     .
