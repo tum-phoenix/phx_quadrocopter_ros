@@ -170,6 +170,10 @@ target_link_libraries(phx_trajectory_controller
 	${catkin_LIBRARIES}
  )
 
+target_link_libraries(phx_trajectory_rc
+        ${catkin_LIBRARIES}
+ )
+
 #############
 ## Install ##
 #############
