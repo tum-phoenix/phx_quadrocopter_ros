@@ -50,7 +50,16 @@ class trajectory_controller
         double _p; // Rates
         double _q;
         double _r;
+    
         double _altitude;
+        double _last_altitude;
+        double _last_alt_t;
+        double _wg;
+        double _integral_alt;
+        double _e_alt;
+        double _last_e_alt;
+        double _limit_integral_altitude;
+        double _last_diff_e_alt;
 
         double _K_P_phi;
         double _K_I_phi;
@@ -86,7 +95,7 @@ class trajectory_controller
         double _integral_p;
         double _integral_q;
         double _integral_r;
-        double _limit_integral;
+        double _limit_integral_attitude;
         double _max_cmd_rate;
     
         double _u_p; // Rate Controller Outputs
