@@ -11,6 +11,7 @@
 #include "math.h"
 #include "phx_uart_msp_bridge/Motor.h"
 #include "phx_uart_msp_bridge/Attitude.h"
+#include "phx_uart_msp_bridge/Altitude.h"
 #include "phx_uart_msp_bridge/RemoteControl.h"
 //#include "roslib.h"
 
@@ -49,6 +50,7 @@ class trajectory_controller
         double _p; // Rates
         double _q;
         double _r;
+        double _altitude;
 
         double _K_P_phi;
         double _K_I_phi;
@@ -63,6 +65,10 @@ class trajectory_controller
         double _K_I_q;
         double _K_P_r;
         double _K_I_r;
+        double _K_P_alt;
+        double _K_I_alt;
+        double _K_D_alt;
+        double _K_N_alt;
 
         double _e_phi; // Reglerinputs (PID Winkel)
         double _e_theta;
@@ -109,6 +115,7 @@ class trajectory_controller
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
         void rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);
+        void altitude_callback(const phx_uart_msp_bridge::Altitude::ConstPtr& msg);
 
         void do_controlling(ros::Publisher);
         int convert_thrust(double newton);
