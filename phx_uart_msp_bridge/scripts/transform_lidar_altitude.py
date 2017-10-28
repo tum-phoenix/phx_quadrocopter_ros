@@ -42,6 +42,7 @@ def convert_altitude_measurement(input_altitude):
     new_msg.estimated_altitude = new_altitude
     ros_publish_new_altitude.publish(new_msg)
 
+    # timestamp kommt in Message nicht an --> sollte diese Zeile nicht vor dem publish stehen?
     update_footprint_transform(new_altitude)
 
 
