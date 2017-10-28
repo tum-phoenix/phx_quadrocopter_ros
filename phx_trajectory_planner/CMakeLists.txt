@@ -140,6 +140,7 @@ include_directories(
 add_executable(phx_trajectory_planner src/path_planner.cpp)
 add_executable(phx_trajectory_planner_goal src/goalpose.cpp)
 add_executable(phx_trajectory_planner_initial src/initialpose.cpp)
+add_executable(phx_trajectory_rc src/ssh_remote_control.cpp)
 add_executable(phx_trajectory_controller src/trajectory_controller.cpp)
 
 ## Rename C++ executable without prefix
