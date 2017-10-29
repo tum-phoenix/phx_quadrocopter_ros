@@ -3,6 +3,30 @@
 #include "math.h"
 
 
+#include <unistd.h>
+#include <termios.h>
+
+// see https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
+char getch() {
+        char buf = 0;
+        struct termios old = {0};
+        if (tcgetattr(0, &old) < 0)
+                perror("tcsetattr()");
+        old.c_lflag &= ~ICANON;
+        old.c_lflag &= ~ECHO;
+        old.c_cc[VMIN] = 1;
+        old.c_cc[VTIME] = 0;
+        if (tcsetattr(0, TCSANOW, &old) < 0)
+                perror("tcsetattr ICANON");
+        if (read(0, &buf, 1) < 0)
+                perror ("read()");
+        old.c_lflag |= ICANON;
+        old.c_lflag |= ECHO;
+        if (tcsetattr(0, TCSADRAIN, &old) < 0)
+                perror ("tcsetattr ~ICANON");
+        return (buf);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -16,7 +40,7 @@ int main(int argc, char **argv)
   rc.roll = 0; // 1 entspricht 0.25 grad
   rc.yaw = 0;
   rc.throttle = 0;
-  rc.aux1 = 2; // 1 entspricht 10 cm
+  rc.aux1 = 2; // 1 entspricht 10 cm -- fuer Throttle Delta Mode auf 0 setzen!!
   rc.aux2 = 0;
   rc.aux3 = 0;
   rc.aux4 = 0;
@@ -26,45 +50,63 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(10);
   ros::Publisher rc_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("/phx/ssh_rc", 1);
 
-  char str[2] = {0};
-  char* cmd = str;
+  char cmd[2] = {0};
+  //char* cmd = str;
+
+  //char cmd = 0;
 
   while (ros::ok()){
-    cmd = fgets(cmd, 2, stdin);
+    //cmd = fgets(cmd, 1, stdin);
+
+    cmd[0] = getch();
 
     //angles
-    if((strcmp(cmd, "i")) && rc.pitch > (-14.75/0.25))
+    if((strcmp(cmd, "i") == 0) && (rc.pitch > (-14.75/0.25))) // strcmp returns 0 if strings are equal ... stupid C
     {
-      rc.pitch -= 1;
+      rc.pitch--;
     }
-    if((strcmp(cmd, "k")) && rc.pitch < (14.75/0.25))
+    if((strcmp(cmd, "k") == 0) && (rc.pitch < (14.75/0.25)))
     {
-      rc.pitch += 1;
+      rc.pitch++;
     }
-    if((strcmp(cmd, "j")) && rc.pitch > (-14.75/0.25))
+    if((strcmp(cmd, "j") == 0) && (rc.roll > (-14.75/0.25)))
     {
-      rc.roll -= 1;
+      rc.roll--;
     }
-    if((strcmp(cmd, "l")) && rc.pitch < (14.75/0.25))
+    if((strcmp(cmd, "l") == 0) && (rc.roll < (14.75/0.25)))
     {
-      rc.roll += 1;
-    }
-
-    //altitude / thottle
-    if((strcmp(cmd, "a")) && rc.aux1 > 0)
-    {
-      rc.aux1 -= 1;
-    }
-    if((strcmp(cmd, "q")) && rc.aux1 < 3)
-    {
-      rc.aux1 += 1;
+      rc.roll++;
     }
 
-    // altitude cmd
-    ROS_DEBUG("roll_cmd %lf [°]\t pitch_cmd %lf [°]\t altitude_cmd %lf [m]\n", rc.roll*1.0/4, rc.pitch*1.0/4, rc.aux1*1.0/10);
+    //altitude cmd mode --> aux1 auf 2 setzen! (0.2 m)
+    if((strcmp(cmd, "a") == 0) && rc.aux1 > 0)
+    {
+      rc.aux1--;
+    }
+    if((strcmp(cmd, "q") == 0) && rc.aux1 < 3*10)
+    {
+      rc.aux1++;
+    }
 
-    // thottle cmd
+    //throttle cmd mode --> aux1 auf 0 setzen!
+    /*
+    if(strcmp(cmd, "a") == 0)
+    {
+      rc.aux1--;
+    }
+    if(strcmp(cmd, "q") == 0)
+    {
+      rc.aux1++;
+    }
+    */
 
+    //ROS_DEBUG("roll_cmd %lf [°]\t pitch_cmd %lf [°]\t altitude_cmd %lf [m]\n", rc.roll*1.0/4, rc.pitch*1.0/4, rc.aux1*1.0/10);
+
+    // Altitude Comamnd Version
+    std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [° t" << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "altitude_cmd: " << rc.aux1*1.0/10 << " [m]" << std::endl;
+
+    // Thrust Delta Command Version
+    //std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [°] " << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "Throttle_delta: " << rc.aux1*1.0/2 << " [N]" << std::endl;
 
     rc_pub.publish(rc);
 

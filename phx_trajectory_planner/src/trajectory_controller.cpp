@@ -5,10 +5,8 @@
 				--> Tiefpassfilter Matlab validieren (z.B. Hand unten durch ziehen sollte keine schnelle Dynamik implizieren...)
     2.) altitude hold testen
     3.) Drehraten filtern, Offset! --> ueberpruefen durch Integration und Vergleich mit Winkeln
-    4.) Remotecontrol Theta und Phi kommandieren koennen! z.B. via ssh arrow-keys?
-    5.) altitude kommandieren können via ssh keys +/- ...?
-    6.) als Backup: altitude hold regler auskommentieren und Throttle dT kommandieren koennen
-    7.) Position hold, Imu Acceleration verwenden
+    4.) als Backup: altitude hold regler auskommentieren und Throttle dT kommandieren koennen
+    5.) Position hold, Imu Acceleration verwenden
     .
     .
     .
@@ -32,7 +30,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _p_cmd = 0; // [rad/s]
   _q_cmd = 0;
   _r_cmd = 0;
-	_altitude_cmd = 1.2;
+  _altitude_cmd = 0.2;
 	
   _u_p = 0; // Regleroutputs (PI Drehraten)
   _u_q = 0;
@@ -114,10 +112,15 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
 
 void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
-  //_phi_cmd = msg->roll;
-  //_theta_cmd = msg->pitch;
+  _phi_cmd = msg->roll*1.0/4;
+  _theta_cmd = msg->pitch*1.0/4;
   //_psi_cmd = msg->yaw;
-  //_dT = msg->throttle;  
+
+  // altitude cmd
+  _altitude_cmd = msg->aux1*1.0/10;
+
+  // throttle cmd --> unten altitude hold regler auskommentieren!
+  //_dT = msg->aux1*1.0/2; // 0.5 Newton Schritte
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -458,9 +461,8 @@ int main(int argc, char** argv)
 	
 		ros::Subscriber altitude = nh.subscribe("/phx/altitude", 1, &trajectory_controller::altitude_callback, &controller);
 	
-		// remote control
-		// phx/fc/rc oder phx/fc/rc_pilot?
-		//ros::Subscriber rc = nh.subscribe("/phx/fc/rc_pilot", 1, &trajectory_controller::rc_callback, &controller);
+    // ssh remote control for trimming
+    ros::Subscriber rc = nh.subscribe("/phx/ssh_rc", 1, &trajectory_controller::rc_callback, &controller);
 
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
