@@ -87,6 +87,16 @@ int main(int argc, char **argv)
     {
       rc.aux1++;
     }
+    
+    // not aus
+    if(strcmp(cmd, "x") == 0)
+    {
+      rc.aux2 = 1;
+    }
+    if(strcmp(cmd, "y") == 0)
+    {
+      rc.aux2 = 0;
+    }
 
     //throttle cmd mode --> aux1 auf 0 setzen!
     /*
