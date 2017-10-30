@@ -103,6 +103,7 @@ class trajectory_controller
         double _u_q;
         double _u_r;
 
+        int _flg_mtr_stop;
 
     public:
 
