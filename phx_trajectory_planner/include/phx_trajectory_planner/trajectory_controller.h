@@ -105,6 +105,7 @@ class trajectory_controller
 
         int _flg_mtr_stop;
 
+        double _lastthrustsNewton[6]; //Needed for constraining the change in thrust
     public:
 
         double _dt;

@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     }
 
     //altitude cmd mode --> aux1 auf 2 setzen! (0.2 m)
-	/*
+
     if((strcmp(cmd, "a") == 0) && rc.aux1 > 0)
     {
       rc.aux1--;
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     {
       rc.aux1++;
     }
-	*/
+
     
     // not aus
     if(strcmp(cmd, "x") == 0)
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     }
 
     //throttle cmd mode --> aux1 auf 0 setzen!
-	  
+/*
     if(strcmp(cmd, "a") == 0)
     {
       rc.aux1--;
@@ -110,15 +110,15 @@ int main(int argc, char **argv)
     {
       rc.aux1++;
     }
-	  
+*/
 
     //ROS_DEBUG("roll_cmd %lf [°]\t pitch_cmd %lf [°]\t altitude_cmd %lf [m]\n", rc.roll*1.0/4, rc.pitch*1.0/4, rc.aux1*1.0/10);
 
     // Altitude Comamnd Version
-    //std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [° t" << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "altitude_cmd: " << rc.aux1*1.0/10 << " [m]" << std::endl;
+    std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [° t" << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "altitude_cmd: " << rc.aux1*1.0/10 << " [m]" << std::endl;
 
     // Thrust Delta Command Version
-    std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [°] " << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "Throttle_delta: " << rc.aux1*1.0/10 << " [N]" << std::endl;
+    //std::cout << "roll_cmd: " << rc.roll*1.0/4 << " [°] " << "pitch_cmd: " << rc.pitch*1.0/4 << " [°] " << "Throttle_delta: " << rc.aux1*1.0/10 << " [N]" << std::endl;
 
     rc_pub.publish(rc);
 

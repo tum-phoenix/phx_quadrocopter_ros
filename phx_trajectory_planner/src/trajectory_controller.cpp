@@ -86,10 +86,10 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_r = 37.3649283;
 	
 	// altitude hold
-	_K_P_alt = 0.04410028;
-	_K_I_alt = 0.00085578;
-	_K_D_alt = 0.38987669;
-	_K_N_alt = 69.125835; // filter coefficient
+  _K_P_alt = 0.02071;
+  _K_I_alt = 0.00069123;
+  _K_D_alt = 0.15357;
+  _K_N_alt = 37.20857; // filter coefficient
 	_altitude = 0;
 	_last_altitude = 0;
 	_last_alt_t = -1; // time, -1 for initialization (first if in altitude_callback)
@@ -101,6 +101,14 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_last_diff_e_alt = 0;
 	
 	_flg_mtr_stop = 0;
+
+  _lastthrustsNewton[0] = 0;
+  _lastthrustsNewton[1] = 0;
+  _lastthrustsNewton[2] = 0;
+  _lastthrustsNewton[3] = 0;
+  _lastthrustsNewton[4] = 0;
+  _lastthrustsNewton[5] = 0;
+
 }
 
 // callback function for path_sub (updates current path, current and goal)
@@ -119,12 +127,12 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
   //_psi_cmd = msg->yaw;
 
   // altitude cmd
-  //_altitude_cmd = msg->aux1*1.0/10;
+  _altitude_cmd = msg->aux1*1.0/10;
 	
 	_flg_mtr_stop = msg->aux2;
 
   // throttle cmd --> unten altitude hold regler auskommentieren!
-  _dT = msg->aux1*1.0/10; // 0.5 Newton Schritte
+  //_dT = msg->aux1*1.0/10; // 0.5 Newton Schritte
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -284,7 +292,7 @@ void trajectory_controller::calc_controller_outputs()
 		_last_diff_e_alt = diff_e_alt;
   }
 	
-	//_dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
+  _dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
 }
 
 // converts thrust to throttle command PWM (1000 .... 2000)
@@ -390,6 +398,17 @@ void trajectory_controller::set_thrusts()
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
   _thrusts.header.stamp = ros::Time::now();
+
+  //Constrain the rate of change of Thrust
+  //14.9112 ist max. Thrust Newton
+  for (int i; i<6; i++){
+    if (thrustsNewton[i]-_lastthrustsNewton[i] > 14.9112 / 50) {
+      thrustsNewton[i] = _lastthrustsNewton[i] + 14.9112 / 50;
+    }
+    if (thrustsNewton[i]-_lastthrustsNewton[i] < - 14.9112 / 50) {
+      thrustsNewton[i] = _lastthrustsNewton[i] - 14.9112 / 50;
+    }
+  }
   // Convert to Hex Clean Flight Reihenfolge
 	if(_flg_mtr_stop)
 	{
@@ -409,7 +428,10 @@ void trajectory_controller::set_thrusts()
   	_thrusts.motor4 = convert_thrust(thrustsNewton[2]);
   	_thrusts.motor5 = convert_thrust(thrustsNewton[5]);	
 	}
-    
+
+  for (int i; i<6; i++){
+    _lastthrustsNewton[i]=thrustsNewton[i];
+  }
   //debug
     /*ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
     ROS_DEBUG("motor1 %d \n", _thrusts.motor1);
@@ -421,6 +443,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 {
   _dt = -1; //For the first loop
   ros::Rate loop_rate(100);  //Calculation Rate
+
 
   while(ros::ok())
   {
