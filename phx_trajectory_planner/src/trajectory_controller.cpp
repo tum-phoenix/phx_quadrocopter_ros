@@ -97,7 +97,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_integral_alt = 0;
 	_e_alt = 0;
 	_last_e_alt = 0;
-	_limit_integral_altitude = 4; // durch Simulation festgelegt, Sprungantwort auf 1 m Kommando
+	_limit_integral_altitude = 10; // durch Simulation festgelegt, Sprungantwort auf 1 m Kommando
 	_last_diff_e_alt = 0;
 	
 	_flg_mtr_stop = 0;
