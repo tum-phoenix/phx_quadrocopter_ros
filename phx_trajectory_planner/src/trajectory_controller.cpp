@@ -99,6 +99,8 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_last_e_alt = 0;
 	_limit_integral_altitude = 4; // durch Simulation festgelegt, Sprungantwort auf 1 m Kommando
 	_last_diff_e_alt = 0;
+	
+	_flg_mtr_stop = 0;
 }
 
 // callback function for path_sub (updates current path, current and goal)
@@ -118,6 +120,8 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
 
   // altitude cmd
   _altitude_cmd = msg->aux1*1.0/10;
+	
+	_flg_mtr_stop = msg->aux2;
 
   // throttle cmd --> unten altitude hold regler auskommentieren!
   //_dT = msg->aux1*1.0/2; // 0.5 Newton Schritte
@@ -387,12 +391,24 @@ void trajectory_controller::set_thrusts()
   _thrusts.header.frame_id = "";
   _thrusts.header.stamp = ros::Time::now();
   // Convert to Hex Clean Flight Reihenfolge
-  _thrusts.motor0 = convert_thrust(thrustsNewton[3]);
-  _thrusts.motor1 = convert_thrust(thrustsNewton[1]);
-  _thrusts.motor2 = convert_thrust(thrustsNewton[4]);
-  _thrusts.motor3 = convert_thrust(thrustsNewton[0]);
-  _thrusts.motor4 = convert_thrust(thrustsNewton[2]);
-  _thrusts.motor5 = convert_thrust(thrustsNewton[5]);
+	if(_flg_mtr_stop)
+	{
+		_thrusts.motor0 = convert_thrust(0);
+  	_thrusts.motor1 = convert_thrust(0);
+  	_thrusts.motor2 = convert_thrust(0);
+  	_thrusts.motor3 = convert_thrust(0);
+  	_thrusts.motor4 = convert_thrust(0);
+  	_thrusts.motor5 = convert_thrust(0);	
+	}
+	else
+	{
+  	_thrusts.motor0 = convert_thrust(thrustsNewton[3]);
+  	_thrusts.motor1 = convert_thrust(thrustsNewton[1]);
+  	_thrusts.motor2 = convert_thrust(thrustsNewton[4]);
+  	_thrusts.motor3 = convert_thrust(thrustsNewton[0]);
+  	_thrusts.motor4 = convert_thrust(thrustsNewton[2]);
+  	_thrusts.motor5 = convert_thrust(thrustsNewton[5]);	
+	}
     
   //debug
     /*ROS_DEBUG("motor0 %d \n", _thrusts.motor0);
