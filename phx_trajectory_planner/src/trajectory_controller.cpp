@@ -412,12 +412,12 @@ void trajectory_controller::set_thrusts()
   // Convert to Hex Clean Flight Reihenfolge
 	if(_flg_mtr_stop)
 	{
-		_thrusts.motor0 = convert_thrust(0);
-  	_thrusts.motor1 = convert_thrust(0);
-  	_thrusts.motor2 = convert_thrust(0);
-  	_thrusts.motor3 = convert_thrust(0);
-  	_thrusts.motor4 = convert_thrust(0);
-  	_thrusts.motor5 = convert_thrust(0);	
+		_thrusts.motor0 = 1000; // min command
+  	_thrusts.motor1 = 1000;
+  	_thrusts.motor2 = 1000;
+  	_thrusts.motor3 = 1000;
+  	_thrusts.motor4 = 1000;
+  	_thrusts.motor5 = 1000;	
 	}
 	else
 	{
