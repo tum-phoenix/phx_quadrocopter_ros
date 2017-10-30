@@ -402,10 +402,10 @@ void trajectory_controller::set_thrusts()
   //Constrain the rate of change of Thrust
   //14.9112 ist max. Thrust Newton
   for (int i = 0; i<6; i++){
-    if (thrustsNewton[i]-_lastthrustsNewton[i] > maxTNewton / 50) {
+    if ((thrustsNewton[i]-_lastthrustsNewton[i]) > (maxTNewton / 50)) {
       thrustsNewton[i] = _lastthrustsNewton[i] + maxTNewton / 50;
     }
-    if (thrustsNewton[i]-_lastthrustsNewton[i] < - maxTNewton / 50) {
+    if ((thrustsNewton[i]-_lastthrustsNewton[i]) < (- maxTNewton / 50)) {
       thrustsNewton[i] = _lastthrustsNewton[i] - maxTNewton / 50;
     }
   }
