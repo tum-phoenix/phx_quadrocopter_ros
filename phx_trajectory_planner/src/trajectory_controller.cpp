@@ -35,7 +35,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _u_p = 0; // Regleroutputs (PI Drehraten)
   _u_q = 0;
   _u_r = 0;
-	_dT = 0; // additional throttle
+  _dT = 0; // additional throttle
 	
   _e_phi = 0; // Reglerinputs (PID Winkel)
   _e_theta = 0;
@@ -119,12 +119,12 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
   //_psi_cmd = msg->yaw;
 
   // altitude cmd
-  _altitude_cmd = msg->aux1*1.0/10;
+  //_altitude_cmd = msg->aux1*1.0/10;
 	
 	_flg_mtr_stop = msg->aux2;
 
   // throttle cmd --> unten altitude hold regler auskommentieren!
-  //_dT = msg->aux1*1.0/2; // 0.5 Newton Schritte
+  _dT = msg->aux1*1.0/10; // 0.5 Newton Schritte
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -176,13 +176,13 @@ void trajectory_controller::altitude_callback(const phx_uart_msp_bridge::Altitud
 	if(_last_alt_t == -1)
 	{
 		_altitude = msg->estimated_altitude;
-		_last_alt_t = msg->header.stamp.nsec + msg->header.stamp.sec;
+		_last_alt_t = msg->header.stamp.nsec*1.0/(1000000000) + msg->header.stamp.sec;
 	}
 	else
 	{
 		_last_altitude = _altitude;
 		double alt_raw = msg->estimated_altitude;
-		double t = msg->header.stamp.nsec + msg->header.stamp.sec;
+		double t = msg->header.stamp.nsec*1.0/(1000000000) + msg->header.stamp.sec;
 		double dt = t - _last_alt_t;
 		
 		// Tiefpass Filter
@@ -284,7 +284,7 @@ void trajectory_controller::calc_controller_outputs()
 		_last_diff_e_alt = diff_e_alt;
   }
 	
-	_dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
+	//_dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
 }
 
 // converts thrust to throttle command PWM (1000 .... 2000)

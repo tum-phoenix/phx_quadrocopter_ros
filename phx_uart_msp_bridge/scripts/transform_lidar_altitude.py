@@ -40,6 +40,7 @@ def convert_altitude_measurement(input_altitude):
 
     new_msg = Altitude()
     new_msg.estimated_altitude = new_altitude
+    new_msg.header.stamp = rospy.Time.now()
     ros_publish_new_altitude.publish(new_msg)
 
     # timestamp kommt in Message nicht an --> sollte diese Zeile nicht vor dem publish stehen?
