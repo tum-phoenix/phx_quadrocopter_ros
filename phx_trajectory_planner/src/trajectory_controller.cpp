@@ -22,7 +22,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _m = 0;
   nh.getParam("/trajectory_controller/mass", _m);
 	
-  _g = 9.81; // m/s^2
+  //_g = 9.81; // m/s^2
 	
   _phi_cmd = 0; // Kommandogroessen in rad!
   _theta_cmd = 0;
@@ -298,7 +298,7 @@ void trajectory_controller::calc_controller_outputs()
 // converts thrust to throttle command PWM (1000 .... 2000)
 int trajectory_controller::convert_thrust(double newton)
 {
-  double gramm = 1000*newton/_g;
+  double gramm = 1000*newton/g;
   //double gramm = 100;
 
   double val = 0;
@@ -363,7 +363,7 @@ int trajectory_controller::convert_thrust(double newton)
 // calcs thrusts according to paper
 void trajectory_controller::set_thrusts()
 {
-  double gravity_norm = _m * _g / ( 6*cos(_theta)*cos(_phi) );
+  double gravity_norm = _m * g / ( 6*cos(_theta)*cos(_phi) );
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};
@@ -402,11 +402,11 @@ void trajectory_controller::set_thrusts()
   //Constrain the rate of change of Thrust
   //14.9112 ist max. Thrust Newton
   for (int i; i<6; i++){
-    if (thrustsNewton[i]-_lastthrustsNewton[i] > 14.9112 / 50) {
-      thrustsNewton[i] = _lastthrustsNewton[i] + 14.9112 / 50;
+    if (thrustsNewton[i]-_lastthrustsNewton[i] > maxTNewton / 50) {
+      thrustsNewton[i] = _lastthrustsNewton[i] + maxTNewton / 50;
     }
-    if (thrustsNewton[i]-_lastthrustsNewton[i] < - 14.9112 / 50) {
-      thrustsNewton[i] = _lastthrustsNewton[i] - 14.9112 / 50;
+    if (thrustsNewton[i]-_lastthrustsNewton[i] < - maxTNewton / 50) {
+      thrustsNewton[i] = _lastthrustsNewton[i] - maxTNewton / 50;
     }
   }
   // Convert to Hex Clean Flight Reihenfolge

@@ -15,6 +15,10 @@
 #include "phx_uart_msp_bridge/RemoteControl.h"
 //#include "roslib.h"
 
+#define g  9.81  //m/s² - gravity
+#define maxTNewton  14.9112 //N - max Thrust of the motors
+
+
 class trajectory_controller
 {
 
@@ -34,7 +38,7 @@ class trajectory_controller
 
         double _L; // distance from COG to any one of the propellers
         */
-        double _g; // gravity, 9.81 m/s²
+        //double _g; // gravity, 9.81 m/s²
 
         double _phi_cmd; // Kommandagroessen in rad
         double _theta_cmd;
