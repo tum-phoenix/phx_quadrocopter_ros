@@ -93,7 +93,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_altitude = 0;
 	_last_altitude = 0;
 	_last_alt_t = -1; // time, -1 for initialization (first if in altitude_callback)
-	_wg = 25; // Grenzfrequenz fuer Tiefpassfilter
+	_wg = 4; // Grenzfrequenz fuer Tiefpassfilter
 	_integral_alt = 0;
 	_e_alt = 0;
 	_last_e_alt = 0;
