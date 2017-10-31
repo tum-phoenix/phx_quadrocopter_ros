@@ -290,7 +290,7 @@ void trajectory_controller::calc_controller_outputs()
 // converts thrust to throttle command PWM (1000 .... 2000)
 int trajectory_controller::convert_thrust(double newton)
 {
-  double gramm = 1000*newton/g;
+  double gramm = 1000*newton/G;
   //double gramm = 100;
 
   double val = 0;
