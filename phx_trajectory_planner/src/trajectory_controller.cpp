@@ -1,13 +1,9 @@
-// !!! This is not a trajectory controller yet !!! Only attitude stabilization based on Simulink / Simmechanics model
+// !!! attitude stabilization and altitude hold controller based on Simulink / Simmechanics model
 
 /* open points:
-		1.) Timestamp bei marvicAltitude Msg einfuegen!! --> fuer Tiefpassfilter
-				--> Tiefpassfilter Matlab validieren (z.B. Hand unten durch ziehen sollte keine schnelle Dynamik implizieren...)
-    2.) altitude hold testen
-    3.) Drehraten filtern, Offset! --> ueberpruefen durch Integration und Vergleich mit Winkeln
-    4.) als Backup: altitude hold regler auskommentieren und Throttle dT kommandieren koennen
-    5.) Position hold, Imu Acceleration verwenden
-    .
+    1.) Drehraten filtern, Offset? (--> ueberpruefen durch Integration und Vergleich mit Winkeln)
+    2.) Position hold, Imu Acceleration verwenden
+    3.) Trajectory Controller
     .
     .
 */
@@ -21,8 +17,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   // all in SI units
   _m = 0;
   nh.getParam("/trajectory_controller/mass", _m);
-	
-  //_g = 9.81; // m/s^2
 	
   _phi_cmd = 0; // Kommandogroessen in rad!
   _theta_cmd = 0;
@@ -66,8 +60,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   
   // durch Simulation ausgelegt
   _limit_integral_attitude = 0.2;
-	
-  _max_cmd_rate = 100*M_PI/180; // 100 °/s
 
   _dt = 0;
 	
@@ -250,21 +242,21 @@ void trajectory_controller::calc_controller_outputs()
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
 	
-  if(u_phi > _max_cmd_rate)
+  if(u_phi > MAX_CMD_RATE)
   {
-    u_phi = _max_cmd_rate;
+    u_phi = MAX_CMD_RATE;
   }
-  else if(u_phi < -_max_cmd_rate)
+  else if(u_phi < -MAX_CMD_RATE)
   {
-    u_phi = -_max_cmd_rate;
+    u_phi = -MAX_CMD_RATE;
   }
-  if(u_theta > _max_cmd_rate)
+  if(u_theta > MAX_CMD_RATE)
   {
-    u_theta = _max_cmd_rate;
+    u_theta = MAX_CMD_RATE;
   }
-  else if(u_theta < -_max_cmd_rate)
+  else if(u_theta < -MAX_CMD_RATE)
   {
-    u_theta = -_max_cmd_rate;
+    u_theta = -MAX_CMD_RATE;
   }
 
   // Rates
@@ -363,7 +355,7 @@ int trajectory_controller::convert_thrust(double newton)
 // calcs thrusts according to paper
 void trajectory_controller::set_thrusts()
 {
-  double gravity_norm = _m * g / ( 6*cos(_theta)*cos(_phi) );
+  double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};
@@ -402,22 +394,22 @@ void trajectory_controller::set_thrusts()
   //Constrain the rate of change of Thrust
   //14.9112 ist max. Thrust Newton
   for (int i = 0; i<6; i++){
-    if ((thrustsNewton[i]-_lastthrustsNewton[i]) > (maxTNewton / 50)) {
-      thrustsNewton[i] = _lastthrustsNewton[i] + maxTNewton / 50;
+    if ((thrustsNewton[i]-_lastthrustsNewton[i]) > (MAXTNEWTON / 50)) {
+      thrustsNewton[i] = _lastthrustsNewton[i] + MAXTNEWTON / 50;
     }
-    if ((thrustsNewton[i]-_lastthrustsNewton[i]) < (- maxTNewton / 50)) {
-      thrustsNewton[i] = _lastthrustsNewton[i] - maxTNewton / 50;
+    if ((thrustsNewton[i]-_lastthrustsNewton[i]) < (- MAXTNEWTON / 50)) {
+      thrustsNewton[i] = _lastthrustsNewton[i] - MAXTNEWTON / 50;
     }
   }
   // Convert to Hex Clean Flight Reihenfolge
 	if(_flg_mtr_stop)
 	{
-		_thrusts.motor0 = 1000; // min command
-  	_thrusts.motor1 = 1000;
-  	_thrusts.motor2 = 1000;
-  	_thrusts.motor3 = 1000;
-  	_thrusts.motor4 = 1000;
-  	_thrusts.motor5 = 1000;	
+		_thrusts.motor0 = MINCMDTHROTTLE; // min command
+  	_thrusts.motor1 = MINCMDTHROTTLE;
+  	_thrusts.motor2 = MINCMDTHROTTLE;
+  	_thrusts.motor3 = MINCMDTHROTTLE;
+  	_thrusts.motor4 = MINCMDTHROTTLE;
+  	_thrusts.motor5 = MINCMDTHROTTLE;	
 	}
 	else
 	{
