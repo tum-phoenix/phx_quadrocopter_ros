@@ -15,8 +15,10 @@
 #include "phx_uart_msp_bridge/RemoteControl.h"
 //#include "roslib.h"
 
-#define g  9.81  //m/s² - gravity
-#define maxTNewton  14.9112 //N - max Thrust of the motors
+#define   G               9.81  //m/s² - gravity
+#define   MAXTNEWTON      14.9112 //N - max Thrust of the motors
+#define   MAX_CMD_RATE    100.0*M_PI/180 // 100 °/s
+#define   MINCMDTHROTTLE  1000
 
 
 class trajectory_controller
@@ -28,17 +30,6 @@ class trajectory_controller
         geometry_msgs::Pose _current;
 
         double _m; // mass
-        /* not needed anymore in new implementation
-        double _k; // thrust_rpm_const_k
-        double _b; // torque_drag_const_b
-
-        double _Ixx; // Massentraegheitsmomente
-        double _Iyy;
-        double _Izz;
-
-        double _L; // distance from COG to any one of the propellers
-        */
-        //double _g; // gravity, 9.81 m/s²
 
         double _phi_cmd; // Kommandagroessen in rad
         double _theta_cmd;
@@ -101,7 +92,6 @@ class trajectory_controller
         double _integral_q;
         double _integral_r;
         double _limit_integral_attitude;
-        double _max_cmd_rate;
     
         double _u_p; // Rate Controller Outputs
         double _u_q;
@@ -110,6 +100,7 @@ class trajectory_controller
         int _flg_mtr_stop;
 
         double _lastthrustsNewton[6]; //Needed for constraining the change in thrust
+  
     public:
 
         double _dt;
