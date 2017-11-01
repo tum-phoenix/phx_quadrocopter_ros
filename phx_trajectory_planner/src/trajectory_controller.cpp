@@ -114,8 +114,8 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
 
 void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
-  _phi_cmd = msg->roll*1.0/4;
-  _theta_cmd = msg->pitch*1.0/4;
+  _phi_cmd = msg->roll*(1.0*M_PI/(4.0*180)); // in [rad] umrechnen !!
+  _theta_cmd = msg->pitch*(1.0*M_PI/(4.0*180));
   //_psi_cmd = msg->yaw;
 
   // altitude cmd
