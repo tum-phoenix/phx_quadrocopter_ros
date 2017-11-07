@@ -7,7 +7,7 @@
         <node name="trajectory_controller" pkg="phx_trajectory_planner" type="phx_trajectory_controller" output="screen">
                 <param name="mass" type="double" value="3.3356"/>
 	</node>
-        <node name="ssh_remote_control" pkg="phx_trajectory_planner" type="phx_trajectory_rc" output="screen" />
+        <node name="my_rc" pkg="phx_trajectory_planner" type="phx_trajectory_rc" output="screen" />
         <!--
 	<node name="goalpose_publisher" pkg="phx_trajectory_planner" type="phx_trajectory_planner_goal" output="screen" />
         <node name="initialpose_publisher" pkg="phx_trajectory_planner" type="phx_trajectory_planner_initial" 	output="screen" />
