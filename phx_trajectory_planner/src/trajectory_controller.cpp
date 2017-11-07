@@ -8,6 +8,12 @@
     .
 */
 
+// ##########################################
+// throttle dT Mode in 1% Schritten
+// von 0 startend: m*g/6 auch auskommentiert
+// --> Altitude Hold ist auskommentiert
+// ##########################################
+
 #include "phx_trajectory_planner/trajectory_controller.h"
 
 // constructor
@@ -114,17 +120,17 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
 
 void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
-  _phi_cmd = msg->roll*(1.0*M_PI/(4.0*180)); // in [rad] umrechnen !!
-  _theta_cmd = msg->pitch*(1.0*M_PI/(4.0*180));
+  _phi_cmd = msg->roll*(1.0*M_PI/(2.0*180)); // in [rad] umrechnen !!
+  _theta_cmd = msg->pitch*(1.0*M_PI/(2.0*180));
   //_psi_cmd = msg->yaw;
 
   // altitude cmd
-  _altitude_cmd = msg->aux1*1.0/10;
+  //_altitude_cmd = msg->aux1*1.0/10;
 	
 	_flg_mtr_stop = msg->aux2;
 
   // throttle cmd --> unten altitude hold regler auskommentieren!
-  //_dT = msg->aux1*1.0/10; // 0.5 Newton Schritte
+  _dT = msg->aux1*1.0*MAXTNEWTON/100.0; // in 1% Schritten
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -284,7 +290,7 @@ void trajectory_controller::calc_controller_outputs()
 		_last_diff_e_alt = diff_e_alt;
   }
 	
-  _dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
+  //_dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
 }
 
 // converts thrust to throttle command PWM (1000 .... 2000)
@@ -355,7 +361,8 @@ int trajectory_controller::convert_thrust(double newton)
 // calcs thrusts according to paper
 void trajectory_controller::set_thrusts()
 {
-  double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
+  //double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
+  double gravity_norm = 0; erst mal rausgenommen wegen erstem Crashtest
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};
@@ -368,24 +375,13 @@ void trajectory_controller::set_thrusts()
   thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);*/
 	
   // new implementation based on Simulink
-  double cog_correction = 0.37; // voruebergehend - Anpassung an Schwerpunktslage
-  thrustsNewton[0] = _dT + gravity_norm + cog_correction + _u_q - _u_r;
-  thrustsNewton[1] = _dT + gravity_norm + cog_correction + _u_q + _u_r;
+  //double cog_correction = 0.37; // fehlerhafte Anpassung an Schwerpunktslage
+  thrustsNewton[0] = _dT + gravity_norm + _u_q - _u_r;
+  thrustsNewton[1] = _dT + gravity_norm + _u_q + _u_r;
   thrustsNewton[2] = _dT + gravity_norm - _u_p - _u_r;
-  thrustsNewton[3] = _dT + gravity_norm - cog_correction - _u_q + _u_r;
-  thrustsNewton[4] = _dT + gravity_norm - cog_correction - _u_q - _u_r;
+  thrustsNewton[3] = _dT + gravity_norm - _u_q + _u_r;
+  thrustsNewton[4] = _dT + gravity_norm - _u_q - _u_r;
   thrustsNewton[5] = _dT + gravity_norm + _u_p + _u_r;
-  /*thrustsNewton[0] = gravity_norm + cog_correction + _u_p + _u_q - _u_r;
-  thrustsNewton[1] = gravity_norm + cog_correction - _u_p + _u_q + _u_r;
-  thrustsNewton[2] = gravity_norm - 2*_u_p - _u_r;
-  thrustsNewton[3] = gravity_norm - cog_correction - _u_p - _u_q + _u_r;
-  thrustsNewton[4] = gravity_norm - cog_correction + _u_p - _u_q - _u_r;
-  thrustsNewton[5] = gravity_norm + 2*_u_p + _u_r;*/
-    
-  //ROS_DEBUG("motor0 %lf \n", thrustsNewton[0]);
-  //ROS_DEBUG("motor1 %lf \n", thrustsNewton[1]);
-  //ROS_DEBUG("motor2 %lf \n", thrustsNewton[2]);
-  //ROS_DEBUG("motor3 %lf \n", thrustsNewton[3]);
 
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
