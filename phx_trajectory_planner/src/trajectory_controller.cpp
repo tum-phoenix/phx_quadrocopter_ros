@@ -362,7 +362,7 @@ int trajectory_controller::convert_thrust(double newton)
 void trajectory_controller::set_thrusts()
 {
   //double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
-  double gravity_norm = 0; erst mal rausgenommen wegen erstem Crashtest
+  double gravity_norm = 0; //erst mal rausgenommen wegen erstem Crashtest
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};
