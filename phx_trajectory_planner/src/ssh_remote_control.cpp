@@ -45,8 +45,6 @@ int main(int argc, char **argv)
   rc.aux3 = 0;
   rc.aux4 = 0;
 
-  rc.header.stamp = ros::Time::now();
-
   ros::Rate loop_rate(10);
   ros::Publisher rc_pub = n.advertise<phx_uart_msp_bridge::RemoteControl>("/phx/ssh_rc", 1);
 
@@ -118,6 +116,8 @@ int main(int argc, char **argv)
     // Thrust Delta Command Version
     std::cout << "roll_cmd: " << rc.roll*1.0/2 << " [°] " << "pitch_cmd: " << rc.pitch*1.0/2 << " [°] " << "Throttle_delta: " << rc.aux1 << " [%]" << std::endl;
 
+    rc.header.stamp = ros::Time::now();      
+          
     rc_pub.publish(rc);
 
     ros::spinOnce();
