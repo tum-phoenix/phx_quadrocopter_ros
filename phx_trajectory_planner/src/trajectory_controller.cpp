@@ -69,25 +69,26 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 
   _dt = 0;
 	
-  _K_P_phi = 2.264305; // PID Roll
-  _K_I_phi = 0.845257;
-  _K_D_phi = 0.502417;
-  _K_P_theta = 2.9259899; // PID Pitch
-  _K_I_theta = 1.9397181;
-  _K_D_theta = 0.37002521;
+	// Zahlenwerte siehe defines in Header
+  _K_P_phi = K_P_phi; // PID Roll
+  _K_I_phi = K_I_phi;
+  _K_D_phi = K_D_phi;
+  _K_P_theta = K_P_theta; // PID Pitch
+  _K_I_theta = K_I_theta;
+  _K_D_theta = K_D_theta;
   //_K_P_psi = 0;
-  _K_P_p = 0.340461; // PI rollrate
-  _K_I_p = 0.02371677;
-  _K_P_q = 0.5492050; // PI pitchrate
-  _K_I_q = 1.9120622;
-  _K_P_r = 0.18682464; // PI yawrate
-  _K_I_r = 37.3649283;
+  _K_P_p = K_P_p; // PI rollrate
+  _K_I_p = K_I_p;
+  _K_P_q = K_P_q; // PI pitchrate
+  _K_I_q = K_I_q;
+  _K_P_r = K_P_r; // PI yawrate
+  _K_I_r = K_I_r;
 	
 	// altitude hold
-  _K_P_alt = 0.02071;
-  _K_I_alt = 0.00069123;
-  _K_D_alt = 0.15357;
-  _K_N_alt = 37.20857; // filter coefficient
+  _K_P_alt = K_P_alt;
+  _K_I_alt = K_I_alt;
+  _K_D_alt = K_D_alt;
+  _K_N_alt = K_N_alt; // filter coefficient
 	_altitude = 0;
 	_last_altitude = 0;
 	_last_alt_t = -1; // time, -1 for initialization (first if in altitude_callback)
@@ -97,6 +98,8 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_last_e_alt = 0;
 	_limit_integral_altitude = 10; // durch Simulation festgelegt, Sprungantwort auf 1 m Kommando
 	_last_diff_e_alt = 0;
+	
+	_flg_I_control = 0;
 	
 	_flg_mtr_stop = 0;
 
@@ -193,8 +196,35 @@ void trajectory_controller::altitude_callback(const phx_uart_msp_bridge::Altitud
 		
 		// Tiefpass Filter
 		_altitude = (alt_raw*_wg*dt + _last_altitude)/(1 +_wg*dt);
-		
 		_last_alt_t = t;
+		
+		if((_altitude < 0.275) && (_flg_I_control != 0)) // shutdown I-Control to avoid Integral Wind-Up when on ground
+		{
+			_flg_I_control = 0;
+			// keep "preloading effect"
+			/*_integral_phi = 0;
+			_integral_theta = 0;
+			//_integral_psi = 0;
+			_integral_p = 0;
+			_integral_q = 0;
+			_integral_r = 0;
+			_integral_alt = 0;*/
+		}
+		
+		if((_altitude >= 0.275) && (_flg_I_control == 0)) // enable after take-off
+		{
+			_flg_I_control = 1;
+			// keep "preloading effect"
+			/*
+			_integral_phi = 0;
+			_integral_theta = 0;
+			//_integral_psi = 0;
+			_integral_p = 0;
+			_integral_q = 0;
+			_integral_r = 0;
+			_integral_alt = 0;
+			*/
+		}
 	}
 }
 
@@ -232,8 +262,11 @@ void trajectory_controller::calc_controller_outputs()
   _e_theta = _theta_cmd - _theta;
   //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
 
-  _integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, _limit_integral_attitude);
-  _integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, _limit_integral_attitude);
+	if(_flg_I_control == 1)
+	{
+		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, _limit_integral_attitude);
+		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, _limit_integral_attitude);
+	}
   
   double diff_e_phi = 0;
   double diff_e_theta = 0;
@@ -270,9 +303,12 @@ void trajectory_controller::calc_controller_outputs()
   _e_q = u_theta - _q;
   _e_r = u_psi - _r;
 
-  _integral_p = integrate(_integral_p, _e_p, _last_e_p, _limit_integral_attitude);
-  _integral_q = integrate(_integral_q, _e_q, _last_e_q, _limit_integral_attitude);
-  _integral_r = integrate(_integral_r, _e_r, _last_e_r, _limit_integral_attitude);
+	if(_flg_I_control == 1)
+	{
+		_integral_p = integrate(_integral_p, _e_p, _last_e_p, _limit_integral_attitude);
+		_integral_q = integrate(_integral_q, _e_q, _last_e_q, _limit_integral_attitude);
+		_integral_r = integrate(_integral_r, _e_r, _last_e_r, _limit_integral_attitude);
+	}
 	  
   _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
   _u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
@@ -281,7 +317,10 @@ void trajectory_controller::calc_controller_outputs()
 	// Altitude
 	_e_alt = _altitude_cmd - _altitude;
 	
-	_integral_alt = integrate(_integral_alt, _e_alt, _last_e_alt, _limit_integral_altitude);
+	if(_flg_I_control == 1)
+	{
+		_integral_alt = integrate(_integral_alt, _e_alt, _last_e_alt, _limit_integral_altitude);
+	}
 	
 	double diff_e_alt = 0;
   if(_dt != 0)

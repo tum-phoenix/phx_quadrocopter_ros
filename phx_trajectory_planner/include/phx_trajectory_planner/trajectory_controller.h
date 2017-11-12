@@ -20,6 +20,27 @@
 #define   MAX_CMD_RATE    100.0*M_PI/180 // 100 °/s
 #define   MINCMDTHROTTLE  1000
 
+// Reglerparameter
+#define   K_P_phi = 2.264305; // PID Roll
+#define   K_I_phi = 0.845257;
+#define   K_D_phi = 0.502417;
+#define   K_P_theta = 2.9259899; // PID Pitch
+#define   K_I_theta = 1.9397181;
+#define   K_D_theta = 0.37002521;
+//#define   K_P_psi = 0;
+#define   K_P_p = 0.340461; // PI rollrate
+#define   K_I_p = 0.02371677;
+#define   K_P_q = 0.5492050; // PI pitchrate
+#define   K_I_q = 1.9120622;
+#define   K_P_r = 0.18682464; // PI yawrate
+#define   K_I_r = 37.3649283;
+	
+	// altitude hold
+#define   K_P_alt = 0.02071;
+#define   K_I_alt = 0.00069123;
+#define   K_D_alt = 0.15357;
+#define   K_N_alt = 37.20857; // filter coefficient
+
 
 class trajectory_controller
 {
@@ -98,6 +119,7 @@ class trajectory_controller
         double _u_r;
 
         int _flg_mtr_stop;
+        int _flg_I_control;
 
         double _lastthrustsNewton[6]; //Needed for constraining the change in thrust
   
