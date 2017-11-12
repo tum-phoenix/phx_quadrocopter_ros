@@ -63,9 +63,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _integral_p = 0;
   _integral_q = 0;
   _integral_r = 0;
-  
-  // durch Simulation ausgelegt
-  _limit_integral_attitude = 0.2;
 
   _dt = 0;
 	
@@ -264,8 +261,8 @@ void trajectory_controller::calc_controller_outputs()
 
 	if(_flg_I_control == 1)
 	{
-		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, _limit_integral_attitude);
-		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, _limit_integral_attitude);
+		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, 0.2); // limit durch Simulation festgelegt
+		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.05); // limit durch Simulation festgelegt
 	}
   
   double diff_e_phi = 0;
@@ -305,9 +302,9 @@ void trajectory_controller::calc_controller_outputs()
 
 	if(_flg_I_control == 1)
 	{
-		_integral_p = integrate(_integral_p, _e_p, _last_e_p, _limit_integral_attitude);
-		_integral_q = integrate(_integral_q, _e_q, _last_e_q, _limit_integral_attitude);
-		_integral_r = integrate(_integral_r, _e_r, _last_e_r, _limit_integral_attitude);
+		_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit durch Simulation festgelegt
+		_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
+		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
 	}
 	  
   _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;

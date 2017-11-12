@@ -21,25 +21,25 @@
 #define   MINCMDTHROTTLE  1000
 
 // Reglerparameter
-#define   K_P_phi = 2.264305; // PID Roll
-#define   K_I_phi = 0.845257;
-#define   K_D_phi = 0.502417;
-#define   K_P_theta = 2.9259899; // PID Pitch
-#define   K_I_theta = 1.9397181;
-#define   K_D_theta = 0.37002521;
-//#define   K_P_psi = 0;
-#define   K_P_p = 0.340461; // PI rollrate
-#define   K_I_p = 0.02371677;
-#define   K_P_q = 0.5492050; // PI pitchrate
-#define   K_I_q = 1.9120622;
-#define   K_P_r = 0.18682464; // PI yawrate
-#define   K_I_r = 37.3649283;
+#define   K_P_phi			2.264305; // PID Roll
+#define   K_I_phi			0.845257;
+#define   K_D_phi			0.502417;
+#define   K_P_theta		3.55258859; // PID Pitch
+#define   K_I_theta		2.2899592; // falls test wieder nicht funktioniert, hier 0 reinschreiben!
+#define   K_D_theta		0.6699618;
+//#define   K_P_psi		0
+#define   K_P_p				0.340461; // PI rollrate
+#define   K_I_p				0.02371677;
+#define   K_P_q				0.978288; // PI pitchrate
+#define   K_I_q				0.5188156;
+#define   K_P_r				0.18682464; // PI yawrate
+#define   K_I_r				37.3649283;
 	
 	// altitude hold
-#define   K_P_alt = 0.02071;
-#define   K_I_alt = 0.00069123;
-#define   K_D_alt = 0.15357;
-#define   K_N_alt = 37.20857; // filter coefficient
+#define   K_P_alt			0.02071;
+#define   K_I_alt			0.00069123;
+#define   K_D_alt			0.15357;
+#define   K_N_alt			37.20857; // filter coefficient
 
 
 class trajectory_controller
@@ -75,7 +75,7 @@ class trajectory_controller
         double _integral_alt;
         double _e_alt;
         double _last_e_alt;
-        double _limit_integral_altitude;
+        //double _limit_integral_altitude;
         double _last_diff_e_alt;
 
         double _K_P_phi;
