@@ -75,7 +75,7 @@ class trajectory_controller
         double _integral_alt;
         double _e_alt;
         double _last_e_alt;
-        //double _limit_integral_altitude;
+        double _limit_integral_altitude;
         double _last_diff_e_alt;
 
         double _K_P_phi;
