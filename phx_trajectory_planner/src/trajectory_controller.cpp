@@ -252,9 +252,9 @@ double trajectory_controller::integrate(double last_integral, double error, doub
 }
 
 // Calculates controller error as suggested in paper
-void trajectory_controller::calc_controller_outputs()
+void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 {
-  // Attitude
+  // Attitude Controller
   _e_phi = _phi_cmd - _phi;
   _e_theta = _theta_cmd - _theta;
   //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
@@ -273,7 +273,7 @@ void trajectory_controller::calc_controller_outputs()
     diff_e_theta = (_e_theta - _last_e_theta)/_dt;
   }
 	
-  // Regleroutputs outer loop	
+  // Regleroutputs outer loop	= Attitude Controller
   double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
@@ -295,7 +295,15 @@ void trajectory_controller::calc_controller_outputs()
     u_theta = -MAX_CMD_RATE;
   }
 
-  // Rates
+  // send message for analyzing controller
+  _ratecmd.header.frame_id = "";
+  _ratecmd.header.stamp = ros::Time::now();
+  _ratecmd.roll = u_phi;
+  _ratecmd.pitch = u_theta;
+  _ratecmd.yaw = u_psi;
+  RateCmdMsg.publish(_ratecmd);
+
+  // Rate Controller
   _e_p = u_phi - _p; // Regler Inputs inner loop
   _e_q = u_theta - _q;
   _e_r = u_psi - _r;
@@ -463,7 +471,7 @@ void trajectory_controller::set_thrusts()
     ROS_DEBUG("motor3 %d \n", _thrusts.motor3);*/
 }
 
-void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
+void trajectory_controller::do_controlling(ros::Publisher MotorMsg, ros::Publisher RateCmdMsg)
 {
   _dt = -1; //For the first loop
   ros::Rate loop_rate(100);  //Calculation Rate
@@ -485,7 +493,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg)
 
     //transform_quaternion(); should only be executed when new orientation arives? --> now called in imu_callback
     //calc_delta_x_dot();
-    calc_controller_outputs();
+    calc_controller_outputs(RateCmdMsg);
 
     set_thrusts();
 
@@ -530,7 +538,10 @@ int main(int argc, char** argv)
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
 
-    controller.do_controlling(MotorMsg);
+    // Regler Kommandierte Drehraten
+    ros::Publisher RateCmdMsg = nh.advertise<phx_uart_msp_bridge::Attitude>("/phx/trajectory_controller", 1);
+
+    controller.do_controlling(MotorMsg, RateCmdMsg);
 
     return 0;
 }

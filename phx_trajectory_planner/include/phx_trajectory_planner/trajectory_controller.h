@@ -17,7 +17,7 @@
 
 #define   G               9.81  //m/s² - gravity
 #define   MAXTNEWTON      14.9112 //N - max Thrust of the motors
-#define   MAX_CMD_RATE    100.0*M_PI/180 // 100 °/s
+#define   MAX_CMD_RATE    300.0*M_PI/180 // 100 °/s
 #define   MINCMDTHROTTLE  1000
 
 // Reglerparameter
@@ -130,6 +130,7 @@ class trajectory_controller
         ros::Time _last;
         ros::Duration _ros_dt;
         phx_uart_msp_bridge::Motor _thrusts;
+        phx_uart_msp_bridge::Attitude _ratecmd;
 
         trajectory_controller(ros::NodeHandle nh); // constructor
 
@@ -139,14 +140,14 @@ class trajectory_controller
         void set_current_pose(const geometry_msgs::Pose::ConstPtr& msg);
         void set_current_goal(const geometry_msgs::Pose::ConstPtr& msg);
         //void calc_delta_x_dot();
-        void calc_controller_outputs();
+        void calc_controller_outputs(ros::Publisher RateCmdMsg);
         //void transform_quaternion();
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
         void rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);
         void altitude_callback(const phx_uart_msp_bridge::Altitude::ConstPtr& msg);
 
-        void do_controlling(ros::Publisher);
+        void do_controlling(ros::Publisher MotorMsg, ros::Publisher RateCmdMsg);
         int convert_thrust(double newton);
         double integrate(double last_integral, double error, double last_error, double limit_integral);
         void attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg);
