@@ -27,7 +27,7 @@
 
 // vereinfachtes Modell: nur auf Winkel regeln
 #define   K_P_theta		2.3; // PID Pitch
-#define   K_I_theta		0.000001901008; // falls test wieder nicht funktioniert, hier 0 reinschreiben!
+#define   K_I_theta		0.000001901008;
 #define   K_D_theta		0.970825;
 
 // Winkel und Drehraten
