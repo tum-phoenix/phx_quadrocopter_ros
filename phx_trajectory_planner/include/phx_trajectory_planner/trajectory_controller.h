@@ -24,9 +24,16 @@
 #define   K_P_phi			2.264305; // PID Roll
 #define   K_I_phi			0.845257;
 #define   K_D_phi			0.502417;
-#define   K_P_theta		3.55258859; // PID Pitch
+
+// vereinfachtes Modell: nur auf Winkel regeln
+#define   K_P_theta		2.3; // PID Pitch
+#define   K_I_theta		0.000001901008; // falls test wieder nicht funktioniert, hier 0 reinschreiben!
+#define   K_D_theta		0.970825;
+
+// Winkel und Drehraten
+/*#define   K_P_theta		3.55258859; // PID Pitch
 #define   K_I_theta		2.2899592; // falls test wieder nicht funktioniert, hier 0 reinschreiben!
-#define   K_D_theta		0.6699618;
+#define   K_D_theta		0.6699618;*/
 //#define   K_P_psi		0
 #define   K_P_p				0.340461; // PI rollrate
 #define   K_I_p				0.02371677;

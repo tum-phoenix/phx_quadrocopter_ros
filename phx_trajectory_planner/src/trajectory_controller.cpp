@@ -277,7 +277,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
-	
+	 
   if(u_phi > MAX_CMD_RATE)
   {
     u_phi = MAX_CMD_RATE;
@@ -286,6 +286,8 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   {
     u_phi = -MAX_CMD_RATE;
   }
+  
+  /*
   if(u_theta > MAX_CMD_RATE)
   {
     u_theta = MAX_CMD_RATE;
@@ -293,7 +295,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   else if(u_theta < -MAX_CMD_RATE)
   {
     u_theta = -MAX_CMD_RATE;
-  }
+  }*/
 
   // send message for analyzing controller
   _ratecmd.header.frame_id = "";
@@ -305,18 +307,25 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 
   // Rate Controller
   _e_p = u_phi - _p; // Regler Inputs inner loop
-  _e_q = u_theta - _q;
+  
+  //_e_q = u_theta - _q;
+  
   _e_r = u_psi - _r;
 
 	if(_flg_I_control == 1)
 	{
 		_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit durch Simulation festgelegt
-		_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
+		
+		//_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
+		
 		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
 	}
 	  
   _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
-  _u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
+  
+  //_u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
+  _u_q = u_theta;
+  
   _u_r = _K_P_r * _e_r + _integral_r * _K_I_r;	
 	
 	// Altitude
