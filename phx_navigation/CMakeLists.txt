@@ -66,11 +66,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-#    phx_uart_msp_bridge
-#)
+generate_messages(
+   DEPENDENCIES
+   sensor_msgs
+    phx_uart_msp_bridge
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -84,7 +84,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phoenix_controller
-#  CATKIN_DEPENDS  rospy sensor_msgs
+  CATKIN_DEPENDS  rospy sensor_msgs phx_uart_msp_bridge
 #  DEPENDS system_lib
 )
 

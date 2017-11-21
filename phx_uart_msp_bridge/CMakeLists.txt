@@ -113,7 +113,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES phx_uart_msp_bridge
    CATKIN_DEPENDS  rospy std_msgs sensor_msgs geometry_msgs diagnostic_msgs message_runtime tf
-#  DEPENDS system_lib
+   DEPENDS system_lib
 )
 
 ###########
