@@ -118,7 +118,7 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
   _current_goal = _current_path.poses[1].pose;
 }
 
-void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
+void trajectory_controller::ssh_rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
   _phi_cmd = msg->roll*(1.0*M_PI/(2.0*180)); // in [rad] umrechnen !!
   _theta_cmd = msg->pitch*(1.0*M_PI/(2.0*180));
@@ -131,6 +131,18 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
 
   // throttle cmd --> unten altitude hold regler auskommentieren!
   _dT = msg->aux1*1.0*MAXTNEWTON/100.0; // in 1% Schritten
+}
+
+void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
+{
+  if((msg->aux4 > 1600) && (_flg_I_control == 0) && (_dT > 0))
+  {
+  	_flg_I_control = 1;
+  }
+  else if((msg->aux4 < 1600) && (_flg_I_control == 1))
+  {
+  	_flg_I_control = 0;
+  }
 }
 
 /*void trajectory_controller::set_current_pose(const geometry_msgs::Pose::ConstPtr& msg)//FIXME: This could be called pose callback
@@ -278,14 +290,14 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
 	 
-  if(u_phi > MAX_CMD_RATE)
+  /*if(u_phi > MAX_CMD_RATE)
   {
     u_phi = MAX_CMD_RATE;
   }
   else if(u_phi < -MAX_CMD_RATE)
   {
     u_phi = -MAX_CMD_RATE;
-  }
+  }*/
   
   /*
   if(u_theta > MAX_CMD_RATE)
@@ -306,7 +318,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   RateCmdMsg.publish(_ratecmd);
 
   // Rate Controller
-  _e_p = u_phi - _p; // Regler Inputs inner loop
+  //_e_p = u_phi - _p; // Regler Inputs inner loop
   
   //_e_q = u_theta - _q;
   
@@ -314,14 +326,15 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 
 	if(_flg_I_control == 1)
 	{
-		_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit durch Simulation festgelegt
+		//_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit durch Simulation festgelegt
 		
 		//_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
 		
 		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
 	}
 	  
-  _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
+  //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
+  _u_p = u_phi;
   
   //_u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
   _u_q = u_theta;
@@ -415,26 +428,19 @@ int trajectory_controller::convert_thrust(double newton)
 void trajectory_controller::set_thrusts()
 {
   //double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
-  double gravity_norm = 0; //erst mal rausgenommen wegen erstem Crashtest
+  //double gravity_norm = 0; //erst mal rausgenommen wegen erstem Crashtest
 
   // Einzelschuebe in Newton
   double thrustsNewton[6] = {0};
-  // old implementation aus paper
-  /*thrustsNewton[0] = gravity_norm + _e_phi*_Ixx/(6*_L) + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[1] = gravity_norm + _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) - _e_phi*_Ixx/(6*_L) + _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[2] = gravity_norm - _e_phi*_Ixx/(3*_L) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[3] = gravity_norm - _e_phi*_Ixx/(6*_L) - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[4] = gravity_norm - _e_theta*_Iyy/(4*sqrt(3)*_L*0.5) + _e_phi*_Ixx/(6*_L) - _e_psi*_k*_Izz/(6*_b);
-  thrustsNewton[5] = gravity_norm + _e_phi*_Ixx/(3*_L) + _e_psi*_k*_Izz/(6*_b);*/
 	
-  // new implementation based on Simulink
-  //double cog_correction = 0.37; // fehlerhafte Anpassung an Schwerpunktslage
-  thrustsNewton[0] = _dT + gravity_norm + _u_q - _u_r;
-  thrustsNewton[1] = _dT + gravity_norm + _u_q + _u_r;
-  thrustsNewton[2] = _dT + gravity_norm - _u_p - _u_r;
-  thrustsNewton[3] = _dT + gravity_norm - _u_q + _u_r;
-  thrustsNewton[4] = _dT + gravity_norm - _u_q - _u_r;
-  thrustsNewton[5] = _dT + gravity_norm + _u_p + _u_r;
+  // Control Matrix see Papers / Simulink Models
+	// ohne gravity_norm  
+  thrustsNewton[0] = _dT - 0.5*_u_p - _u_q - _u_r;
+  thrustsNewton[1] = _dT - 0.5*_u_p + _u_q - _u_r;
+  thrustsNewton[2] = _dT + 0.5*_u_p - _u_q + _u_r;
+  thrustsNewton[3] = _dT + 0.5*_u_p + _u_q + _u_r;
+  thrustsNewton[4] = _dT - _u_p + _u_r;
+  thrustsNewton[5] = _dT + _u_p - _u_r;
 
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
@@ -459,15 +465,6 @@ void trajectory_controller::set_thrusts()
   	_thrusts.motor3 = MINCMDTHROTTLE;
   	_thrusts.motor4 = MINCMDTHROTTLE;
   	_thrusts.motor5 = MINCMDTHROTTLE;	
-	}
-	else
-	{
-  	_thrusts.motor0 = convert_thrust(thrustsNewton[3]);
-  	_thrusts.motor1 = convert_thrust(thrustsNewton[1]);
-  	_thrusts.motor2 = convert_thrust(thrustsNewton[4]);
-  	_thrusts.motor3 = convert_thrust(thrustsNewton[0]);
-  	_thrusts.motor4 = convert_thrust(thrustsNewton[2]);
-  	_thrusts.motor5 = convert_thrust(thrustsNewton[5]);	
 	}
 
   for (int i = 0; i<6; i++){
@@ -542,7 +539,10 @@ int main(int argc, char** argv)
 		ros::Subscriber altitude = nh.subscribe("/phx/altitude", 1, &trajectory_controller::altitude_callback, &controller);
 	
     // ssh remote control for trimming
-    ros::Subscriber rc = nh.subscribe("/phx/ssh_rc", 1, &trajectory_controller::rc_callback, &controller);
+    ros::Subscriber ssh_rc = nh.subscribe("/phx/ssh_rc", 1, &trajectory_controller::ssh_rc_callback, &controller);
+    
+    // remote control callback for enabling Controller and I-Control
+    ros::Subscriber rc = nh.subscribe("/phx/fc/rc", 1, &trajectory_controller::rc_callback, &controller);
 
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);

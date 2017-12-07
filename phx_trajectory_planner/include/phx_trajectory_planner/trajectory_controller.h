@@ -21,13 +21,13 @@
 #define   MINCMDTHROTTLE  1000
 
 // Reglerparameter
-#define   K_P_phi			2.264305; // PID Roll
-#define   K_I_phi			0.845257;
-#define   K_D_phi			0.502417;
+#define   K_P_phi			1//2.264305; // PID Roll
+#define   K_I_phi			0.5//0.845257;
+#define   K_D_phi			0//0.502417;
 
 // vereinfachtes Modell: nur auf Winkel regeln
-#define   K_P_theta		2.3; // PID Pitch
-#define   K_I_theta		0.000001901008;
+#define   K_P_theta		0.5//2.3; // PID Pitch
+#define   K_I_theta		0.25//0.000001901008;
 #define   K_D_theta		0.970825;
 
 // Winkel und Drehraten
@@ -152,6 +152,7 @@ class trajectory_controller
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
         void rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);
+        void ssh_rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);
         void altitude_callback(const phx_uart_msp_bridge::Altitude::ConstPtr& msg);
 
         void do_controlling(ros::Publisher MotorMsg, ros::Publisher RateCmdMsg);
