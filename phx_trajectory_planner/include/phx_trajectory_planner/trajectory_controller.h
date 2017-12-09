@@ -17,28 +17,23 @@
 
 #define   G               9.81  //m/s² - gravity
 #define   MAXTNEWTON      14.9112 //N - max Thrust of the motors
-#define   MAX_CMD_RATE    300.0*M_PI/180 // 100 °/s
+#define   MAX_CMD_RATE    300.0*M_PI/180 // 300 °/s
 #define   MINCMDTHROTTLE  1000
 
 // Reglerparameter
-#define   K_P_phi			1//2.264305; // PID Roll
-#define   K_I_phi			0.5//0.845257;
-#define   K_D_phi			0//0.502417;
+#define   K_P_phi			6; // PID Roll
+#define   K_I_phi			0;
+#define   K_D_phi			0;
 
-// vereinfachtes Modell: nur auf Winkel regeln
-#define   K_P_theta		0.5//2.3; // PID Pitch
-#define   K_I_theta		0.25//0.000001901008;
-#define   K_D_theta		0.970825;
+#define   K_P_theta		6; // PID Pitch
+#define   K_I_theta		0;
+#define   K_D_theta		0;
 
 // Winkel und Drehraten
-/*#define   K_P_theta		3.55258859; // PID Pitch
-#define   K_I_theta		2.2899592; // falls test wieder nicht funktioniert, hier 0 reinschreiben!
-#define   K_D_theta		0.6699618;*/
-//#define   K_P_psi		0
-#define   K_P_p				0.340461; // PI rollrate
-#define   K_I_p				0.02371677;
-#define   K_P_q				0.978288; // PI pitchrate
-#define   K_I_q				0.5188156;
+#define   K_P_p				12; // PI rollrate
+#define   K_I_p				0;//0.02371677;
+#define   K_P_q				12; // PI pitchrate
+#define   K_I_q				0;//0.5188156;
 #define   K_P_r				0.18682464; // PI yawrate
 #define   K_I_r				37.3649283;
 	
@@ -159,6 +154,8 @@ class trajectory_controller
         int convert_thrust(double newton);
         double integrate(double last_integral, double error, double last_error, double limit_integral);
         void attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg);
+        
+        double constrain(double value, double lower_limit, double upper_limit);
 };
 
 #endif

@@ -206,34 +206,6 @@ void trajectory_controller::altitude_callback(const phx_uart_msp_bridge::Altitud
 		// Tiefpass Filter
 		_altitude = (alt_raw*_wg*dt + _last_altitude)/(1 +_wg*dt);
 		_last_alt_t = t;
-		
-		if((_altitude < 0.275) && (_flg_I_control != 0)) // shutdown I-Control to avoid Integral Wind-Up when on ground
-		{
-			_flg_I_control = 0;
-			// keep "preloading effect"
-			/*_integral_phi = 0;
-			_integral_theta = 0;
-			//_integral_psi = 0;
-			_integral_p = 0;
-			_integral_q = 0;
-			_integral_r = 0;
-			_integral_alt = 0;*/
-		}
-		
-		if((_altitude >= 0.275) && (_flg_I_control == 0)) // enable after take-off
-		{
-			_flg_I_control = 1;
-			// keep "preloading effect"
-			/*
-			_integral_phi = 0;
-			_integral_theta = 0;
-			//_integral_psi = 0;
-			_integral_p = 0;
-			_integral_q = 0;
-			_integral_r = 0;
-			_integral_alt = 0;
-			*/
-		}
 	}
 }
 
@@ -263,6 +235,22 @@ double trajectory_controller::integrate(double last_integral, double error, doub
   return integral;
 }
 
+double constrain(double value, double lower_limit, double upper_limit)
+{
+	if(value > upper_limit)
+  {
+    return upper_limit;
+  }
+  else if(value < lower_limit)
+  {
+    return lower_limit;
+  }
+  else
+  {
+  	return value;
+  }
+}
+
 // Calculates controller error as suggested in paper
 void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 {
@@ -271,43 +259,33 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   _e_theta = _theta_cmd - _theta;
   //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
 
+  // I-Anteil
+  /* 
 	if(_flg_I_control == 1)
 	{
 		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, 0.2); // limit durch Simulation festgelegt
 		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.05); // limit durch Simulation festgelegt
 	}
+	*/
   
+  // D-Anteil
   double diff_e_phi = 0;
   double diff_e_theta = 0;
+  /*
   if(_dt != 0)
   {
     diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
     diff_e_theta = (_e_theta - _last_e_theta)/_dt;
   }
+  */
 	
   // Regleroutputs outer loop	= Attitude Controller
   double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
-	 
-  /*if(u_phi > MAX_CMD_RATE)
-  {
-    u_phi = MAX_CMD_RATE;
-  }
-  else if(u_phi < -MAX_CMD_RATE)
-  {
-    u_phi = -MAX_CMD_RATE;
-  }*/
-  
-  /*
-  if(u_theta > MAX_CMD_RATE)
-  {
-    u_theta = MAX_CMD_RATE;
-  }
-  else if(u_theta < -MAX_CMD_RATE)
-  {
-    u_theta = -MAX_CMD_RATE;
-  }*/
+	
+	u_phi = constrain(u_phi, -MAX_CMD_RATE, MAX_CMD_RATE);
+	u_theta = constrain(u_theta, -MAX_CMD_RATE, MAX_CMD_RATE); 
 
   // send message for analyzing controller
   _ratecmd.header.frame_id = "";
@@ -318,10 +296,8 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   RateCmdMsg.publish(_ratecmd);
 
   // Rate Controller
-  //_e_p = u_phi - _p; // Regler Inputs inner loop
-  
-  //_e_q = u_theta - _q;
-  
+  _e_p = u_phi - _p; // Regler Inputs inner loop  
+  _e_q = u_theta - _q;
   _e_r = u_psi - _r;
 
 	if(_flg_I_control == 1)
@@ -333,15 +309,16 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
 	}
 	  
-  //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
-  _u_p = u_phi;
+  _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
+  //_u_p = u_phi;
   
-  //_u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
-  _u_q = u_theta;
+  _u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
+  //_u_q = u_theta;
   
   _u_r = _K_P_r * _e_r + _integral_r * _K_I_r;	
 	
 	// Altitude
+	/*
 	_e_alt = _altitude_cmd - _altitude;
 	
 	if(_flg_I_control == 1)
@@ -356,7 +333,8 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 		_last_diff_e_alt = diff_e_alt;
   }
 	
-  //_dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
+  _dT = _K_P_alt*_e_alt + _K_I_alt*_integral_alt + diff_e_alt;
+  */
 }
 
 // converts thrust to throttle command PWM (1000 .... 2000)
@@ -435,6 +413,7 @@ void trajectory_controller::set_thrusts()
 	
   // Control Matrix see Papers / Simulink Models
 	// ohne gravity_norm  
+	// Hex Clean Flight Reihenfolge
   thrustsNewton[0] = _dT - 0.5*_u_p - _u_q - _u_r;
   thrustsNewton[1] = _dT - 0.5*_u_p + _u_q - _u_r;
   thrustsNewton[2] = _dT + 0.5*_u_p - _u_q + _u_r;
@@ -456,7 +435,7 @@ void trajectory_controller::set_thrusts()
       thrustsNewton[i] = _lastthrustsNewton[i] - MAXTNEWTON / 50;
     }
   }
-  // Convert to Hex Clean Flight Reihenfolge
+
 	if(_flg_mtr_stop)
 	{
 		_thrusts.motor0 = MINCMDTHROTTLE; // min command
