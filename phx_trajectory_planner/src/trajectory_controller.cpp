@@ -235,7 +235,7 @@ double trajectory_controller::integrate(double last_integral, double error, doub
   return integral;
 }
 
-double constrain(double value, double lower_limit, double upper_limit)
+double trajectory_controller::constrain(double value, double lower_limit, double upper_limit)
 {
 	if(value > upper_limit)
   {
