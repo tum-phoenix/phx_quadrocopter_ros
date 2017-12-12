@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   rc.roll = 0; // 1 entspricht 0.5 grad
   rc.yaw = 0;
   rc.throttle = 0;
-  rc.aux1 = 0; // 1 entspricht 10 cm -- fuer Throttle Delta Mode auf 0 setzen!!
+  rc.aux1 = 1; // 1 entspricht 1% Schub
   rc.aux2 = 0;
   rc.aux3 = 0;
   rc.aux4 = 0;
