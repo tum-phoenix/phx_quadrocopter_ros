@@ -60,6 +60,10 @@ bool SerialCom::init() {
         input_baud_set = cfsetispeed(&usb_tio, B230400);
         output_baud_set = cfsetospeed(&usb_tio, B230400);
         std::cout << "SerialCom::init  using 230400 baudrate " << std::endl;
+    } else if  (serial_device_baud_rate == 500000) {
+        input_baud_set = cfsetispeed(&usb_tio, B500000);
+        output_baud_set = cfsetospeed(&usb_tio, B500000);
+        std::cout << "SerialCom::init  using 500000 baudrate " << std::endl;
     } else if  (serial_device_baud_rate == 115200) {
         input_baud_set = cfsetispeed(&usb_tio, B115200);
         output_baud_set = cfsetospeed(&usb_tio, B115200);
