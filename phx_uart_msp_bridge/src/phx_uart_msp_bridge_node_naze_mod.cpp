@@ -90,14 +90,14 @@ int main(int argc, char **argv)
     ros::Subscriber set_motor = n.subscribe<phx_uart_msp_bridge::Motor>("phx/fc/motor_set", 1, motor_pwm_callback);
 
     // ros loop speed (this might interfere with the serial reading and the size of the serial buffer!)
-    ros::Rate loop_rate(50);
+    ros::Rate loop_rate(100);
     
     // serialcom init
     //SerialCom serial_interface;                                              // create SerialCom instance
     //serial_interface.set_device("/dev/ttyUSB0");                             // select the device
     //serial_interface.set_device("/dev/ttyAMA0");                             // select the device
     serial_interface.set_device("/dev/naze");                             // select the device
-    serial_interface.set_baudrate(115200);                                   // set the communication baudrate
+    serial_interface.set_baudrate(500000);                                   // set the communication baudrate, 115200
     serial_interface.set_max_io(250);                                        // set maximum bytes per reading
     serial_interface.init();                                                 // start serial connection
     sleep(5);                                                                // wait for boot loader and calibration
@@ -193,18 +193,19 @@ int main(int argc, char **argv)
         }
         if (loop_counter % 10 == 0) {
             serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
-            serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
-            serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
-            serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
+            //serial_interface.prepare_request(MULTIWII_GPS); request_gps++; request_total++;
+            //serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 16); request_gps_way_point++; request_total++;
+            //serial_interface.prepare_msg_gps_get_way_point(/* way_point_number = */ 0); request_gps_way_point++; request_total++;
         }
         if (loop_counter % 1 == 0) {
             serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
+            serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
         if (loop_counter % 2 == 0) {
             serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;
             serial_interface.prepare_request(MULTIWII_RC_PILOT); request_rc_pilot++; request_total++;
             serial_interface.prepare_request(MULTIWII_ALTITUDE); request_altitude++; request_total++;
-            serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+            //serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
         }
 
         serial_interface.send_from_buffer();
