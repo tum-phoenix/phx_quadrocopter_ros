@@ -135,7 +135,7 @@ void trajectory_controller::ssh_rc_callback(const phx_uart_msp_bridge::RemoteCon
 
 void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
-  if((msg->aux4 > 1600) && (_flg_I_control == 0) && (_dT > 0))
+  if((msg->aux4 > 1600) && (_flg_I_control == 0) && (_dT > 2.0*MAXTNEWTON/100.0))
   {
   	_flg_I_control = 1;
   }
@@ -398,7 +398,7 @@ int trajectory_controller::convert_thrust(double newton)
   }
 
   val = c + (d-c)*(gramm-a)/(b-a);
-  val = 1025 + 975 * val/100; // convert to PWM for motor
+  val = 1000 + 10 * val; // convert to PWM for motor
   return (int)val;
 }
 
@@ -438,7 +438,7 @@ void trajectory_controller::set_thrusts()
 
 	if(_flg_mtr_stop)
 	{
-		_thrusts.motor0 = MINCMDTHROTTLE; // min command
+	_thrusts.motor0 = MINCMDTHROTTLE; // min command
   	_thrusts.motor1 = MINCMDTHROTTLE;
   	_thrusts.motor2 = MINCMDTHROTTLE;
   	_thrusts.motor3 = MINCMDTHROTTLE;
