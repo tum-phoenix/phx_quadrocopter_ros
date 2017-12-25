@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     }
 
     //throttle cmd mode --> aux1 auf 0 setzen!
-    if(strcmp(cmd, "a") == 0)
+    if((strcmp(cmd, "a") == 0) && (rc.aux1 > 3))
     {
       rc.aux1--;
     }

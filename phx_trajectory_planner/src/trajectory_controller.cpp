@@ -470,6 +470,10 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg, ros::Publish
     {
       _ros_dt = _now - _last;
       _dt = _ros_dt.toSec();
+      if((_dt < 0.005) || (_dt > 0.015))
+      {
+      	std::cout << "Warning: Controller Loop Rate 100 Hz not achieved - desired dt: 0.01 - actual dt: " << _dt << std::endl;
+      }
     }
     else
     {
