@@ -1,5 +1,25 @@
 // !!! attitude stabilization and altitude hold controller based on Simulink / Simmechanics model
 
+// ##########################################
+// PID TUNING @ NI.com
+// 
+// The gains of a PID controller can be obtained by trial and error method.
+// Once an engineer understands the significance of each gain parameter,
+// this method becomes relatively easy. In this method, the I and D terms are set to zero first and
+// the proportional gain is increased until the output of the loop oscillates. As one increases 
+// the proportional gain, the system becomes faster, but care must be taken not make the system unstable.
+// Once P has been set to obtain a desired fast response, the integral term is increased to stop the oscillations.
+// The integral term reduces the steady state error, but increases overshoot. Some amount of overshoot
+// is always necessary for a fast system so that it could respond to changes immediately. The integral term
+// is tweaked to achieve a minimal steady state error. Once the P and I have been set to get the desired
+// fast control system with minimal steady state error, the derivative term is increased until the loop
+// is acceptably quick to its set point. Increasing derivative term decreases overshoot and yields higher
+// gain with stability but would cause the system to be highly sensitive to noise. 
+// Often times, engineers need to tradeoff one characteristic of a control system for another to better
+// meet their requirements.
+//
+// ##########################################
+
 /* open points:
     1.) Drehraten filtern, Offset? (--> ueberpruefen durch Integration und Vergleich mit Winkeln)
     2.) Position hold, Imu Acceleration verwenden
@@ -27,9 +47,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _phi_cmd = 0; // Kommandogroessen in rad!
   _theta_cmd = 0;
   //_psi_cmd = 0; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
-  _p_cmd = 0; // [rad/s]
-  _q_cmd = 0;
-  _r_cmd = 0;
   _altitude_cmd = 0.2;
 	
   _u_p = 0; // Regleroutputs (PI Drehraten)
@@ -49,6 +66,8 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _last_e_p = 0;
   _last_e_q = 0;
   _last_e_r = 0;	
+  _last_diff_e_phi = 0;
+	_last_diff_e_theta = 0;
 
   _theta = 0; // current states
   _phi = 0;
@@ -97,7 +116,6 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	_last_diff_e_alt = 0;
 	
 	_flg_I_control = 0;
-	
 	_flg_mtr_stop = 0;
 
   _lastthrustsNewton[0] = 0;
@@ -139,7 +157,7 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
   {
   	_flg_I_control = 1;
   }
-  else if((msg->aux4 < 1600) && (_flg_I_control == 1))
+  else if(((msg->aux4 < 1600) || (_dT <= 2.0*MAXTNEWTON/100.0)) && (_flg_I_control == 1))
   {
   	_flg_I_control = 0;
   }
@@ -174,17 +192,19 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // ====================================================================
   // Drehraten kommen in [°/s]! --> Umrechnung in rad/s notwendig
   // Koordinatentrafo nicht notwendig
+  // im Standard körperfesten Koordinatensystem
   // ====================================================================	
 					// Umrechnung s. UART MSP BRIDGE SRC
   _p = msg->angular_velocity.x*(M_PI/180)*(2000/8192);
-  _q = -msg->angular_velocity.y*(M_PI/180)*(2000/8192);
-  _r = -msg->angular_velocity.z*(M_PI/180)*(2000/8192);
+  _q = -msg->angular_velocity.y*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
+  _r = -msg->angular_velocity.z*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
 }
 
 void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg)
 {
+	// Eulerwinkel
   _phi = (double) msg->roll*M_PI/180;
-  _theta = (double) -msg->pitch*M_PI/180;
+  _theta = (double) -msg->pitch*M_PI/180; // MINUS aus Versuchen bestimmt
   _psi = (double) msg->yaw*M_PI/180;
 }
 
@@ -259,33 +279,36 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   _e_theta = _theta_cmd - _theta;
   //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
 
-  // I-Anteil
-  /* 
+  // I-Anteil 
 	if(_flg_I_control == 1)
 	{
 		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, 0.2); // limit durch Simulation festgelegt
-		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.05); // limit durch Simulation festgelegt
+		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.2); // limit durch Simulation festgelegt
 	}
-	*/
   
   // D-Anteil
   double diff_e_phi = 0;
   double diff_e_theta = 0;
-  /*
   if(_dt != 0)
   {
     diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
     diff_e_theta = (_e_theta - _last_e_theta)/_dt;
+    
+    // Tiefpass Filter
+    diff_e_phi = (diff_e_phi*K_N_phi*_dt + _last_diff_e_phi)/(1 +K_N_phi*_dt);
+    diff_e_theta = (diff_e_theta*K_N_theta*_dt + _last_diff_e_theta)/(1 +K_N_theta*_dt);
+    
+		_last_diff_e_phi = diff_e_phi;
+  	_last_diff_e_theta = diff_e_theta;
   }
-  */
 	
   // Regleroutputs outer loop	= Attitude Controller
   double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
 	
-	u_phi = constrain(u_phi, -MAX_CMD_RATE, MAX_CMD_RATE);
-	u_theta = constrain(u_theta, -MAX_CMD_RATE, MAX_CMD_RATE); 
+	//u_phi = constrain(u_phi, -MAX_CMD_RATE, MAX_CMD_RATE);
+	//u_theta = constrain(u_theta, -MAX_CMD_RATE, MAX_CMD_RATE); 
 
   // send message for analyzing controller
   _ratecmd.header.frame_id = "";
@@ -296,8 +319,8 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   RateCmdMsg.publish(_ratecmd);
 
   // Rate Controller
-  _e_p = u_phi - _p; // Regler Inputs inner loop  
-  _e_q = u_theta - _q;
+  //_e_p = u_phi - _p; // Regler Inputs inner loop  
+  //_e_q = u_theta - _q;
   _e_r = u_psi - _r;
 
 	if(_flg_I_control == 1)
@@ -309,11 +332,11 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
 	}
 	  
-  _u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
-  //_u_p = u_phi;
+  //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
+  _u_p = u_phi;
   
-  _u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
-  //_u_q = u_theta;
+  //_u_q = _K_P_q * _e_q + _integral_q * _K_I_q;
+  _u_q = u_theta;
   
   _u_r = _K_P_r * _e_r + _integral_r * _K_I_r;	
 	
@@ -438,12 +461,21 @@ void trajectory_controller::set_thrusts()
 
 	if(_flg_mtr_stop)
 	{
-	_thrusts.motor0 = MINCMDTHROTTLE; // min command
+		_thrusts.motor0 = MINCMDTHROTTLE; // min command
   	_thrusts.motor1 = MINCMDTHROTTLE;
   	_thrusts.motor2 = MINCMDTHROTTLE;
   	_thrusts.motor3 = MINCMDTHROTTLE;
   	_thrusts.motor4 = MINCMDTHROTTLE;
   	_thrusts.motor5 = MINCMDTHROTTLE;	
+	}
+	else
+	{
+		_thrusts.motor0 = convert_thrust(thrustsNewton[0]);
+		_thrusts.motor1 = convert_thrust(thrustsNewton[1]);
+		_thrusts.motor2 = convert_thrust(thrustsNewton[2]);
+		_thrusts.motor3 = convert_thrust(thrustsNewton[3]);
+		_thrusts.motor4 = convert_thrust(thrustsNewton[4]);
+		_thrusts.motor5 = convert_thrust(thrustsNewton[5]);
 	}
 
   for (int i = 0; i<6; i++){
@@ -472,7 +504,7 @@ void trajectory_controller::do_controlling(ros::Publisher MotorMsg, ros::Publish
       _dt = _ros_dt.toSec();
       if((_dt < 0.005) || (_dt > 0.015))
       {
-      	std::cout << "Warning: Controller Loop Rate 100 Hz not achieved - desired dt: 0.01 - actual dt: " << _dt << std::endl;
+      	std::cout << "Warning: Controller Loop Rate 100 Hz not achieved - actual Rate: " << 1/_dt << std::endl;
       }
     }
     else

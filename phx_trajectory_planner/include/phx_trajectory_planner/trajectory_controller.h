@@ -21,21 +21,23 @@
 #define   MINCMDTHROTTLE  1000
 
 // Reglerparameter
-#define   K_P_phi			6; // PID Roll
-#define   K_I_phi			0;
-#define   K_D_phi			0;
+#define   K_P_phi			0.002319736362; // PID Roll
+#define   K_I_phi			0.000007755;
+#define   K_D_phi			0.11134833;
+#define		K_N_phi			32.95941476; // filter coefficient
 
-#define   K_P_theta		6; // PID Pitch
+#define   K_P_theta		0.0000000208; // PID Pitch
 #define   K_I_theta		0;
-#define   K_D_theta		0;
+#define   K_D_theta		0.0949788061;
+#define		K_N_theta		27.1329014; // filter coefficient
 
 // Winkel und Drehraten
 #define   K_P_p				12; // PI rollrate
 #define   K_I_p				0;//0.02371677;
 #define   K_P_q				12; // PI pitchrate
 #define   K_I_q				0;//0.5188156;
-#define   K_P_r				0.18682464; // PI yawrate
-#define   K_I_r				37.3649283;
+#define   K_P_r				10.717655;//0.18682464; // PI yawrate
+#define   K_I_r				0.0000011333;//37.3649283;
 	
 	// altitude hold
 #define   K_P_alt			0.02071;
@@ -57,9 +59,6 @@ class trajectory_controller
         double _phi_cmd; // Kommandagroessen in rad
         double _theta_cmd;
         //double _psi_cmd; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
-        double _p_cmd; // Rates
-        double _q_cmd;
-        double _r_cmd;
         double _altitude_cmd;
         double _dT; // throttle delta
     
@@ -114,7 +113,8 @@ class trajectory_controller
         double _integral_p;
         double _integral_q;
         double _integral_r;
-        double _limit_integral_attitude;
+        double _last_diff_e_phi;
+  			double _last_diff_e_theta;
     
         double _u_p; // Rate Controller Outputs
         double _u_q;
