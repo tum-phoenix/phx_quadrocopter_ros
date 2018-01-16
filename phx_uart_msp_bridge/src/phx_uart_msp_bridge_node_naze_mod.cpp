@@ -200,6 +200,9 @@ int main(int argc, char **argv)
         if (loop_counter % 1 == 0) {
             serial_interface.prepare_request(MULTIWII_ATTITUDE); request_attitude++; request_total++;
             serial_interface.prepare_request(MULTIWII_IMU); request_imu++; request_total++;
+            
+            // for flight data gathering
+            //serial_interface.prepare_request(MULTIWII_MOTOR); request_motor++; request_total++;
         }
         if (loop_counter % 2 == 0) {
             serial_interface.prepare_request(MULTIWII_RC); request_rc++; request_total++;

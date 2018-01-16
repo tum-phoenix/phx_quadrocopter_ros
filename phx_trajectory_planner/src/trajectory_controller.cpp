@@ -329,7 +329,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 		
 		//_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
 		
-		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 0.2); // limit durch Simulation festgelegt
+		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 1); // limit durch Simulation festgelegt
 	}
 	  
   //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
