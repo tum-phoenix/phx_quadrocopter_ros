@@ -156,10 +156,12 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
   if((msg->aux4 > 1600) && (_flg_I_control == 0) && (_dT > 2.0*MAXTNEWTON/100.0))
   {
   	_flg_I_control = 1;
+  	std::cout << "I Control on" << std::endl;
   }
   else if(((msg->aux4 < 1600) || (_dT <= 2.0*MAXTNEWTON/100.0)) && (_flg_I_control == 1))
   {
   	_flg_I_control = 0;
+  	std::cout << "I Control off" << std::endl;
   }
 }
 
@@ -195,9 +197,9 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // im Standard körperfesten Koordinatensystem
   // ====================================================================	
 					// Umrechnung s. UART MSP BRIDGE SRC
-  _p = msg->angular_velocity.x*(M_PI/180)*(2000/8192);
-  _q = -msg->angular_velocity.y*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
-  _r = -msg->angular_velocity.z*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
+  _p = (msg->angular_velocity.x)*(M_PI/180.0)*(2000.0/8192.0);
+  _q = -(msg->angular_velocity.y)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
+  _r = -(msg->angular_velocity.z)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
 }
 
 void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg)
