@@ -137,48 +137,41 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(phx_uart_msp_bridge_node_naze src/phx_uart_msp_bridge_node_naze.cpp)
-add_executable(phx_uart_msp_bridge_node_naze_mod src/phx_uart_msp_bridge_node_naze_mod.cpp)
-add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
-add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fully360.cpp)
-add_executable(phx_tf_copter_to_copter_stabilized src/transform_copter_stabilized_to_copter.cpp)
-
 add_dependencies(phx_uart_msp_bridge_node_naze ${PROJECT_NAME}_gencpp)
-add_dependencies(phx_tf_copter_to_copter_stabilized ${PROJECT_NAME}_gencpp)
-add_executable(phx_uart_msp_bridge_node_servo src/phx_uart_msp_bridge_node_servo.cpp)
-
-
 target_link_libraries(phx_uart_msp_bridge_node_naze
    ${catkin_LIBRARIES}
    phx_serial_com
 )
 
-
+add_executable(phx_uart_msp_bridge_node_naze_mod src/phx_uart_msp_bridge_node_naze_mod.cpp)
+add_dependencies(phx_uart_msp_bridge_node_naze_mod ${PROJECT_NAME}_gencpp)
 target_link_libraries(phx_uart_msp_bridge_node_naze_mod
    ${catkin_LIBRARIES}
    phx_serial_com
 )
 
-
+add_executable(phx_uart_msp_bridge_node_marvicRCaltitudeServo src/phx_uart_msp_bridge_node_marvicRCaltitudeServo.cpp)
+add_dependencies(phx_uart_msp_bridge_node_marvicRCaltitudeServo ${PROJECT_NAME}_gencpp)
 target_link_libraries(phx_uart_msp_bridge_node_marvicRCaltitudeServo
    ${catkin_LIBRARIES}
    phx_serial_com
 )
 
-target_link_libraries(phx_tf_copter_to_copter_stabilized
-   ${catkin_LIBRARIES}
-)
-
-
+add_executable(phx_uart_msp_bridge_node_fully360 src/phx_uart_msp_bridge_node_fully360.cpp)
+add_dependencies(phx_uart_msp_bridge_node_fully360 ${PROJECT_NAME}_gencpp)
 target_link_libraries(phx_uart_msp_bridge_node_fully360
    ${catkin_LIBRARIES}
    phx_serial_com
 )
 
+add_executable(phx_tf_copter_to_copter_stabilized src/transform_copter_stabilized_to_copter.cpp)
+add_dependencies(phx_tf_copter_to_copter_stabilized ${PROJECT_NAME}_gencpp)
 target_link_libraries(phx_tf_copter_to_copter_stabilized
    ${catkin_LIBRARIES}
 )
 
-
+add_executable(phx_uart_msp_bridge_node_servo src/phx_uart_msp_bridge_node_servo.cpp)
+add_dependencies(phx_uart_msp_bridge_node_servo ${PROJECT_NAME}_gencpp)
 target_link_libraries(phx_uart_msp_bridge_node_servo
    ${catkin_LIBRARIES}
    phx_serial_com
