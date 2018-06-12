@@ -36,8 +36,8 @@
 #define   K_I_p				0 //0.02371677;
 #define   K_P_q				12 // PI pitchrate
 #define   K_I_q				0 //0.5188156;
-#define   K_P_r				10//300 // PI yawrate
-#define   K_I_r				10//
+#define   K_P_r				2//300 // PI yawrate
+#define   K_I_r				0//
 	
 	// altitude hold
 #define   K_P_alt			0.02071
@@ -61,6 +61,7 @@ class trajectory_controller
         //double _psi_cmd; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
         double _altitude_cmd;
         double _dT; // throttle delta
+        double _r_cmd;
     
         double _phi; // current states
         double _theta;

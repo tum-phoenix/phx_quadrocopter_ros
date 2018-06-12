@@ -75,6 +75,14 @@ int main(int argc, char **argv)
     {
       rc.roll++;
     }
+    if((strcmp(cmd, "u") == 0) && (rc.roll > (-10/0.5)))
+    {
+      rc.aux3--;
+    }
+    if((strcmp(cmd, "o") == 0) && (rc.roll < (10/0.5)))
+    {
+      rc.aux3++;
+    }
 
     //altitude cmd mode --> aux1 auf 2 setzen! (0.2 m)
 /*

@@ -48,6 +48,7 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _theta_cmd = 0;
   //_psi_cmd = 0; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
   _altitude_cmd = 0.2;
+  _r_cmd = 0;
 	
   _u_p = 0; // Regleroutputs (PI Drehraten)
   _u_q = 0;
@@ -138,8 +139,11 @@ void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
 
 void trajectory_controller::ssh_rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg)
 {
-  _phi_cmd = msg->roll*(1.0*M_PI/(2.0*180)); // in [rad] umrechnen !!
-  _theta_cmd = msg->pitch*(1.0*M_PI/(2.0*180));
+  _phi_cmd = (msg->roll)*(1.0*M_PI/(2.0*180)); // in [rad] umrechnen !!
+  _theta_cmd = (msg->pitch)*(1.0*M_PI/(2.0*180));
+  _r_cmd = (msg->aux3)*(1.0*M_PI/(2.0*180));
+  
+  //std::cout << "roll_cmd: " << _phi_cmd << " [rad] " << "pitch_cmd: " << _theta_cmd << " [rad] " << "Throttle_delta: " << std::endl;
   //_psi_cmd = msg->yaw;
 
   // altitude cmd
@@ -156,10 +160,12 @@ void trajectory_controller::rc_callback(const phx_uart_msp_bridge::RemoteControl
   if((msg->aux4 > 1600) && (_flg_I_control == 0) && (_dT > 2.0*MAXTNEWTON/100.0))
   {
   	_flg_I_control = 1;
+  	std::cout << "I Control on" << std::endl;
   }
   else if(((msg->aux4 < 1600) || (_dT <= 2.0*MAXTNEWTON/100.0)) && (_flg_I_control == 1))
   {
   	_flg_I_control = 0;
+  	std::cout << "I Control off" << std::endl;
   }
 }
 
@@ -195,9 +201,9 @@ void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
   // im Standard körperfesten Koordinatensystem
   // ====================================================================	
 					// Umrechnung s. UART MSP BRIDGE SRC
-  _p = msg->angular_velocity.x*(M_PI/180)*(2000/8192);
-  _q = -msg->angular_velocity.y*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
-  _r = -msg->angular_velocity.z*(M_PI/180)*(2000/8192); // MINUS aus Versuchen bestimmt
+  _p = (msg->angular_velocity.x)*(M_PI/180.0)*(2000.0/8192.0);
+  _q = -(msg->angular_velocity.y)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
+  _r = -(msg->angular_velocity.z)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
 }
 
 void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg)
@@ -321,7 +327,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   // Rate Controller
   //_e_p = u_phi - _p; // Regler Inputs inner loop  
   //_e_q = u_theta - _q;
-  _e_r = u_psi - _r;
+  _e_r = _r_cmd - _r;
 
 	if(_flg_I_control == 1)
 	{
@@ -329,7 +335,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 		
 		//_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
 		
-		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 1); // limit durch Simulation festgelegt
+		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 5); // limit durch Simulation festgelegt
 	}
 	  
   //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
@@ -437,12 +443,12 @@ void trajectory_controller::set_thrusts()
   // Control Matrix see Papers / Simulink Models
 	// ohne gravity_norm  
 	// Hex Clean Flight Reihenfolge
-  thrustsNewton[0] = _dT - 0.5*_u_p - _u_q - _u_r;
-  thrustsNewton[1] = _dT - 0.5*_u_p + _u_q - _u_r;
-  thrustsNewton[2] = _dT + 0.5*_u_p - _u_q + _u_r;
-  thrustsNewton[3] = _dT + 0.5*_u_p + _u_q + _u_r;
-  thrustsNewton[4] = _dT - _u_p + _u_r;
-  thrustsNewton[5] = _dT + _u_p - _u_r;
+  thrustsNewton[0] = _dT - 0.5*_u_p - _u_q + _u_r;
+  thrustsNewton[1] = _dT - 0.5*_u_p + _u_q + _u_r;
+  thrustsNewton[2] = _dT + 0.5*_u_p - _u_q - _u_r;
+  thrustsNewton[3] = _dT + 0.5*_u_p + _u_q - _u_r;
+  thrustsNewton[4] = _dT - _u_p - _u_r;
+  thrustsNewton[5] = _dT + _u_p + _u_r;
 
   // in prozent umrechnen
   _thrusts.header.frame_id = "";
