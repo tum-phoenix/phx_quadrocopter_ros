@@ -9,19 +9,19 @@
 using namespace cv;
 using namespace std;
 
-const float calibreationSquareDimension = 0.0264f;  //in Meter, Größe der einzelnen Felder!!
-const float arucoSquareDimension = 0.1321f;     //in Meter, Größe der Aruco Vierecke, NOCH NACHMESSEN!!
+const float calibreationSquareDimension = 0.0264f;  //in Meter, GrÃ¶ÃŸe der einzelnen Felder!!
+const float arucoSquareDimension = 0.1321f;     //in Meter, GrÃ¶ÃŸe der Aruco Vierecke, NOCH NACHMESSEN!!
 const Size chessboardDimension(6,9);  //Size kann zwei Werte speichern. Hier sollen es 6 Elemente in x Richtung und 9 Elemente in y Richtung sein.
 
 void createknownBoardPositions(Size boardSize, float squareEdgeLength, vector<Point3f>& corners) //Point3f bedeutet, dass es eine X, Y und Z Komponente gibt.
 {
-	for (int i=0; i<boardSize.height; i++)  //boardSize.height greift auf erste Komponente des Size Objektes zu (auf die Höhe)
+	for (int i=0; i<boardSize.height; i++)  //boardSize.height greift auf erste Komponente des Size Objektes zu (auf die HÃ¶he)
 	{
 		for (int j = 0; j < boardSize.width; j++)
 		{
-			corners.push_back(Point3f(j*squareEdgeLength, i*squareEdgeLength, 0.0f)); //zunächst wird ein Point3f Objekt erzeugt mit den Koordinaten j*squareEdgeLengths und i*squareEdgeLengths, 0.0f da z-Komponente=0, da Ebene.
+			corners.push_back(Point3f(j*squareEdgeLength, i*squareEdgeLength, 0.0f)); //zunÃ¤chst wird ein Point3f Objekt erzeugt mit den Koordinaten j*squareEdgeLengths und i*squareEdgeLengths, 0.0f da z-Komponente=0, da Ebene.
 		}																			  //Point3f ist eine Klasse, hier wird der Konstruktor direkt aufgerufen und die eingegebenen Werte gespeichert. 
-	}																				  //kann mit Klassen so gemacht werden (ohne den Objekten einen Namen zu geben) dann können die Objekte aber nicht referenziert werden. (Hier muss das Objekt später nicht nochmal referenziert werden) 
+	}																				  //kann mit Klassen so gemacht werden (ohne den Objekten einen Namen zu geben) dann kÃ¶nnen die Objekte aber nicht referenziert werden. (Hier muss das Objekt spÃ¤ter nicht nochmal referenziert werden) 
 }
 // diese Funktion berechnet die Positionen der Eckpunkte der einzelnen Rechtecke in einer perfekten Wetl
 // d.h keine "Verdrehung"/Kippung des Brettes auf dem die Rechtecke geklebt sind.
@@ -48,21 +48,21 @@ void getChessboardCorners(vector<Mat> images, vector<vector<Point2f>>& allFoundC
 	}
 
 }
-// diese Funktion soll die Eckpunkte aus den Bildern erkennen. Dafür werden die Bilder mit der Mat Variablen images eingelesen. 
+// diese Funktion soll die Eckpunkte aus den Bildern erkennen. DafÃ¼r werden die Bilder mit der Mat Variablen images eingelesen. 
 // Die Koordinaten (x und y) der gefundenen Eckpunkte werden in allFoundCorners gespeichert. 
-// mit der bool Variablen showResults kann ausgewählt werden, ob die Ergebnisse angezeigt werden sollen. 
+// mit der bool Variablen showResults kann ausgewÃ¤hlt werden, ob die Ergebnisse angezeigt werden sollen. 
 
 
 void cameraCalibration(vector<Mat> &calibrationImages, Size boardSize, float squareEdgeLength, Mat &cameraMatrix, Mat &distanceCoefficients)
 {
 	vector<vector<Point2f>> checkerboardImageSpacePoints;  // points that are detected in the calibration image
-	getChessboardCorners(calibrationImages, checkerboardImageSpacePoints, false); // 1. Parameter gibt an von welchen Bildern die Punkte gefunden werden sollen, 2. Parameter gibt an wo Ergebnisse (Pos der Punkte) gespeichert werden soll, False da kein Rückgabewert erwartet wird
+	getChessboardCorners(calibrationImages, checkerboardImageSpacePoints, false); // 1. Parameter gibt an von welchen Bildern die Punkte gefunden werden sollen, 2. Parameter gibt an wo Ergebnisse (Pos der Punkte) gespeichert werden soll, False da kein RÃ¼ckgabewert erwartet wird
 
-	vector<vector<Point3f>> worldSpaceCornerPoints(1);  // Zahl in Klammer gibt initiale Größe des Vektors an. (hier =1)
+	vector<vector<Point3f>> worldSpaceCornerPoints(1);  // Zahl in Klammer gibt initiale GrÃ¶ÃŸe des Vektors an. (hier =1)
 	createknownBoardPositions(boardSize, squareEdgeLength, worldSpaceCornerPoints[0]);  //create knownBoardPositions berechnet einfach die Position der Eckpunkte in einer perfekten Welt
 
-	worldSpaceCornerPoints.resize(checkerboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);  // Verändert Größe des Vektors auf die Anzahl der Images, jedes Image dreidimensionale Points hat. Wird dann mit worldSpaceCornerPoints[0] populated. 
-																									// da Ergebnisse für knownBoardPositions (perfekte Welt) für alle Images gleich sind, wird Vektor für jedes Images mit den gleichen Werten populated. 
+	worldSpaceCornerPoints.resize(checkerboardImageSpacePoints.size(), worldSpaceCornerPoints[0]);  // VerÃ¤ndert GrÃ¶ÃŸe des Vektors auf die Anzahl der Images, jedes Image dreidimensionale Points hat. Wird dann mit worldSpaceCornerPoints[0] populated. 
+																									// da Ergebnisse fÃ¼r knownBoardPositions (perfekte Welt) fÃ¼r alle Images gleich sind, wird Vektor fÃ¼r jedes Images mit den gleichen Werten populated. 
 
 	vector<Mat> rVectors, tVectors; 
 	distanceCoefficients = Mat::zeros(8, 1, CV_64F);
@@ -84,7 +84,7 @@ bool saveCameraCalibration(string name, Mat cameraMatrix, Mat distanceCoefficien
 		{
 			for(int c=0; c<columns; c++)
 			{
-				double value= cameraMatrix.at<double>(r,c);  // Wir iterieren über die einzelnen Elemente der cameraMatrix 
+				double value= cameraMatrix.at<double>(r,c);  // Wir iterieren Ã¼ber die einzelnen Elemente der cameraMatrix 
 				outStream << value << endl; 
 			}
 		}
@@ -99,7 +99,7 @@ bool saveCameraCalibration(string name, Mat cameraMatrix, Mat distanceCoefficien
 		{
 			for (int c = 0; c<columns; c++)
 			{
-				double value = distanceCoefficients.at<double>(r, c);  // Wir iterieren über die einzelnen Elemente der cameraMatrix 
+				double value = distanceCoefficients.at<double>(r, c);  // Wir iterieren Ã¼ber die einzelnen Elemente der cameraMatrix 
 				outStream << value << endl;
 			}
 		}
@@ -228,7 +228,7 @@ int startWebcamMonitoring(const Mat& cameraMatrix, const Mat& distanceCoefficien
 	Mat frame;
 	vector<int> markerIds;              //Zahlennummer des jeweiligen Markers 
 	vector<vector<Point2f>> markerCorners, rejectedCandidates;
-	aruco::DetectorParameters Parameters;     // Parameter, die für die Detektion benutzt werden 
+	aruco::DetectorParameters Parameters;     // Parameter, die fÃ¼r die Detektion benutzt werden 
 	Ptr <aruco::Dictionary> markerDictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME::DICT_4X4_100);
 
 	VideoCapture vid(0);
@@ -279,7 +279,7 @@ int main()
 {
 	Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
 	Mat distanceCoefficients;
-	int numberOfPics = 38; //Anzahl der Bilder für Kamera Kalibrierung
+	int numberOfPics = 38; //Anzahl der Bilder fÃ¼r Kamera Kalibrierung
 
 	//CameraCalibrationProcess(cameraMatrix, distanceCoefficients, numberOfPics);	
 	//saveCameraCalibration("ILoveCameraCalibration.txt", cameraMatrix, distanceCoefficients);
