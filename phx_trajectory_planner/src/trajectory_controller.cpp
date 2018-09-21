@@ -21,17 +21,17 @@
 // ##########################################
 
 /* open points:
-    1.) Drehraten filtern, Offset? (--> ueberpruefen durch Integration und Vergleich mit Winkeln)
-    2.) Position hold, Imu Acceleration verwenden
+    1.) filter turnrates, Offset? (--> check by integration and comparison with angles)
+    2.) Position hold, use Imu Acceleration
     3.) Trajectory Controller
     .
     .
 */
 
 // ##########################################
-// throttle dT Mode in 1% Schritten
-// von 0 startend: m*g/6 auch auskommentiert
-// --> Altitude Hold ist auskommentiert
+// throttle dT mode in 1% steps
+// starting from 0: m*g/6 also commented out
+// --> Altitude Hold is commented out
 // ##########################################
 
 #include "phx_trajectory_planner/trajectory_controller.h"
@@ -46,19 +46,19 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 	
   _phi_cmd = 0; // Kommandogroessen in rad!
   _theta_cmd = 0;
-  //_psi_cmd = 0; psi erst mal nur Rate zu 0 regeln wg. Problemen bei erstem Test
+  //_psi_cmd = 0; psi: only command rate to 0 for now due problems in first test
   _altitude_cmd = 0.2;
   _r_cmd = 0;
 	
-  _u_p = 0; // Regleroutputs (PI Drehraten)
+  _u_p = 0; // controller outputs (PI turnrates)
   _u_q = 0;
   _u_r = 0;
   _dT = 0; // additional throttle
 	
-  _e_phi = 0; // Reglerinputs (PID Winkel)
+  _e_phi = 0; // controller inputs (PID angles)
   _e_theta = 0;
   //_e_psi = 0;
-  _e_p = 0; // Reglerinputs (PI Drehraten)
+  _e_p = 0; // controller inputs (PI turnrates)
   _e_q = 0;
   _e_r = 0;
   _last_e_phi = 0;
@@ -86,11 +86,11 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 
   _dt = 0;
 	
-	// Zahlenwerte siehe defines in Header
-  _K_P_phi = K_P_phi; // PID Roll
+  // numbers are defined in header (+ given by Simulink for easier tuning)
+  _K_P_phi = K_P_phi; // PID roll
   _K_I_phi = K_I_phi;
   _K_D_phi = K_D_phi;
-  _K_P_theta = K_P_theta; // PID Pitch
+  _K_P_theta = K_P_theta; // PID ritch
   _K_I_theta = K_I_theta;
   _K_D_theta = K_D_theta;
   //_K_P_psi = 0;
@@ -106,15 +106,16 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _K_I_alt = K_I_alt;
   _K_D_alt = K_D_alt;
   _K_N_alt = K_N_alt; // filter coefficient
+
 	_altitude = 0;
 	_last_altitude = 0;
 	_last_alt_t = -1; // time, -1 for initialization (first if in altitude_callback)
-	_wg = 4; // Grenzfrequenz fuer Tiefpassfilter
+  _wg = 4; // cutoff frequency for lowpass filter
 	_integral_alt = 0;
 	_e_alt = 0;
 	_last_e_alt = 0;
-	_limit_integral_altitude = 10; // durch Simulation festgelegt, Sprungantwort auf 1 m Kommando
-	_last_diff_e_alt = 0;
+  _limit_integral_altitude = 10; // determined by simulation, response to 1 m command
+  _last_diff_e_alt = 0;
 	
 	_flg_I_control = 0;
 	_flg_mtr_stop = 0;
@@ -127,6 +128,34 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
   _lastthrustsNewton[5] = 0;
 
 }
+
+// callback for gains subscriber (published by Simulink)
+/*void trajectory_controller::gains_callback(const phx_uart_msp_bridge::ConstPtr& msg)
+{
+  //First do safety check so gains aren't changed mid flight
+  //TODO: Is it enough to have rotors running on idle? Which switch on the rc is aux2?
+  if (_flg_mtr_stop == 1)
+  {
+    _K_P_phi = msg->K_P_phi; // PID Roll
+    _K_I_phi = msg->K_I_phi;
+    _K_D_phi = msg->K_D_phi;
+    _K_P_theta = msg->K_P_theta; // PID Pitch
+    _K_I_theta = msg->K_I_theta;
+    _K_D_theta = msg->K_D_theta;
+    _K_P_p = msg->K_P_p; // PI rollrate
+    _K_I_p = msg->K_I_p;
+    _K_P_q = msg->K_P_q; // PI pitchrate
+    _K_I_q = msg->K_I_q;
+    _K_P_r = msg->K_P_r; // PI yawrate
+    _K_I_r = msg->K_I_r;
+
+    _K_P_alt = msg->K_P_alt;
+    _K_I_alt = msg->K_I_alt;
+    _K_D_alt = msg->K_D_alt;
+    _K_N_alt = msg->K_N_alt; // filter coefficient
+  }
+
+}*/
 
 // callback function for path_sub (updates current path, current and goal)
 void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
@@ -196,25 +225,26 @@ void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr
 void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
   // ====================================================================
-  // Drehraten kommen in [°/s]! --> Umrechnung in rad/s notwendig
-  // Koordinatentrafo nicht notwendig
-  // im Standard körperfesten Koordinatensystem
+  // getting turnraes in [°/s]! --> transformation to rad/s necessary
+  // no coordinate transformation necessary
+  // in standard body fixed system
   // ====================================================================	
-					// Umrechnung s. UART MSP BRIDGE SRC
+          // conversion s. UART MSP BRIDGE SRC
   _p = (msg->angular_velocity.x)*(M_PI/180.0)*(2000.0/8192.0);
-  _q = -(msg->angular_velocity.y)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
-  _r = -(msg->angular_velocity.z)*(M_PI/180.0)*(2000.0/8192.0); // MINUS aus Versuchen bestimmt
+  _q = -(msg->angular_velocity.y)*(M_PI/180.0)*(2000.0/8192.0); // MINUS determined in experiment
+  _r = -(msg->angular_velocity.z)*(M_PI/180.0)*(2000.0/8192.0); // MINUS determined in experiment
 }
 
+//Callback for attitude subscriber (getting current euler angles)
 void trajectory_controller::attitude_callback(const phx_uart_msp_bridge::Attitude::ConstPtr& msg)
 {
-	// Eulerwinkel
+  // Euler angles
   _phi = (double) msg->roll*M_PI/180;
-  _theta = (double) -msg->pitch*M_PI/180; // MINUS aus Versuchen bestimmt
+  _theta = (double) -msg->pitch*M_PI/180; // MINUS determined in experiment
   _psi = (double) msg->yaw*M_PI/180;
 }
 
-// Tiefpass Filter fuer Lidar Altitude
+// lowpass filter for Lidar Altitude
 void trajectory_controller::altitude_callback(const phx_uart_msp_bridge::Altitude::ConstPtr& msg)
 {
 	if(_last_alt_t == -1)
@@ -229,7 +259,7 @@ void trajectory_controller::altitude_callback(const phx_uart_msp_bridge::Altitud
 		double t = msg->header.stamp.nsec*1.0/(1000000000) + msg->header.stamp.sec;
 		double dt = t - _last_alt_t;
 		
-		// Tiefpass Filter
+    // lowpass filter
 		_altitude = (alt_raw*_wg*dt + _last_altitude)/(1 +_wg*dt);
 		_last_alt_t = t;
 	}
@@ -283,16 +313,16 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   // Attitude Controller
   _e_phi = _phi_cmd - _phi;
   _e_theta = _theta_cmd - _theta;
-  //e_psi = _psi_cmd - _psi; erst mal rausgenommen wg. Problemen bei erstem Test
+  //e_psi = _psi_cmd - _psi; commented out due to problems in first test
 
-  // I-Anteil 
+  // I-part
 	if(_flg_I_control == 1)
 	{
-		_integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, 0.2); // limit durch Simulation festgelegt
-		_integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.2); // limit durch Simulation festgelegt
-	}
+    _integral_phi = integrate(_integral_phi, _e_phi, _last_e_phi, 0.2); // limit determined by simulation
+    _integral_theta = integrate(_integral_theta, _e_theta, _last_e_theta, 0.2); // limit determined by simulation
+  }
   
-  // D-Anteil
+  // D-part
   double diff_e_phi = 0;
   double diff_e_theta = 0;
   if(_dt != 0)
@@ -300,7 +330,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
     diff_e_phi = (_e_phi - _last_e_phi)/_dt; // differentiate
     diff_e_theta = (_e_theta - _last_e_theta)/_dt;
     
-    // Tiefpass Filter
+    // lowpass filter
     diff_e_phi = (diff_e_phi*K_N_phi*_dt + _last_diff_e_phi)/(1 +K_N_phi*_dt);
     diff_e_theta = (diff_e_theta*K_N_theta*_dt + _last_diff_e_theta)/(1 +K_N_theta*_dt);
     
@@ -308,7 +338,7 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
   	_last_diff_e_theta = diff_e_theta;
   }
 	
-  // Regleroutputs outer loop	= Attitude Controller
+  // controller outputs outer loop	= Attitude Controller
   double u_phi = _K_P_phi * _e_phi + _integral_phi * _K_I_phi + diff_e_phi * _K_D_phi; // p_cmd
   double u_theta = _K_P_theta * _e_theta + _integral_theta * _K_I_theta + diff_e_theta * _K_D_theta; // q_cmd
   double u_psi = 0; // r_cmd
@@ -331,11 +361,11 @@ void trajectory_controller::calc_controller_outputs(ros::Publisher RateCmdMsg)
 
 	if(_flg_I_control == 1)
 	{
-		//_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit durch Simulation festgelegt
+    //_integral_p = integrate(_integral_p, _e_p, _last_e_p, 0.2); // limit determined by simulation
 		
-		//_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit durch Simulation festgelegt
+    //_integral_q = integrate(_integral_q, _e_q, _last_e_q, 0.05); // limit determined by simulation
 		
-		_integral_r = integrate(_integral_r, _e_r, _last_e_r, 5); // limit durch Simulation festgelegt
+    _integral_r = integrate(_integral_r, _e_r, _last_e_r, 5); // limit determined by simulation
 	}
 	  
   //_u_p = _K_P_p * _e_p + _integral_p * _K_I_p;
@@ -383,9 +413,9 @@ int trajectory_controller::convert_thrust(double newton)
 	  gramm = 0;
   }
 
-  // vgl. prop.schubkennfeld
+  // see prop.schubkennfeld
   // linear interpolation
-  // Wenn Regler zu hohen Schub gibt, wird 100 eingestellt
+  // if controller output is to high, thrust is set to 100
   if(gramm < 600)
   {
     a = 0;
@@ -435,13 +465,13 @@ int trajectory_controller::convert_thrust(double newton)
 void trajectory_controller::set_thrusts()
 {
   //double gravity_norm = _m * G / ( 6*cos(_theta)*cos(_phi) );
-  //double gravity_norm = 0; //erst mal rausgenommen wegen erstem Crashtest
+  //double gravity_norm = 0; //commented out due to first test
 
-  // Einzelschuebe in Newton
+  // thrusts per rotor in Newton
   double thrustsNewton[6] = {0};
 	
   // Control Matrix see Papers / Simulink Models
-	// ohne gravity_norm  
+  // without gravity_norm
 	// Hex Clean Flight Reihenfolge
   thrustsNewton[0] = _dT - 0.5*_u_p - _u_q + _u_r;
   thrustsNewton[1] = _dT - 0.5*_u_p + _u_q + _u_r;
@@ -450,7 +480,7 @@ void trajectory_controller::set_thrusts()
   thrustsNewton[4] = _dT - _u_p - _u_r;
   thrustsNewton[5] = _dT + _u_p + _u_r;
 
-  // in prozent umrechnen
+  // convert to percent
   _thrusts.header.frame_id = "";
   _thrusts.header.stamp = ros::Time::now();
 
@@ -565,10 +595,13 @@ int main(int argc, char** argv)
     // remote control callback for enabling Controller and I-Control
     ros::Subscriber rc = nh.subscribe("/phx/fc/rc", 1, &trajectory_controller::rc_callback, &controller);
 
+    // subscribe to gains published via Simulink to make tuning easier
+    // ros::Subscriber gains = ng.subscribe("phx/gains", 1, &trajectory_controller::gains_callback, &controller);
+
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
 
-    // Regler Kommandierte Drehraten
+    // turnrates commanded by controller
     ros::Publisher RateCmdMsg = nh.advertise<phx_uart_msp_bridge::Attitude>("/phx/trajectory_controller", 1);
 
     controller.do_controlling(MotorMsg, RateCmdMsg);
