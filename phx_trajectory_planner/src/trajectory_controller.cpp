@@ -133,8 +133,8 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 /*void trajectory_controller::gains_callback(const phx_uart_msp_bridge::ConstPtr& msg)
 {
   //First do safety check so gains aren't changed mid flight
-  //TODO: Is it enough to have rotors running on idle? Which switch on the rc is aux2?
-  if (_flg_mtr_stop == 1)
+  //TODO: Find valid thresholds
+  if ((_altitude < ???) && (_p == 0) && (_q == 0) && (_r == 0))
   {
     _K_P_phi = msg->K_P_phi; // PID Roll
     _K_I_phi = msg->K_I_phi;
@@ -225,7 +225,7 @@ void trajectory_controller::set_current_goal(const geometry_msgs::Pose::ConstPtr
 void trajectory_controller::imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
 {
   // ====================================================================
-  // getting turnraes in [°/s]! --> transformation to rad/s necessary
+  // getting turnrates in [°/s]! --> transformation to rad/s necessary
   // no coordinate transformation necessary
   // in standard body fixed system
   // ====================================================================	
