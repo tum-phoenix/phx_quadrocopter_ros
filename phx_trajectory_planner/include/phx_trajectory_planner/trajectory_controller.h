@@ -146,7 +146,7 @@ class trajectory_controller
         //void calc_delta_x_dot();
         void calc_controller_outputs(ros::Publisher RateCmdMsg);
         //void transform_quaternion();
-        //void gains_callback(const phx_trajectory_controller::Gains::ConstPtr& msg);
+        void gains_callback(const phx_trajectory_planner::Gains::ConstPtr& msg);
         void imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
         void set_thrusts();
         void rc_callback(const phx_uart_msp_bridge::RemoteControl::ConstPtr& msg);

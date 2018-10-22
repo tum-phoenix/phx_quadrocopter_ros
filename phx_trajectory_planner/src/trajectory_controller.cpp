@@ -130,32 +130,31 @@ trajectory_controller::trajectory_controller(ros::NodeHandle nh)
 }
 
 // callback for gains subscriber (published by Simulink)
-/*void trajectory_controller::gains_callback(const phx_uart_msp_bridge::ConstPtr& msg)
+void trajectory_controller::gains_callback(const phx_trajectory_planner::Gains::ConstPtr& msg)
 {
   //First do safety check so gains aren't changed mid flight
   //TODO: Find valid thresholds
-  if ((_altitude < ???) && (_p == 0) && (_q == 0) && (_r == 0))
+  if ((_altitude < 0) && (_p == 0) && (_q == 0) && (_r == 0))
   {
-    _K_P_phi = msg->K_P_phi; // PID Roll
-    _K_I_phi = msg->K_I_phi;
-    _K_D_phi = msg->K_D_phi;
-    _K_P_theta = msg->K_P_theta; // PID Pitch
-    _K_I_theta = msg->K_I_theta;
-    _K_D_theta = msg->K_D_theta;
-    _K_P_p = msg->K_P_p; // PI rollrate
-    _K_I_p = msg->K_I_p;
-    _K_P_q = msg->K_P_q; // PI pitchrate
-    _K_I_q = msg->K_I_q;
-    _K_P_r = msg->K_P_r; // PI yawrate
-    _K_I_r = msg->K_I_r;
+    _K_P_phi = msg->K_Pphi; // PID Roll
+    _K_I_phi = msg->K_Iphi;
+    _K_D_phi = msg->K_Dphi;
+    _K_P_theta = msg->K_Ptheta; // PID Pitch
+    _K_I_theta = msg->K_Itheta;
+    _K_D_theta = msg->K_Dtheta;
+    _K_P_p = msg->K_Pp; // PI rollrate
+    _K_I_p = msg->K_Ip;
+    _K_P_q = msg->K_Pq; // PI pitchrate
+    _K_I_q = msg->K_Iq;
+    _K_P_r = msg->K_Pr; // PI yawrate
+    _K_I_r = msg->K_Ir;
 
-    _K_P_alt = msg->K_P_alt;
-    _K_I_alt = msg->K_I_alt;
-    _K_D_alt = msg->K_D_alt;
-    _K_N_alt = msg->K_N_alt; // filter coefficient
+    _K_P_alt = msg->K_Palt;
+    _K_I_alt = msg->K_Ialt;
+    _K_D_alt = msg->K_Dalt;
+    _K_N_alt = msg->K_Nalt; // filter coefficient
   }
-
-}*/
+}
 
 // callback function for path_sub (updates current path, current and goal)
 void trajectory_controller::path_callback(const nav_msgs::Path::ConstPtr& msg)
