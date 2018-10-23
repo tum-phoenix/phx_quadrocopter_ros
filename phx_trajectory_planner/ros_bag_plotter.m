@@ -1,4 +1,4 @@
-clear all
+billclear all
 close all
 clc
 
