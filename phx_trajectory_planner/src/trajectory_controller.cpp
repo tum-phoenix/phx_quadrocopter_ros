@@ -1,3 +1,4 @@
+
 // !!! attitude stabilization and altitude hold controller based on Simulink / Simmechanics model
 
 // ##########################################
@@ -134,7 +135,7 @@ void trajectory_controller::gains_callback(const phx_trajectory_planner::Gains::
 {
   //First do safety check so gains aren't changed mid flight
   //TODO: Find valid thresholds
-  if ((_altitude < 0) && (_p == 0) && (_q == 0) && (_r == 0))
+  if (msg->aux4 < 1600)
   {
     _K_P_phi = msg->K_Pphi; // PID Roll
     _K_I_phi = msg->K_Iphi;
@@ -595,7 +596,7 @@ int main(int argc, char** argv)
     ros::Subscriber rc = nh.subscribe("/phx/fc/rc", 1, &trajectory_controller::rc_callback, &controller);
 
     // subscribe to gains published via Simulink to make tuning easier
-    ros::Subscriber gains = nh.subscribe("phx/sl/gains", 1, &trajectory_controller::gains_callback, &controller);
+    ros::Subscriber gains = ng.subscribe("phx/gains", 1, &trajectory_controller::gains_callback, &controller);
 
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);
