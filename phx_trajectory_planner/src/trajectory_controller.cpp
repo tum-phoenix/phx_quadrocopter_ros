@@ -135,7 +135,8 @@ void trajectory_controller::gains_callback(const phx_trajectory_planner::Gains::
 {
   //First do safety check so gains aren't changed mid flight
   //TODO: Find valid thresholds
-  if (msg->aux4 < 1600)
+
+  if ((_altitude < 0) && (_p == 0) && (_q == 0) && (_r == 0))
   {
     _K_P_phi = msg->K_Pphi; // PID Roll
     _K_I_phi = msg->K_Iphi;
