@@ -596,7 +596,7 @@ int main(int argc, char** argv)
     ros::Subscriber rc = nh.subscribe("/phx/fc/rc", 1, &trajectory_controller::rc_callback, &controller);
 
     // subscribe to gains published via Simulink to make tuning easier
-    ros::Subscriber gains = ng.subscribe("phx/gains", 1, &trajectory_controller::gains_callback, &controller);
+    ros::Subscriber gains = nh.subscribe("phx/gains", 1, &trajectory_controller::gains_callback, &controller);
 
     // motorcmds
     ros::Publisher MotorMsg = nh.advertise<phx_uart_msp_bridge::Motor>("/phx/fc/motor_set", 1);

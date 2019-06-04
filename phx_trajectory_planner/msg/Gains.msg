@@ -15,3 +15,4 @@ float64 K_Palt
 float64 K_Ialt
 float64 K_Dalt
 float64 K_Nalt
+float64 aux4
